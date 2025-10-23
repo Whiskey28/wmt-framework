@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+  Maven Settings 配置文件示例
+  将此文件复制到 ~/.m2/settings.xml (Linux/Mac) 或 %USERPROFILE%\.m2\settings.xml (Windows)
+  并根据实际情况修改服务器地址和认证信息
+-->
+<settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0
+                              https://maven.apache.org/xsd/settings-1.0.0.xsd">
+
+    <!-- 本地仓库路径 -->
+    <localRepository>${user.home}/.m2/repository</localRepository>
+
+    <!-- 服务器认证信息 -->
+    <servers>
+        <!-- 发布到Maven仓库的认证信息 -->
+        <server>
+            <id>releases</id>
+            <username>your-username</username>
+            <password>your-password</password>
+        </server>
+        <server>
+            <id>snapshots</id>
+            <username>your-username</username>
+            <password>your-password</password>
+        </server>
+        
+        <!-- GPG签名配置（如果需要发布到Maven中央仓库） -->
+        <server>
+            <id>gpg.passphrase</id>
+            <passphrase>your-gpg-passphrase</passphrase>
+        </server>
+    </servers>
+
+    <!-- 镜像配置 -->
+    <mirrors>
+        <!-- 使用阿里云镜像加速下载 -->
+        <mirror>
+            <id>aliyunmaven</id>
+            <mirrorOf>central</mirrorOf>
+            <name>阿里云公共仓库</name>
+            <url>https://maven.aliyun.com/repository/public</url>
+        </mirror>
+    </mirrors>
+
+    <!-- Profile配置 -->
+    <profiles>
+        <!-- JDK 1.8配置 -->
+        <profile>
+            <id>jdk-1.8</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+                <jdk>1.8</jdk>
+            </activation>
+            <properties>
+                <maven.compiler.source>1.8</maven.compiler.source>
+                <maven.compiler.target>1.8</maven.compiler.target>
+                <maven.compiler.compilerVersion>1.8</maven.compiler.compilerVersion>
+            </properties>
+        </profile>
+    </profiles>
+
+</settings>
+
