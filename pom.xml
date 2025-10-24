@@ -10,7 +10,7 @@
     <modules>
         <module>wmt-dependencies</module>
         <module>wmt-framework</module>
-        <module>wmt-demo</module>
+<!--        <module>wmt-demo</module>-->
     </modules>
 
     <name>${project.artifactId}</name>
@@ -146,7 +146,8 @@
                 </executions>
             </plugin>
 
-            <!-- 生成源码jar -->
+            <!-- 生成源码jar - 已禁用，保护源代码 -->
+            <!--
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
@@ -159,6 +160,7 @@
                     </execution>
                 </executions>
             </plugin>
+            -->
 
             <!-- 生成javadoc -->
             <plugin>
