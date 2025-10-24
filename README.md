@@ -267,6 +267,34 @@ deploy.bat
 # 使用release profile（包含GPG签名）
 ./deploy.sh release
 ```
+## 支持版本
+
+
+### 中间件版本范围清单
+
+| 组件名称                                                    | BOM 中使用的客户端/框架版本 | 建议服务端中间件版本范围                                                                          | 说明 / 依据                                                                                                                    |
+| ------------------------------------------------------- | ---------------- | ------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| Redis 客户端（Redisson v3.51.0）                             | 3.51.0           | **Redis 服务端 ≥ 3.0**（推荐 5.x、6.x、7.x）                                                   | 官方说明：“Redis compatible – from 3.0 up to the latest version”([Redisson][1])。因此你可以放心使用 Redis 3.0 以上版本。建议在生产中使用主流的 6.x 或 7.x。 |
+| MyBatis-Plus（v3.5.14）                                   | 3.5.14           | 关系型数据库（MySQL、PostgreSQL、Oracle、SQL Server 等）主流版本（如 MySQL 5.7/8.0、PostgreSQL 12/13/14） | 虽然 MyBatis-Plus 本身并不限制数据库版本，但因其基于 MyBatis + JDBC 驱动，建议使用较新数据库版本以避免老版本驱动或兼容问题。 MyBatis 官方支持 JDK8+、现代数据库。([mybatis.org][2])  |
+| Flowable 工作流引擎 v6.8.0                                   | 6.8.0            | 支持 Spring Boot 2.7.x，对应关系型数据库主流版本                                                     | 官方 Release 中指出 6.8.0 是基于 Spring Boot 2.7.6([GitHub][3])。建议选用兼容 Spring Boot 2.7.x 的中间件栈。                                    |
+| Druid 数据库连接池 v1.2.27                                    | 1.2.27           | 支持 JDBC 驱动所对应的数据库版本                                                                   | Druid 是连接池，并不强限定数据库版本，但需确保 JDBC 驱动与数据库匹配。                                                                                  |
+| Dynamic‑Datasource‑Spring‑Boot‑Starter v4.3.1           | 4.3.1            | 多数据源支持任意主流数据库版本                                                                       | 该组件支持多数据源切换，适用范围较宽，但建议数据库版本与主 JDBC 驱动版本兼容。                                                                                 |
+| XXL‑Job v2.4.0                                          | 2.4.0            | 任意可运行 Java 8 的环境 + 支持数据库（如 MySQL）                                                     | XXL-Job 本身对数据库版本要求较低，但要确保 JDBC 驱动兼容。                                                                                       |
+| Apache RocketMQ Spring Boot‑Starter v2.3.4              | 2.3.4            | 建议使用 RocketMQ 服务端相匹配的 4.x/5.x 版本                                                      | 虽然你使用的是 Spring Boot Starter 客户端版本，但服务端版本建议与客户端成熟配套。需查阅 RocketMQ 官方兼容矩阵。                                                    |
+| 日志/监控/追踪相关（如 SkyWalking v8.12.0）                        | 8.12.0           | SkyWalking 服务端建议使用对应 8.x 系列版本                                                         | 建议客户端和服务端版本在同一大版本系列。                                                                                                       |
+| 其他辅助工具（如 JSoup 1.21.2、Guava 33.4.8-jre、Hutool 5.8.40 等） | —                | 辅助工具库，无服务端中间件版本需求                                                                     | 这些属于纯 Java 库，不涉及服务端中间件版本兼容问题。                                                                                              |
+
+---
+
+### 关于 Java / Spring Boot 版本范围（你提到还需确定）
+
+* BOM 中指定：`spring.boot.version = 2.7.18`，`spring.framework.version = 5.3.39`。
+  因此建议使用 **Spring Boot 2.7.x 系列（2.7.18 为基准）**，对应 Spring Framework 5.3.x 系列。
+* Java 建议使用 JDK 8 （你已指定 JDK 8）。在 JDK 8 环境下，以上版本组合是可行的。
+* 注意：某些中间件或库可能未来要求 JDK 11+，但当前你环境为 JDK8，应重点选择支持 JDK 8 的版本。
+
+---
+
 
 ## 🔐 源码保护
 

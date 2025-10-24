@@ -65,6 +65,12 @@
             <artifactId>jsoup</artifactId>
         </dependency>
 
+        <!-- Brotli compression support -->
+        <dependency>
+            <groupId>com.aayushatharva.brotli4j</groupId>
+            <artifactId>brotli4j</artifactId>
+        </dependency>
+
         <!-- Test 测试相关 -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

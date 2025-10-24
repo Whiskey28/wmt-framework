@@ -29,6 +29,9 @@
         <module>wmt-spring-boot-starter-biz-tenant</module>
         <module>wmt-spring-boot-starter-biz-data-permission</module>
         <module>wmt-spring-boot-starter-biz-ip</module>
+
+        <module>wmt-spring-boot-starter-file</module>
+        <module>wmt-spring-boot-starter-storage</module>
     </modules>
 
     <artifactId>wmt-framework</artifactId>
@@ -58,7 +61,7 @@
                     </execution>
                 </executions>
             </plugin>
-            
+
             <!-- 禁用javadoc生成，避免路径解析错误 -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
