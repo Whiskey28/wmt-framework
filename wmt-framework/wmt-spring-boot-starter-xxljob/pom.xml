@@ -12,7 +12,7 @@
     <packaging>jar</packaging>
 
     <name>${project.artifactId}</name>
-    <description>XXL-Job 执行器与兼容路由</description>
+    <description>XXL-Job 执行器自动配置</description>
 
     <dependencies>
         <dependency>
@@ -27,10 +27,6 @@
             <groupId>com.xuxueli</groupId>
             <artifactId>xxl-job-core</artifactId>
             <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.wmt</groupId>
-            <artifactId>wmt-spring-boot-starter-job</artifactId>
         </dependency>
     </dependencies>
 
