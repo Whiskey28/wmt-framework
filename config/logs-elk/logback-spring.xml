@@ -1,0 +1,145 @@
+<configuration>
+    <!-- 参考 org/springframework/boot/logging/logback/defaults.xml 配置，优化 CONSOLE_LOG_PATTERN、FILE_LOG_PATTERN -->
+    <!-- 格式化输出：%d 表示日期，%thread 表示线程名，%-5level：级别从左显示 5 个字符宽度，%msg：日志消息，%n是换行符 -->
+    <!-- CONSOLE_LOG_PATTERN 相比 FILE_LOG_PATTERN 多了 highlight、cyan 等高亮 -->
+    <property name="CONSOLE_LOG_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %highlight(%-5level) %cyan(%logger{50}:%L) - %msg%n"/>
+    <property name="FILE_LOG_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50}:%L - %msg%n"/>
+
+    <!-- 应用名称 -->
+    <property name="APP_NAME" value="${spring.application.name:-guarantee-server}"/>
+    <!-- 环境名称 -->
+    <property name="ENV_NAME" value="${spring.profiles.active:-local}"/>
+    <!-- 节点ID -->
+    <property name="NODE_ID" value="${HOSTNAME:-${spring.application.name}}"/>
+
+    <!-- 控制台 Appender - 开发环境使用传统格式 -->
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <pattern>${CONSOLE_LOG_PATTERN}</pattern>
+        </encoder>
+    </appender>
+
+    <!-- JSON 控制台 Appender - 生产环境使用JSON格式 -->
+    <appender name="STDOUT_JSON" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+            <includeContext>true</includeContext>
+            <includeMdc>true</includeMdc>
+            <customFields>{"appName":"${APP_NAME}","env":"${ENV_NAME}","nodeId":"${NODE_ID}"}</customFields>
+        </encoder>
+    </appender>
+
+    <!-- 文件 Appender - 传统格式 -->
+    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <pattern>${FILE_LOG_PATTERN}</pattern>
+        </encoder>
+        <!-- 日志文件名 -->
+        <file>${LOG_FILE}</file>
+        <!-- 滚动策略：基于【每天 + 大小】创建日志文件 -->
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_FILE}.%d{yyyy-MM-dd}.%i.log</fileNamePattern> <!-- 日志文件输出的文件名 -->
+            <maxHistory>30</maxHistory> <!-- 日志文件的保留天数 -->
+            <maxFileSize>10MB</maxFileSize> <!-- 日志文件，到达多少容量，进行滚动 -->
+        </rollingPolicy>
+    </appender>
+
+    <!-- JSON 文件 Appender -->
+    <appender name="FILE_JSON" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+            <includeContext>true</includeContext>
+            <includeMdc>true</includeMdc>
+            <customFields>{"appName":"${APP_NAME}","env":"${ENV_NAME}","nodeId":"${NODE_ID}"}</customFields>
+        </encoder>
+        <!-- 日志文件名 -->
+        <file>${LOG_FILE}.json</file>
+        <!-- 滚动策略：基于【每天 + 大小】创建日志文件 -->
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_FILE}.json.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <maxHistory>30</maxHistory>
+            <maxFileSize>10MB</maxFileSize>
+        </rollingPolicy>
+    </appender>
+
+
+    <!-- 异步写入日志，提升性能 -->
+    <appender name="ASYNC_FILE" class="ch.qos.logback.classic.AsyncAppender">
+        <discardingThreshold>0</discardingThreshold>
+        <queueSize>512</queueSize>
+        <appender-ref ref="FILE"/>
+    </appender>
+
+    <appender name="ASYNC_FILE_JSON" class="ch.qos.logback.classic.AsyncAppender">
+        <discardingThreshold>0</discardingThreshold>
+        <queueSize>512</queueSize>
+        <appender-ref ref="FILE_JSON"/>
+    </appender>
+
+    
+
+    <!-- SkyWalking Appender：GRPC 日志收集，实现日志中心 -->
+    <!--
+    <appender name="SKYWALKING" class="org.apache.skywalking.apm.toolkit.log.logback.v1.x.log.GRPCLogClientAppender">
+        <encoder class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
+            <layout class="org.apache.skywalking.apm.toolkit.log.logback.v1.x.TraceIdPatternLogbackLayout">
+                <pattern>[%tid] ${FILE_LOG_PATTERN}</pattern>
+            </layout>
+        </encoder>
+    </appender>
+    -->
+
+    <!-- 根据环境配置不同的日志输出 -->
+    <springProfile name="local,dev,test,prod">
+        <!-- XXL-Job 组件日志（本地与常规环境：仅控制台与文件） -->
+        <logger name="com.xxl.job" level="INFO" additivity="false">
+            <appender-ref ref="STDOUT"/>
+            <appender-ref ref="ASYNC_FILE"/>
+        </logger>
+
+        <root level="INFO">
+            <appender-ref ref="STDOUT"/>
+            <appender-ref ref="ASYNC_FILE"/>
+        </root>
+    </springProfile>
+
+    <springProfile name="wmtlocal">
+        <!-- Logstash TCP Appender - 仅在 wmtlocal 下启用 -->
+        <appender name="LOGSTASH" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
+            <destination>172.20.10.2:5045</destination>
+            <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+                <includeContext>true</includeContext>
+                <includeMdc>true</includeMdc>
+                <customFields>{"appName":"${APP_NAME}","env":"${ENV_NAME}","nodeId":"${NODE_ID}"}</customFields>
+            </encoder>
+            <keepAliveDuration>5 minutes</keepAliveDuration>
+            <reconnectionDelay>1000</reconnectionDelay>
+        </appender>
+
+        <appender name="ASYNC_LOGSTASH" class="ch.qos.logback.classic.AsyncAppender">
+            <discardingThreshold>0</discardingThreshold>
+            <queueSize>512</queueSize>
+            <appender-ref ref="LOGSTASH"/>
+        </appender>
+
+        <!-- XXL-Job 组件日志（wmtlocal：JSON/文件/ELK） -->
+        <logger name="com.xxl.job" level="INFO" additivity="false">
+            <appender-ref ref="STDOUT_JSON"/>
+            <appender-ref ref="ASYNC_FILE_JSON"/>
+            <appender-ref ref="ASYNC_LOGSTASH"/>
+        </logger>
+
+        <root level="INFO">
+            <appender-ref ref="STDOUT_JSON"/>
+            <appender-ref ref="ASYNC_FILE_JSON"/>
+            <appender-ref ref="ASYNC_LOGSTASH"/>
+        </root>
+    </springProfile>
+
+    <!-- 默认配置 -->
+    <springProfile name="!local &amp; !dev &amp; !test &amp; !prod">
+        <root level="INFO">
+            <appender-ref ref="STDOUT"/>
+            <appender-ref ref="ASYNC_FILE"/>
+        </root>
+    </springProfile>
+
+</configuration>
