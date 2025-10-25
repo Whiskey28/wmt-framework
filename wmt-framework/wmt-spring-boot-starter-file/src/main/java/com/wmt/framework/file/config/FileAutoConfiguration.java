@@ -1,7 +1,10 @@
 package com.wmt.framework.file.config;
 
-import com.wmt.framework.file.core.*;
-import com.wmt.framework.file.core.impl.*;
+import com.wmt.framework.file.core.service.FileCompressService;
+import com.wmt.framework.file.core.service.impl.FileCompressServiceImpl;
+import com.wmt.framework.file.core.service.impl.FileConvertServiceImpl;
+import com.wmt.framework.file.core.service.impl.FilePreviewServiceImpl;
+import com.wmt.framework.file.core.service.impl.FileValidateServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

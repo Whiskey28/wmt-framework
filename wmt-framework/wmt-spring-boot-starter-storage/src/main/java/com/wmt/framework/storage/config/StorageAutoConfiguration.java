@@ -1,7 +1,6 @@
 package com.wmt.framework.storage.config;
 
-import com.wmt.framework.storage.config.StorageProperties;
-import com.wmt.framework.storage.core.StorageServiceFactory;
+import com.wmt.framework.storage.core.factory.StorageServiceFactory;
 import com.wmt.framework.storage.core.impl.LocalStorageServiceImpl;
 import com.wmt.framework.storage.core.impl.MinioStorageServiceImpl;
 import lombok.extern.slf4j.Slf4j;

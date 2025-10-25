@@ -8,7 +8,7 @@
 
 - **wmt-spring-boot-starter-web** - Web基础组件（含Swagger文档）
 - **wmt-spring-boot-starter-security** - 安全认证组件
-- **wmt-spring-boot-starter-redis** - Redis缓存组件
+- **wmt-spring-boot-starter-cache** - Redis缓存组件
 - **wmt-spring-boot-starter-mybatis** - MyBatis增强组件
 - **wmt-spring-boot-starter-excel** - Excel导入导出组件
 - **wmt-spring-boot-starter-xxljob** - XXL-JOB定时任务组件

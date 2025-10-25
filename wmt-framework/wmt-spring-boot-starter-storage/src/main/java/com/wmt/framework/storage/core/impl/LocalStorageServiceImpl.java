@@ -1,8 +1,8 @@
 package com.wmt.framework.storage.core.impl;
 
-import com.wmt.framework.storage.core.FileInfo;
-import com.wmt.framework.storage.core.FileUploadRequest;
-import com.wmt.framework.storage.core.StorageService;
+import com.wmt.framework.storage.core.dto.FileInfo;
+import com.wmt.framework.storage.core.dto.FileUploadRequest;
+import com.wmt.framework.storage.core.service.StorageService;
 import com.wmt.framework.storage.config.StorageProperties;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;

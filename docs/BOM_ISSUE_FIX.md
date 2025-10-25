@@ -185,7 +185,7 @@ Set-Content $filePath -Value $content -Encoding UTF8  # 这会添加BOM
 - wmt-spring-boot-starter-mq
 - wmt-spring-boot-starter-mybatis
 - wmt-spring-boot-starter-protection
-- wmt-spring-boot-starter-redis
+- wmt-spring-boot-starter-cache
 - wmt-spring-boot-starter-security
 - wmt-spring-boot-starter-web
 - wmt-spring-boot-starter-websocket

@@ -94,6 +94,9 @@
         <logback.version>1.2.13</logback.version> <!-- 无法使用 1.3.X 版本，启动会报错 -->
         <!-- ELK 日志相关 -->
         <logstash-logback-encoder.version>6.6</logstash-logback-encoder.version>
+        <!-- Elasticsearch 相关 -->
+        <elasticsearch.version>7.17.23</elasticsearch.version>
+        <testcontainers.version>1.19.8</testcontainers.version>
     </properties>
 
     <dependencyManagement>
@@ -262,6 +265,12 @@
                 <groupId>com.fhs-opensource</groupId>
                 <artifactId>easy-trans-anno</artifactId>
                 <version>${easy-trans.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.wmt</groupId>
+                <artifactId>wmt-spring-boot-starter-cache</artifactId>
+                <version>${revision}</version>
             </dependency>
 
             <dependency>
@@ -760,6 +769,35 @@
                 <groupId>io.minio</groupId>
                 <artifactId>minio</artifactId>
                 <version>${minio.version}</version>
+            </dependency>
+
+            <!-- Elasticsearch 相关 -->
+            <dependency>
+                <groupId>co.elastic.clients</groupId>
+                <artifactId>elasticsearch-java</artifactId>
+                <version>8.11.0</version>
+            </dependency>
+            <dependency>
+                <groupId>org.elasticsearch.client</groupId>
+                <artifactId>elasticsearch-rest-client</artifactId>
+                <version>${elasticsearch.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.elasticsearch.client</groupId>
+                <artifactId>elasticsearch-rest-client-sniffer</artifactId>
+                <version>${elasticsearch.version}</version>
+            </dependency>
+
+            <!-- Testcontainers for Elasticsearch testing -->
+            <dependency>
+                <groupId>org.testcontainers</groupId>
+                <artifactId>elasticsearch</artifactId>
+                <version>${testcontainers.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.testcontainers</groupId>
+                <artifactId>junit-jupiter</artifactId>
+                <version>${testcontainers.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

@@ -1,23 +1,20 @@
 package com.wmt.framework.storage.core.impl;
 
-import com.wmt.framework.storage.*;
-import com.wmt.framework.storage.core.FileInfo;
-import com.wmt.framework.storage.core.FileUploadRequest;
-import com.wmt.framework.storage.core.StorageService;
+import com.wmt.framework.storage.core.dto.FileInfo;
+import com.wmt.framework.storage.core.dto.FileUploadRequest;
+import com.wmt.framework.storage.core.service.StorageService;
 import com.wmt.framework.storage.config.StorageProperties;
 import io.minio.*;
 import io.minio.http.Method;
 import io.minio.messages.DeleteError;
 import io.minio.messages.DeleteObject;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
 import org.springframework.util.StringUtils;
 
 import javax.annotation.PostConstruct;
-import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.util.ArrayList;

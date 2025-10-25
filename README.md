@@ -60,7 +60,7 @@ WMT是一个基于Spring Boot的企业级技术组件库，提供了一系列开
     <!-- Redis组件 -->
     <dependency>
         <groupId>com.wmt</groupId>
-        <artifactId>wmt-spring-boot-starter-redis</artifactId>
+        <artifactId>wmt-spring-boot-starter-cache</artifactId>
     </dependency>
 </dependencies>
 ```
@@ -113,7 +113,7 @@ spring:
 | wmt-common | 公共工具类和基础组件 | `com.wmt:wmt-common` |
 | wmt-spring-boot-starter-web | Web增强组件（统一异常处理、参数校验、API日志等） | `com.wmt:wmt-spring-boot-starter-web` |
 | wmt-spring-boot-starter-mybatis | MyBatis增强组件（分页、数据源等） | `com.wmt:wmt-spring-boot-starter-mybatis` |
-| wmt-spring-boot-starter-redis | Redis组件（缓存、分布式锁等） | `com.wmt:wmt-spring-boot-starter-redis` |
+| wmt-spring-boot-starter-cache | Redis组件（缓存、分布式锁等） | `com.wmt:wmt-spring-boot-starter-cache` |
 | wmt-spring-boot-starter-security | 安全组件（认证、授权等） | `com.wmt:wmt-spring-boot-starter-security` |
 | wmt-spring-boot-starter-websocket | WebSocket组件 | `com.wmt:wmt-spring-boot-starter-websocket` |
 | wmt-spring-boot-starter-monitor | 监控组件（链路追踪等） | `com.wmt:wmt-spring-boot-starter-monitor` |

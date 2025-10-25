@@ -30,9 +30,9 @@
 | GuaranteeLock4jConfiguration | WmtLock4jConfiguration | wmt-spring-boot-starter-protection |
 | GuaranteeRateLimiterConfiguration | WmtRateLimiterConfiguration | wmt-spring-boot-starter-protection |
 | GuaranteeApiSignatureAutoConfiguration | WmtApiSignatureAutoConfiguration | wmt-spring-boot-starter-protection |
-| GuaranteeCacheAutoConfiguration | WmtCacheAutoConfiguration | wmt-spring-boot-starter-redis |
-| GuaranteeCacheProperties | WmtCacheProperties | wmt-spring-boot-starter-redis |
-| GuaranteeRedisAutoConfiguration | WmtRedisAutoConfiguration | wmt-spring-boot-starter-redis |
+| GuaranteeCacheAutoConfiguration | WmtCacheAutoConfiguration | wmt-spring-boot-starter-cache |
+| GuaranteeCacheProperties | WmtCacheProperties | wmt-spring-boot-starter-cache |
+| GuaranteeRedisAutoConfiguration | WmtRedisAutoConfiguration | wmt-spring-boot-starter-cache |
 | GuaranteeOperateLogConfiguration | WmtOperateLogConfiguration | wmt-spring-boot-starter-security |
 | GuaranteeSecurityAutoConfiguration | WmtSecurityAutoConfiguration | wmt-spring-boot-starter-security |
 | GuaranteeWebSecurityConfigurerAdapter | WmtWebSecurityConfigurerAdapter | wmt-spring-boot-starter-security |
@@ -109,7 +109,7 @@ wmt-demo/
 
 - ✅ **wmt-spring-boot-starter-web** - Web基础组件（含Swagger文档）
 - ✅ **wmt-spring-boot-starter-security** - 安全认证组件
-- ✅ **wmt-spring-boot-starter-redis** - Redis缓存组件
+- ✅ **wmt-spring-boot-starter-cache** - Redis缓存组件
 - ✅ **wmt-spring-boot-starter-mybatis** - MyBatis增强组件
 - ✅ **wmt-spring-boot-starter-excel** - Excel导入导出组件
 - ✅ **wmt-spring-boot-starter-xxljob** - XXL-JOB定时任务组件

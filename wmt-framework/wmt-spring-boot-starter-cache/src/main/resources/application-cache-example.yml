@@ -1,0 +1,51 @@
+# WMT Redis 多级缓存配置示例
+
+# 基础Redis配置
+spring:
+  redis:
+    host: localhost
+    port: 6379
+    password: 
+    database: 0
+    timeout: 2000ms
+    lettuce:
+      pool:
+        max-active: 8
+        max-wait: -1ms
+        max-idle: 8
+        min-idle: 0
+
+# WMT缓存配置
+wmt:
+  cache:
+    # Redis扫描批次大小
+    redis-scan-batch-size: 30
+    
+    # 多级缓存配置
+    multi-level:
+      # 是否启用多级缓存
+      enabled: true
+      
+      # 本地缓存配置 (L1)
+      local:
+        enabled: true
+        max-size: 1000
+        ttl: 5m
+        refresh-after-write: 3m
+      
+      # Redis缓存配置 (L2)
+      redis:
+        enabled: true
+        ttl: 1h
+        key-prefix: "wmt:cache:"
+      
+      # 数据库缓存配置 (L3)
+      database:
+        enabled: true
+        null-value-protection: true
+        null-value-ttl: 5m
+
+# 日志配置
+logging:
+  level:
+    com.wmt.framework.cache: DEBUG

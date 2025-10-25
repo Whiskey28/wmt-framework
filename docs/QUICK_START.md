@@ -52,7 +52,7 @@
         <!-- Redis组件 -->
         <dependency>
             <groupId>com.wmt</groupId>
-            <artifactId>wmt-spring-boot-starter-redis</artifactId>
+            <artifactId>wmt-spring-boot-starter-cache</artifactId>
         </dependency>
     </dependencies>
 </project>

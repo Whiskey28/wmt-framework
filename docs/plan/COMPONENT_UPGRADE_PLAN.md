@@ -12,7 +12,7 @@
 
 #### 2. 数据存储组件
 - **wmt-spring-boot-starter-mybatis**: MyBatis增强，多数据源、数据翻译
-- **wmt-spring-boot-starter-redis**: Redis缓存、分布式锁
+- **wmt-spring-boot-starter-cache**: Redis缓存、分布式锁
 - **wmt-spring-boot-starter-excel**: Excel导入导出，基于FastExcel
 
 #### 3. 任务调度组件
@@ -39,6 +39,7 @@
 ### 阶段一：存储与文件管理（高优先级）
 
 #### 1.1 wmt-spring-boot-starter-storage
+已初始化未验证未优化
 **目标**: 统一文件存储管理，支持多种存储方式
 
 **核心功能**:
@@ -72,6 +73,7 @@ public class StorageProperties {
 **依赖关系**: 依赖wmt-common，可选依赖各云服务SDK
 
 #### 1.2 wmt-spring-boot-starter-file
+已初始化未验证未优化
 **目标**: 文件处理增强，支持多种文件格式
 
 **核心功能**:
@@ -96,9 +98,11 @@ public interface FilePreviewService {
 }
 ```
 
-### 阶段二：数据与缓存增强（中优先级）
+### 阶段二：数据与缓存增强（中优先级）-增强
 
 #### 2.1 wmt-spring-boot-starter-cache
+已初始化未验证未优化
+保留原redis
 **目标**: 多级缓存管理，提升系统性能
 
 **核心功能**:
@@ -124,6 +128,7 @@ public User getUserById(Long userId);
 ```
 
 #### 2.2 wmt-spring-boot-starter-search
+已初始化未验证未优化
 **目标**: 全文搜索支持，提升数据检索能力
 
 **核心功能**:

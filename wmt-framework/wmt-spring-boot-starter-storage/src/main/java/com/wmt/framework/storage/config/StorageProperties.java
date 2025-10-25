@@ -1,6 +1,6 @@
 package com.wmt.framework.storage.config;
 
-import com.wmt.framework.storage.core.StorageType;
+import com.wmt.framework.storage.core.enums.StorageType;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
