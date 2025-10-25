@@ -1,0 +1,170 @@
+# WMT日志管理组件配置示例
+
+# 基础配置
+wmt:
+  log:
+    enabled: true
+    
+    # 日志收集配置
+    collection:
+      enabled: true
+      levels: [INFO, WARN, ERROR, DEBUG]
+      sources: [application, access, error, security]
+      interval: PT30S
+      batch-size: 100
+      async: true
+      queue-size: 1000
+    
+    # 日志存储配置
+    storage:
+      enabled: true
+      type: elasticsearch  # 可选: file, elasticsearch, database
+      
+      # Elasticsearch存储配置
+      elasticsearch:
+        hosts: [localhost:9200]
+        index-prefix: wmt-logs
+        index-template: wmt-logs-template
+        bulk-size: 1000
+        refresh-interval: PT1S
+        connect-timeout: PT10S
+        read-timeout: PT30S
+      
+      # 文件存储配置
+      file:
+        path: logs
+        retention-days: 30
+        compress: true
+        max-file-size: 100
+      
+      # 数据库存储配置
+      database:
+        table-name: wmt_logs
+        batch-size: 100
+        retention-days: 90
+    
+    # 日志分析配置
+    analysis:
+      enabled: true
+      interval: PT5M
+      
+      # 异常检测配置
+      exception-detection:
+        enabled: true
+        threshold: 10
+        time-window: PT10M
+      
+      # 趋势分析配置
+      trend-analysis:
+        enabled: true
+        period: PT1H
+        metrics: [error_rate, response_time, throughput]
+    
+    # 日志告警配置
+    alerting:
+      enabled: true
+      channels: [email, webhook, sms]
+      
+      # 告警规则
+      rules:
+        - name: error-rate-alert
+          description: 错误率告警
+          condition: error_rate
+          threshold: 0.1
+          time-window: PT5M
+          enabled: true
+        - name: response-time-alert
+          description: 响应时间告警
+          condition: avg_response_time
+          threshold: 1000
+          time-window: PT5M
+          enabled: true
+        - name: exception-count-alert
+          description: 异常数量告警
+          condition: error_count
+          threshold: 50
+          time-window: PT5M
+          enabled: true
+      
+      # 告警通知配置
+      config:
+        email:
+          smtp-host: smtp.example.com
+          smtp-port: 587
+          username: alert@example.com
+          password: password
+          from: alert@example.com
+          to: [admin@example.com, dev@example.com]
+        webhook:
+          url: http://webhook.example.com/alerts
+          timeout: 30s
+          headers:
+            Authorization: Bearer token123
+        sms:
+          provider: aliyun
+          access-key: your-access-key
+          secret-key: your-secret-key
+          template-code: SMS_123456
+          sign-name: WMT系统
+    
+    # 日志可视化配置
+    visualization:
+      enabled: true
+      
+      # Kibana配置
+      kibana:
+        url: http://localhost:5601
+        index-pattern: wmt-logs-*
+        default-time-range: last 1 hour
+      
+      # 仪表板配置
+      dashboard:
+        enabled: true
+        config:
+          title: WMT日志监控仪表板
+          refresh-interval: 30s
+          panels:
+            - type: histogram
+              title: 日志时间分布
+              query: "*"
+              field: timestamp
+            - type: pie
+              title: 日志级别分布
+              query: "*"
+              field: level
+            - type: table
+              title: 错误日志详情
+              query: "level:ERROR"
+              fields: [timestamp, message, className, methodName]
+            - type: line
+              title: 响应时间趋势
+              query: "responseTime:*"
+              field: responseTime
+
+# Spring Boot配置
+spring:
+  application:
+    name: wmt-demo
+  
+  # Elasticsearch配置
+  elasticsearch:
+    rest:
+      uris: http://localhost:9200
+      connection-timeout: 10s
+      read-timeout: 30s
+      max-conn-total: 100
+      max-conn-per-route: 10
+  
+  # 日志配置
+  profiles:
+    active: wmtlocal  # 使用wmtlocal环境启用ELK集成
+
+# 日志级别配置
+logging:
+  level:
+    com.wmt.framework.log: DEBUG
+    org.elasticsearch: INFO
+    org.springframework.elasticsearch: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %highlight(%-5level) %cyan(%logger{50}:%L) - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50}:%L - %msg%n"
