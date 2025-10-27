@@ -1,0 +1,578 @@
+# WMT Search Starter 配置示例
+# 基于 wmt-spring-boot-starter-search 的完整配置示例
+
+# ==================== 基础配置 ====================
+spring:
+  application:
+    name: wmt-search-demo
+  profiles:
+    active: dev
+
+# ==================== WMT Search 配置 ====================
+wmt:
+  search:
+    # 是否启用搜索功能
+    enabled: true
+    
+    # Elasticsearch配置
+    elasticsearch:
+      # 是否启用Elasticsearch
+      enabled: true
+      # Elasticsearch节点地址
+      hosts:
+        - localhost:9200
+      # 用户名
+      username: elastic
+      # 密码
+      password: password
+      # 连接超时时间（秒）
+      connection-timeout: 30
+      # 读取超时时间（秒）
+      read-timeout: 30
+      # 最大连接数
+      max-connections: 100
+      # 每个路由的最大连接数
+      max-connections-per-route: 10
+      # 是否启用SSL
+      ssl-enabled: false
+      # SSL证书路径
+      ssl-cert-path: 
+      # SSL密钥路径
+      ssl-key-path: 
+      # SSL信任证书路径
+      ssl-trust-cert-path: 
+      # 是否启用SSL验证
+      ssl-verify-peer: true
+      # 是否启用SSL验证主机名
+      ssl-verify-hostname: true
+      # 是否启用搜索监控
+      monitoring-enabled: true
+      # 监控间隔（秒）
+      monitoring-interval: 30
+      # 是否启用搜索统计
+      statistics-enabled: true
+      # 统计保留天数
+      statistics-retention: 30
+      # 是否启用搜索告警
+      alerting-enabled: true
+      # 告警阈值（搜索失败率百分比）
+      alerting-threshold: 10
+      # 告警重试次数
+      alerting-retry-count: 3
+      # 告警重试间隔（秒）
+      alerting-retry-interval: 60
+      # 是否启用搜索压缩
+      compression-enabled: true
+      # 压缩阈值（字节）
+      compression-threshold: 1024
+      # 压缩算法
+      compression-algorithm: gzip
+      # 是否启用搜索加密
+      encryption-enabled: false
+      # 加密密钥
+      encryption-key: "your-encryption-key"
+      # 加密算法
+      encryption-algorithm: AES
+      # 是否启用搜索签名
+      signature-enabled: false
+      # 签名密钥
+      signature-key: "your-signature-key"
+      # 签名算法
+      signature-algorithm: HMAC-SHA256
+    
+    # 搜索配置
+    search:
+      # 默认分页大小
+      default-page-size: 10
+      # 最大分页大小
+      max-page-size: 1000
+      # 是否启用搜索建议
+      suggest-enabled: true
+      # 是否启用搜索日志
+      search-log-enabled: true
+      # 搜索日志保留天数
+      search-log-retention: 30
+      # 是否启用搜索缓存
+      cache-enabled: true
+      # 缓存过期时间（秒）
+      cache-expire-time: 3600
+      # 缓存大小
+      cache-size: 10000
+      # 是否启用搜索监控
+      monitoring-enabled: true
+      # 监控间隔（秒）
+      monitoring-interval: 30
+      # 是否启用搜索统计
+      statistics-enabled: true
+      # 统计保留天数
+      statistics-retention: 30
+      # 是否启用搜索告警
+      alerting-enabled: true
+      # 告警阈值（搜索响应时间毫秒）
+      alerting-threshold: 1000
+      # 告警重试次数
+      alerting-retry-count: 3
+      # 告警重试间隔（秒）
+      alerting-retry-interval: 60
+      # 是否启用搜索压缩
+      compression-enabled: true
+      # 压缩阈值（字节）
+      compression-threshold: 1024
+      # 压缩算法
+      compression-algorithm: gzip
+      # 是否启用搜索加密
+      encryption-enabled: false
+      # 加密密钥
+      encryption-key: "your-encryption-key"
+      # 加密算法
+      encryption-algorithm: AES
+      # 是否启用搜索签名
+      signature-enabled: false
+      # 签名密钥
+      signature-key: "your-signature-key"
+      # 签名算法
+      signature-algorithm: HMAC-SHA256
+    
+    # 索引配置
+    index:
+      # 默认分片数
+      default-shards: 1
+      # 默认副本数
+      default-replicas: 0
+      # 是否自动创建索引
+      auto-create-index: true
+      # 索引刷新间隔（秒）
+      refresh-interval: 5
+      # 索引存储类型
+      store-type: fs
+      # 索引分析器
+      analyzer: standard
+      # 索引分词器
+      tokenizer: standard
+      # 索引过滤器
+      filters:
+        - lowercase
+        - stop
+        - synonym
+      # 索引同义词
+      synonyms:
+        - "car,automobile,vehicle"
+        - "phone,telephone,mobile"
+        - "computer,laptop,pc"
+      # 是否启用索引监控
+      monitoring-enabled: true
+      # 监控间隔（秒）
+      monitoring-interval: 30
+      # 是否启用索引统计
+      statistics-enabled: true
+      # 统计保留天数
+      statistics-retention: 30
+      # 是否启用索引告警
+      alerting-enabled: true
+      # 告警阈值（索引大小MB）
+      alerting-threshold: 1000
+      # 告警重试次数
+      alerting-retry-count: 3
+      # 告警重试间隔（秒）
+      alerting-retry-interval: 60
+      # 是否启用索引压缩
+      compression-enabled: true
+      # 压缩阈值（字节）
+      compression-threshold: 1048576 # 1MB
+      # 压缩算法
+      compression-algorithm: gzip
+      # 是否启用索引加密
+      encryption-enabled: false
+      # 加密密钥
+      encryption-key: "your-encryption-key"
+      # 加密算法
+      encryption-algorithm: AES
+      # 是否启用索引签名
+      signature-enabled: false
+      # 签名密钥
+      signature-key: "your-signature-key"
+      # 签名算法
+      signature-algorithm: HMAC-SHA256
+    
+    # 搜索分析配置
+    analysis:
+      # 是否启用搜索分析
+      enabled: true
+      # 分析类型：term, phrase, fuzzy, wildcard
+      type: term
+      # 分析配置
+      config:
+        # 是否启用词项分析
+        term-enabled: true
+        # 词项分析器
+        term-analyzer: standard
+        # 词项分词器
+        term-tokenizer: standard
+        # 词项过滤器
+        term-filters:
+          - lowercase
+          - stop
+          - synonym
+        # 是否启用短语分析
+        phrase-enabled: true
+        # 短语分析器
+        phrase-analyzer: standard
+        # 短语分词器
+        phrase-tokenizer: standard
+        # 短语过滤器
+        phrase-filters:
+          - lowercase
+          - stop
+          - synonym
+        # 是否启用模糊分析
+        fuzzy-enabled: true
+        # 模糊分析器
+        fuzzy-analyzer: standard
+        # 模糊分词器
+        fuzzy-tokenizer: standard
+        # 模糊过滤器
+        fuzzy-filters:
+          - lowercase
+          - stop
+          - synonym
+        # 是否启用通配符分析
+        wildcard-enabled: true
+        # 通配符分析器
+        wildcard-analyzer: standard
+        # 通配符分词器
+        wildcard-tokenizer: standard
+        # 通配符过滤器
+        wildcard-filters:
+          - lowercase
+          - stop
+          - synonym
+        # 是否启用分析监控
+        monitoring-enabled: true
+        # 监控间隔（秒）
+        monitoring-interval: 30
+        # 是否启用分析统计
+        statistics-enabled: true
+        # 统计保留天数
+        statistics-retention: 30
+        # 是否启用分析告警
+        alerting-enabled: true
+        # 告警阈值（分析响应时间毫秒）
+        alerting-threshold: 1000
+        # 告警重试次数
+        alerting-retry-count: 3
+        # 告警重试间隔（秒）
+        alerting-retry-interval: 60
+        # 是否启用分析压缩
+        compression-enabled: true
+        # 压缩阈值（字节）
+        compression-threshold: 1024
+        # 压缩算法
+        compression-algorithm: gzip
+        # 是否启用分析加密
+        encryption-enabled: false
+        # 加密密钥
+        encryption-key: "your-encryption-key"
+        # 加密算法
+        encryption-algorithm: AES
+        # 是否启用分析签名
+        signature-enabled: false
+        # 签名密钥
+        signature-key: "your-signature-key"
+        # 签名算法
+        signature-algorithm: HMAC-SHA256
+    
+    # 搜索建议配置
+    suggest:
+      # 是否启用搜索建议
+      enabled: true
+      # 建议类型：completion, phrase, term
+      type: completion
+      # 建议配置
+      config:
+        # 是否启用完成建议
+        completion-enabled: true
+        # 完成建议分析器
+        completion-analyzer: standard
+        # 完成建议分词器
+        completion-tokenizer: standard
+        # 完成建议过滤器
+        completion-filters:
+          - lowercase
+          - stop
+          - synonym
+        # 是否启用短语建议
+        phrase-enabled: true
+        # 短语建议分析器
+        phrase-analyzer: standard
+        # 短语建议分词器
+        phrase-tokenizer: standard
+        # 短语建议过滤器
+        phrase-filters:
+          - lowercase
+          - stop
+          - synonym
+        # 是否启用词项建议
+        term-enabled: true
+        # 词项建议分析器
+        term-analyzer: standard
+        # 词项建议分词器
+        term-tokenizer: standard
+        # 词项建议过滤器
+        term-filters:
+          - lowercase
+          - stop
+          - synonym
+        # 是否启用建议监控
+        monitoring-enabled: true
+        # 监控间隔（秒）
+        monitoring-interval: 30
+        # 是否启用建议统计
+        statistics-enabled: true
+        # 统计保留天数
+        statistics-retention: 30
+        # 是否启用建议告警
+        alerting-enabled: true
+        # 告警阈值（建议响应时间毫秒）
+        alerting-threshold: 1000
+        # 告警重试次数
+        alerting-retry-count: 3
+        # 告警重试间隔（秒）
+        alerting-retry-interval: 60
+        # 是否启用建议压缩
+        compression-enabled: true
+        # 压缩阈值（字节）
+        compression-threshold: 1024
+        # 压缩算法
+        compression-algorithm: gzip
+        # 是否启用建议加密
+        encryption-enabled: false
+        # 加密密钥
+        encryption-key: "your-encryption-key"
+        # 加密算法
+        encryption-algorithm: AES
+        # 是否启用建议签名
+        signature-enabled: false
+        # 签名密钥
+        signature-key: "your-signature-key"
+        # 签名算法
+        signature-algorithm: HMAC-SHA256
+    
+    # 热门搜索配置
+    hot-search:
+      # 是否启用热门搜索
+      enabled: true
+      # 热门搜索类型：count, score, time
+      type: count
+      # 热门搜索配置
+      config:
+        # 是否启用计数热门搜索
+        count-enabled: true
+        # 计数热门搜索分析器
+        count-analyzer: standard
+        # 计数热门搜索分词器
+        count-tokenizer: standard
+        # 计数热门搜索过滤器
+        count-filters:
+          - lowercase
+          - stop
+          - synonym
+        # 是否启用评分热门搜索
+        score-enabled: true
+        # 评分热门搜索分析器
+        score-analyzer: standard
+        # 评分热门搜索分词器
+        score-tokenizer: standard
+        # 评分热门搜索过滤器
+        score-filters:
+          - lowercase
+          - stop
+          - synonym
+        # 是否启用时间热门搜索
+        time-enabled: true
+        # 时间热门搜索分析器
+        time-analyzer: standard
+        # 时间热门搜索分词器
+        time-tokenizer: standard
+        # 时间热门搜索过滤器
+        time-filters:
+          - lowercase
+          - stop
+          - synonym
+        # 是否启用热门搜索监控
+        monitoring-enabled: true
+        # 监控间隔（秒）
+        monitoring-interval: 30
+        # 是否启用热门搜索统计
+        statistics-enabled: true
+        # 统计保留天数
+        statistics-retention: 30
+        # 是否启用热门搜索告警
+        alerting-enabled: true
+        # 告警阈值（热门搜索响应时间毫秒）
+        alerting-threshold: 1000
+        # 告警重试次数
+        alerting-retry-count: 3
+        # 告警重试间隔（秒）
+        alerting-retry-interval: 60
+        # 是否启用热门搜索压缩
+        compression-enabled: true
+        # 压缩阈值（字节）
+        compression-threshold: 1024
+        # 压缩算法
+        compression-algorithm: gzip
+        # 是否启用热门搜索加密
+        encryption-enabled: false
+        # 加密密钥
+        encryption-key: "your-encryption-key"
+        # 加密算法
+        encryption-algorithm: AES
+        # 是否启用热门搜索签名
+        signature-enabled: false
+        # 签名密钥
+        signature-key: "your-signature-key"
+        # 签名算法
+        signature-algorithm: HMAC-SHA256
+    
+    # 搜索监控配置
+    monitoring:
+      # 是否启用搜索监控
+      enabled: true
+      # 监控间隔（秒）
+      interval: 30
+      # 是否启用搜索统计
+      statistics-enabled: true
+      # 搜索统计保留天数
+      statistics-retention: 30
+      # 是否启用搜索告警
+      alerting-enabled: true
+      # 搜索告警阈值配置
+      alerting-thresholds:
+        # 搜索响应时间阈值（毫秒）
+        response-time: 1000
+        # 搜索错误率阈值（百分比）
+        error-rate: 5
+        # 搜索成功率阈值（百分比）
+        success-rate: 95
+        # 搜索可用性阈值（百分比）
+        availability: 99
+        # 搜索命中率阈值（百分比）
+        hit-rate: 80
+        # 搜索未命中率阈值（百分比）
+        miss-rate: 20
+        # 搜索缓存命中率阈值（百分比）
+        cache-hit-rate: 80
+        # 搜索缓存未命中率阈值（百分比）
+        cache-miss-rate: 20
+        # 搜索索引大小阈值（MB）
+        index-size: 1000
+        # 搜索索引数量阈值
+        index-count: 100
+      # 告警重试次数
+      alerting-retry-count: 3
+      # 告警重试间隔（秒）
+      alerting-retry-interval: 60
+      # 告警通知方式：email, sms, webhook
+      alert-notification-types:
+        - email
+        - webhook
+      # 告警通知配置
+      alert-notification:
+        # 邮件配置
+        email:
+          enabled: true
+          smtp-host: smtp.gmail.com
+          smtp-port: 587
+          username: your-email@gmail.com
+          password: your-password
+          from: alerts@your-domain.com
+          to:
+            - admin@your-domain.com
+            - devops@your-domain.com
+          subject: "[WMT Search] 搜索监控告警"
+        # Webhook配置
+        webhook:
+          enabled: true
+          url: https://your-webhook-url.com/alerts
+          method: POST
+          headers:
+            Content-Type: application/json
+            Authorization: Bearer your-token
+          timeout: 10
+          retry-count: 3
+
+# ==================== 数据源配置 ====================
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/wmt_search?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&useSSL=false
+    username: root
+    password: 123456
+    druid:
+      initial-size: 5
+      min-idle: 5
+      max-active: 20
+      max-wait: 60000
+      time-between-eviction-runs-millis: 60000
+      min-evictable-idle-time-millis: 300000
+      validation-query: SELECT 1
+      test-while-idle: true
+      test-on-borrow: false
+      test-on-return: false
+      pool-prepared-statements: true
+      max-pool-prepared-statement-per-connection-size: 20
+
+# ==================== Redis配置 ====================
+spring:
+  redis:
+    host: localhost
+    port: 6379
+    password: 
+    database: 0
+    timeout: 5000ms
+    lettuce:
+      pool:
+        max-active: 8
+        max-wait: -1ms
+        max-idle: 8
+        min-idle: 0
+
+# ==================== Elasticsearch配置 ====================
+spring:
+  elasticsearch:
+    uris: http://localhost:9200
+    username: elastic
+    password: password
+    connection-timeout: 10000
+    read-timeout: 30000
+    max-connections: 100
+    max-connections-per-route: 10
+
+# ==================== 日志配置 ====================
+logging:
+  level:
+    root: INFO
+    com.wmt: DEBUG
+    org.springframework.search: DEBUG
+    org.elasticsearch: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n"
+  file:
+    name: ./logs/wmt-search-demo.log
+    max-size: 100MB
+    max-history: 30
+
+# ==================== 监控配置 ====================
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus,search
+  endpoint:
+    health:
+      show-details: when-authorized
+    search:
+      enabled: true
+  info:
+    env:
+      enabled: true

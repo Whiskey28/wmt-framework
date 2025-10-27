@@ -1,0 +1,287 @@
+# WMT Security Starter 配置示例
+# 基于 wmt-spring-boot-starter-security 的完整配置示例
+
+# ==================== 基础配置 ====================
+spring:
+  application:
+    name: wmt-security-demo
+  profiles:
+    active: dev
+
+# ==================== WMT Security 配置 ====================
+wmt:
+  security:
+    # 是否启用安全功能
+    enabled: true
+    
+    # 排除路径（不需要认证的路径）
+    permit-all-urls:
+      - /api/public/**
+      - /api/auth/login
+      - /api/auth/register
+      - /api/auth/refresh
+      - /api/auth/logout
+      - /api/auth/captcha
+      - /api/auth/forgot-password
+      - /api/auth/reset-password
+      - /api/health/**
+      - /api/info/**
+      - /swagger-ui/**
+      - /v3/api-docs/**
+      - /webjars/**
+      - /favicon.ico
+      - /actuator/**
+      - /druid/**
+    
+    # Token配置
+    token:
+      # 令牌自定义标识
+      header: Authorization
+      # 令牌前缀
+      prefix: Bearer 
+      # 令牌密钥（生产环境请使用更复杂的密钥）
+      secret: abcdefghijklmnopqrstuvwxyz1234567890
+      # 令牌有效期（分钟）
+      expire-time: 720
+      # 刷新令牌有效期（天）
+      refresh-expire-time: 7
+      # 是否允许同一用户多地登录
+      allow-multi-login: true
+      # 是否允许刷新令牌
+      allow-refresh: true
+      # 刷新令牌阈值（分钟，剩余时间小于此值时自动刷新）
+      refresh-threshold: 30
+    
+    # 密码配置
+    password:
+      # 密码最小长度
+      min-length: 6
+      # 密码最大长度
+      max-length: 20
+      # 是否必须包含数字
+      require-digit: true
+      # 是否必须包含小写字母
+      require-lowercase: true
+      # 是否必须包含大写字母
+      require-uppercase: false
+      # 是否必须包含特殊字符
+      require-special: false
+      # 密码历史记录数量（0表示不限制）
+      history-count: 0
+      # 密码有效期（天，0表示永不过期）
+      expire-days: 0
+    
+    # 登录配置
+    login:
+      # 最大登录尝试次数
+      max-attempts: 5
+      # 登录失败锁定时间（分钟）
+      lockout-duration: 30
+      # 是否启用验证码
+      captcha-enabled: true
+      # 验证码类型：simple, math, google
+      captcha-type: simple
+      # 验证码有效期（分钟）
+      captcha-expire: 5
+      # 是否启用记住我功能
+      remember-me-enabled: true
+      # 记住我有效期（天）
+      remember-me-days: 7
+    
+    # 会话配置
+    session:
+      # 会话超时时间（分钟）
+      timeout: 30
+      # 最大并发会话数
+      max-sessions: 1
+      # 是否允许新会话踢出旧会话
+      allow-session-fixation: true
+      # 会话固定保护策略：migrateSession, newSession, none
+      session-fixation-protection: migrateSession
+    
+    # 权限配置
+    permission:
+      # 是否启用权限验证
+      enabled: true
+      # 是否启用方法级权限
+      method-level-enabled: true
+      # 是否启用数据权限
+      data-permission-enabled: true
+      # 默认权限前缀
+      default-prefix: "ROLE_"
+      # 超级管理员角色
+      super-admin-role: "ROLE_SUPER_ADMIN"
+      # 匿名用户角色
+      anonymous-role: "ROLE_ANONYMOUS"
+    
+    # 操作日志配置
+    operation-log:
+      # 是否启用操作日志
+      enabled: true
+      # 是否记录登录日志
+      login-log-enabled: true
+      # 是否记录登出日志
+      logout-log-enabled: true
+      # 是否记录操作日志
+      operation-log-enabled: true
+      # 是否记录异常日志
+      exception-log-enabled: true
+      # 日志保存天数
+      log-retention-days: 30
+      # 是否异步记录日志
+      async-enabled: true
+    
+    # 安全头配置
+    headers:
+      # 是否启用安全头
+      enabled: true
+      # X-Frame-Options
+      frame-options: DENY
+      # X-Content-Type-Options
+      content-type-options: nosniff
+      # X-XSS-Protection
+      xss-protection: 1; mode=block
+      # Strict-Transport-Security
+      hsts-enabled: true
+      hsts-max-age: 31536000
+      hsts-include-subdomains: true
+      # Content-Security-Policy
+      csp-enabled: true
+      csp-policy: "default-src 'self'"
+    
+    # CORS配置
+    cors:
+      # 是否启用CORS
+      enabled: true
+      # 允许的源
+      allowed-origins: 
+        - "http://localhost:3000"
+        - "http://localhost:8080"
+        - "https://your-domain.com"
+      # 允许的方法
+      allowed-methods:
+        - "GET"
+        - "POST"
+        - "PUT"
+        - "DELETE"
+        - "OPTIONS"
+      # 允许的头部
+      allowed-headers:
+        - "Content-Type"
+        - "Authorization"
+        - "X-Requested-With"
+        - "X-CSRF-TOKEN"
+      # 是否允许凭证
+      allow-credentials: true
+      # 预检请求缓存时间
+      max-age: 3600
+
+# ==================== Spring Security 配置 ====================
+spring:
+  security:
+    # 用户配置
+    user:
+      name: admin
+      password: admin123
+      roles: ADMIN
+    
+    # 会话配置
+    session:
+      # 会话创建策略：always, if_required, never, stateless
+      creation-policy: if_required
+      # 会话固定保护策略
+      fixation:
+        strategy: migrateSession
+    
+    # CSRF配置
+    csrf:
+      # 是否启用CSRF保护
+      enabled: true
+      # 忽略的URL模式
+      ignored-urls:
+        - /api/public/**
+        - /api/auth/login
+        - /api/auth/register
+    
+    # 密码编码器配置
+    password:
+      # 编码器类型：bcrypt, pbkdf2, scrypt, argon2
+      encoder: bcrypt
+      # BCrypt强度
+      bcrypt-strength: 10
+
+# ==================== 数据源配置（用于权限管理） ====================
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/wmt_security?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&useSSL=false
+    username: root
+    password: 123456
+    druid:
+      initial-size: 5
+      min-idle: 5
+      max-active: 20
+      max-wait: 60000
+      time-between-eviction-runs-millis: 60000
+      min-evictable-idle-time-millis: 300000
+      validation-query: SELECT 1
+      test-while-idle: true
+      test-on-borrow: false
+      test-on-return: false
+      pool-prepared-statements: true
+      max-pool-prepared-statement-per-connection-size: 20
+
+# ==================== Redis配置（用于会话管理） ====================
+spring:
+  redis:
+    host: localhost
+    port: 6379
+    password: 
+    database: 0
+    timeout: 5000ms
+    lettuce:
+      pool:
+        max-active: 8
+        max-wait: -1ms
+        max-idle: 8
+        min-idle: 0
+
+# ==================== 会话存储配置 ====================
+spring:
+  session:
+    # 会话存储类型：none, jdbc, redis, hazelcast, mongodb
+    store-type: redis
+    # 会话超时时间
+    timeout: 30m
+    # 会话刷新模式：on_save, immediate
+    redis:
+      flush-mode: on_save
+      namespace: spring:session
+
+# ==================== 日志配置 ====================
+logging:
+  level:
+    root: INFO
+    com.wmt: DEBUG
+    org.springframework.security: DEBUG
+    org.springframework.session: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n"
+  file:
+    name: ./logs/wmt-security-demo.log
+    max-size: 100MB
+    max-history: 30
+
+# ==================== 监控配置 ====================
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: when-authorized
+  info:
+    env:
+      enabled: true
