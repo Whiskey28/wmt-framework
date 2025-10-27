@@ -1,170 +1,461 @@
-# WMT日志管理组件配置示例
+# WMT Log Starter 配置示例
+# 基于 wmt-spring-boot-starter-log 的完整配置示例
 
-# 基础配置
-wmt:
-  log:
-    enabled: true
-    
-    # 日志收集配置
-    collection:
-      enabled: true
-      levels: [INFO, WARN, ERROR, DEBUG]
-      sources: [application, access, error, security]
-      interval: PT30S
-      batch-size: 100
-      async: true
-      queue-size: 1000
-    
-    # 日志存储配置
-    storage:
-      enabled: true
-      type: elasticsearch  # 可选: file, elasticsearch, database
-      
-      # Elasticsearch存储配置
-      elasticsearch:
-        hosts: [localhost:9200]
-        index-prefix: wmt-logs
-        index-template: wmt-logs-template
-        bulk-size: 1000
-        refresh-interval: PT1S
-        connect-timeout: PT10S
-        read-timeout: PT30S
-      
-      # 文件存储配置
-      file:
-        path: logs
-        retention-days: 30
-        compress: true
-        max-file-size: 100
-      
-      # 数据库存储配置
-      database:
-        table-name: wmt_logs
-        batch-size: 100
-        retention-days: 90
-    
-    # 日志分析配置
-    analysis:
-      enabled: true
-      interval: PT5M
-      
-      # 异常检测配置
-      exception-detection:
-        enabled: true
-        threshold: 10
-        time-window: PT10M
-      
-      # 趋势分析配置
-      trend-analysis:
-        enabled: true
-        period: PT1H
-        metrics: [error_rate, response_time, throughput]
-    
-    # 日志告警配置
-    alerting:
-      enabled: true
-      channels: [email, webhook, sms]
-      
-      # 告警规则
-      rules:
-        - name: error-rate-alert
-          description: 错误率告警
-          condition: error_rate
-          threshold: 0.1
-          time-window: PT5M
-          enabled: true
-        - name: response-time-alert
-          description: 响应时间告警
-          condition: avg_response_time
-          threshold: 1000
-          time-window: PT5M
-          enabled: true
-        - name: exception-count-alert
-          description: 异常数量告警
-          condition: error_count
-          threshold: 50
-          time-window: PT5M
-          enabled: true
-      
-      # 告警通知配置
-      config:
-        email:
-          smtp-host: smtp.example.com
-          smtp-port: 587
-          username: alert@example.com
-          password: password
-          from: alert@example.com
-          to: [admin@example.com, dev@example.com]
-        webhook:
-          url: http://webhook.example.com/alerts
-          timeout: 30s
-          headers:
-            Authorization: Bearer token123
-        sms:
-          provider: aliyun
-          access-key: your-access-key
-          secret-key: your-secret-key
-          template-code: SMS_123456
-          sign-name: WMT系统
-    
-    # 日志可视化配置
-    visualization:
-      enabled: true
-      
-      # Kibana配置
-      kibana:
-        url: http://localhost:5601
-        index-pattern: wmt-logs-*
-        default-time-range: last 1 hour
-      
-      # 仪表板配置
-      dashboard:
-        enabled: true
-        config:
-          title: WMT日志监控仪表板
-          refresh-interval: 30s
-          panels:
-            - type: histogram
-              title: 日志时间分布
-              query: "*"
-              field: timestamp
-            - type: pie
-              title: 日志级别分布
-              query: "*"
-              field: level
-            - type: table
-              title: 错误日志详情
-              query: "level:ERROR"
-              fields: [timestamp, message, className, methodName]
-            - type: line
-              title: 响应时间趋势
-              query: "responseTime:*"
-              field: responseTime
-
-# Spring Boot配置
+# ==================== 基础配置 ====================
 spring:
   application:
-    name: wmt-demo
-  
-  # Elasticsearch配置
-  elasticsearch:
-    rest:
-      uris: http://localhost:9200
-      connection-timeout: 10s
-      read-timeout: 30s
-      max-conn-total: 100
-      max-conn-per-route: 10
-  
-  # 日志配置
+    name: wmt-log-demo
   profiles:
-    active: wmtlocal  # 使用wmtlocal环境启用ELK集成
+    active: dev
 
-# 日志级别配置
+# ==================== WMT Log 配置 ====================
+wmt:
+  log:
+    # 是否启用日志功能
+    enabled: true
+    
+    # 日志级别配置
+    level:
+      # 根日志级别
+      root: INFO
+      # 应用日志级别
+      application: DEBUG
+      # 框架日志级别
+      framework: DEBUG
+      # 第三方库日志级别
+      third-party: WARN
+      # 数据库日志级别
+      database: DEBUG
+      # 缓存日志级别
+      cache: DEBUG
+      # 消息队列日志级别
+      mq: DEBUG
+      # 任务调度日志级别
+      job: DEBUG
+      # 安全日志级别
+      security: DEBUG
+      # 监控日志级别
+      monitoring: DEBUG
+      # 性能日志级别
+      performance: DEBUG
+      # 错误日志级别
+      error: ERROR
+      # 告警日志级别
+      alert: WARN
+    
+    # 日志格式配置
+    format:
+      # 控制台日志格式
+      console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n"
+      # 文件日志格式
+      file: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n"
+      # JSON日志格式
+      json: '{"timestamp":"%d{yyyy-MM-dd HH:mm:ss.SSS}","thread":"%thread","level":"%-5level","logger":"%logger{50}","message":"%msg"}'
+      # 结构化日志格式
+      structured: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n"
+      # 是否启用颜色输出
+      color-enabled: true
+      # 是否启用高亮显示
+      highlight-enabled: true
+      # 是否启用异常堆栈跟踪
+      stack-trace-enabled: true
+      # 异常堆栈跟踪深度
+      stack-trace-depth: 10
+      # 是否启用调用者信息
+      caller-info-enabled: true
+      # 调用者信息深度
+      caller-info-depth: 5
+    
+    # 日志文件配置
+    file:
+      # 是否启用文件日志
+      enabled: true
+      # 日志文件路径
+      path: ./logs
+      # 日志文件名
+      name: wmt-log-demo.log
+      # 日志文件大小限制（MB）
+      max-size: 100
+      # 日志文件数量限制
+      max-history: 30
+      # 日志文件总大小限制（MB）
+      total-size-cap: 1000
+      # 是否启用日志文件压缩
+      compression-enabled: true
+      # 压缩格式
+      compression-format: gz
+      # 是否启用日志文件加密
+      encryption-enabled: false
+      # 加密密钥
+      encryption-key: "your-encryption-key"
+      # 加密算法
+      encryption-algorithm: AES
+      # 是否启用日志文件签名
+      signature-enabled: false
+      # 签名密钥
+      signature-key: "your-signature-key"
+      # 签名算法
+      signature-algorithm: HMAC-SHA256
+      # 是否启用日志文件监控
+      monitoring-enabled: true
+      # 监控间隔（秒）
+      monitoring-interval: 30
+      # 是否启用日志文件统计
+      statistics-enabled: true
+      # 统计保留天数
+      statistics-retention: 30
+      # 是否启用日志文件告警
+      alerting-enabled: true
+      # 告警阈值（文件大小MB）
+      alerting-threshold: 500
+      # 告警重试次数
+      alerting-retry-count: 3
+      # 告警重试间隔（秒）
+      alerting-retry-interval: 60
+    
+    # 日志输出配置
+    output:
+      # 是否启用控制台输出
+      console-enabled: true
+      # 是否启用文件输出
+      file-enabled: true
+      # 是否启用网络输出
+      network-enabled: false
+      # 网络输出地址
+      network-host: localhost
+      # 网络输出端口
+      network-port: 514
+      # 网络输出协议
+      network-protocol: UDP
+      # 是否启用数据库输出
+      database-enabled: false
+      # 数据库输出表名
+      database-table: log_entries
+      # 数据库输出批次大小
+      database-batch-size: 100
+      # 数据库输出批次间隔（毫秒）
+      database-batch-interval: 1000
+      # 是否启用消息队列输出
+      mq-enabled: false
+      # 消息队列输出主题
+      mq-topic: log-entries
+      # 消息队列输出批次大小
+      mq-batch-size: 100
+      # 消息队列输出批次间隔（毫秒）
+      mq-batch-interval: 1000
+      # 是否启用Elasticsearch输出
+      elasticsearch-enabled: false
+      # Elasticsearch输出索引
+      elasticsearch-index: log-entries
+      # Elasticsearch输出批次大小
+      elasticsearch-batch-size: 100
+      # Elasticsearch输出批次间隔（毫秒）
+      elasticsearch-batch-interval: 1000
+    
+    # 日志过滤配置
+    filter:
+      # 是否启用日志过滤
+      enabled: true
+      # 过滤类型：level, logger, message, thread, time
+      type: level
+      # 过滤配置
+      config:
+        # 是否启用级别过滤
+        level-enabled: true
+        # 级别过滤规则
+        level-rules:
+          - level: DEBUG
+            enabled: true
+          - level: INFO
+            enabled: true
+          - level: WARN
+            enabled: true
+          - level: ERROR
+            enabled: true
+        # 是否启用日志器过滤
+        logger-enabled: true
+        # 日志器过滤规则
+        logger-rules:
+          - logger: "com.wmt.*"
+            enabled: true
+          - logger: "org.springframework.*"
+            enabled: false
+          - logger: "org.apache.*"
+            enabled: false
+        # 是否启用消息过滤
+        message-enabled: true
+        # 消息过滤规则
+        message-rules:
+          - pattern: ".*password.*"
+            enabled: false
+          - pattern: ".*token.*"
+            enabled: false
+          - pattern: ".*secret.*"
+            enabled: false
+        # 是否启用线程过滤
+        thread-enabled: true
+        # 线程过滤规则
+        thread-rules:
+          - thread: "main"
+            enabled: true
+          - thread: "http-nio-.*"
+            enabled: true
+        # 是否启用时间过滤
+        time-enabled: true
+        # 时间过滤规则
+        time-rules:
+          - start-time: "00:00:00"
+            end-time: "23:59:59"
+            enabled: true
+        # 是否启用IP过滤
+        ip-enabled: true
+        # IP过滤规则
+        ip-rules:
+          - ip: "127.0.0.1"
+            enabled: true
+          - ip: "192.168.1.*"
+            enabled: true
+        # 是否启用用户过滤
+        user-enabled: true
+        # 用户过滤规则
+        user-rules:
+          - user: "admin"
+        enabled: true
+          - user: "user"
+        enabled: true
+    
+    # 日志聚合配置
+    aggregation:
+      # 是否启用日志聚合
+      enabled: true
+      # 聚合类型：time, level, logger, message, thread, ip, user
+      type: time
+      # 聚合配置
+      config:
+        # 是否启用时间聚合
+        time-enabled: true
+        # 时间聚合间隔（秒）
+        time-interval: 60
+        # 时间聚合窗口（秒）
+        time-window: 300
+        # 是否启用级别聚合
+        level-enabled: true
+        # 级别聚合间隔（秒）
+        level-interval: 60
+        # 级别聚合窗口（秒）
+        level-window: 300
+        # 是否启用日志器聚合
+        logger-enabled: true
+        # 日志器聚合间隔（秒）
+        logger-interval: 60
+        # 日志器聚合窗口（秒）
+        logger-window: 300
+        # 是否启用消息聚合
+        message-enabled: true
+        # 消息聚合间隔（秒）
+        message-interval: 60
+        # 消息聚合窗口（秒）
+        message-window: 300
+        # 是否启用线程聚合
+        thread-enabled: true
+        # 线程聚合间隔（秒）
+        thread-interval: 60
+        # 线程聚合窗口（秒）
+        thread-window: 300
+        # 是否启用IP聚合
+        ip-enabled: true
+        # IP聚合间隔（秒）
+        ip-interval: 60
+        # IP聚合窗口（秒）
+        ip-window: 300
+        # 是否启用用户聚合
+        user-enabled: true
+        # 用户聚合间隔（秒）
+        user-interval: 60
+        # 用户聚合窗口（秒）
+        user-window: 300
+        # 是否启用聚合缓存
+        cache-enabled: true
+        # 聚合缓存过期时间（秒）
+        cache-expire-time: 3600
+        # 聚合缓存大小
+        cache-size: 10000
+        # 是否启用聚合压缩
+        compression-enabled: true
+        # 聚合压缩阈值（字节）
+        compression-threshold: 1024
+        # 聚合压缩算法
+        compression-algorithm: gzip
+        # 是否启用聚合加密
+        encryption-enabled: false
+        # 聚合加密密钥
+        encryption-key: "your-encryption-key"
+        # 聚合加密算法
+        encryption-algorithm: AES
+        # 是否启用聚合签名
+        signature-enabled: false
+        # 聚合签名密钥
+        signature-key: "your-signature-key"
+        # 聚合签名算法
+        signature-algorithm: HMAC-SHA256
+        # 是否启用聚合监控
+        monitoring-enabled: true
+        # 聚合监控间隔（秒）
+        monitoring-interval: 30
+        # 是否启用聚合统计
+        statistics-enabled: true
+        # 聚合统计保留天数
+        statistics-retention: 30
+        # 是否启用聚合告警
+        alerting-enabled: true
+        # 聚合告警阈值（聚合数量）
+        alerting-threshold: 1000
+        # 聚合告警重试次数
+        alerting-retry-count: 3
+        # 聚合告警重试间隔（秒）
+        alerting-retry-interval: 60
+    
+    # 日志监控配置
+    monitoring:
+      # 是否启用日志监控
+          enabled: true
+      # 监控间隔（秒）
+      interval: 30
+      # 是否启用日志统计
+      statistics-enabled: true
+      # 日志统计保留天数
+      statistics-retention: 30
+      # 是否启用日志告警
+      alerting-enabled: true
+      # 日志告警阈值配置
+      alerting-thresholds:
+        # 日志错误率阈值（百分比）
+        error-rate: 5
+        # 日志警告率阈值（百分比）
+        warning-rate: 10
+        # 日志文件大小阈值（MB）
+        file-size: 500
+        # 日志文件数量阈值
+        file-count: 100
+        # 日志处理时间阈值（毫秒）
+        processing-time: 1000
+        # 日志内存使用率阈值（百分比）
+        memory-usage: 80
+        # 日志磁盘使用率阈值（百分比）
+        disk-usage: 80
+        # 日志网络延迟阈值（毫秒）
+        network-latency: 1000
+        # 日志数据库延迟阈值（毫秒）
+        database-latency: 1000
+        # 日志消息队列延迟阈值（毫秒）
+        mq-latency: 1000
+        # 日志Elasticsearch延迟阈值（毫秒）
+        elasticsearch-latency: 1000
+      # 告警重试次数
+      alerting-retry-count: 3
+      # 告警重试间隔（秒）
+      alerting-retry-interval: 60
+      # 告警通知方式：email, sms, webhook
+      alert-notification-types:
+        - email
+        - webhook
+      # 告警通知配置
+      alert-notification:
+        # 邮件配置
+        email:
+          enabled: true
+          smtp-host: smtp.gmail.com
+          smtp-port: 587
+          username: your-email@gmail.com
+          password: your-password
+          from: alerts@your-domain.com
+          to:
+            - admin@your-domain.com
+            - devops@your-domain.com
+          subject: "[WMT Log] 日志监控告警"
+        # Webhook配置
+        webhook:
+          enabled: true
+          url: https://your-webhook-url.com/alerts
+          method: POST
+          headers:
+            Content-Type: application/json
+            Authorization: Bearer your-token
+          timeout: 10
+          retry-count: 3
+
+# ==================== 数据源配置 ====================
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/wmt_log?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&useSSL=false
+    username: root
+    password: 123456
+    druid:
+      initial-size: 5
+      min-idle: 5
+      max-active: 20
+      max-wait: 60000
+      time-between-eviction-runs-millis: 60000
+      min-evictable-idle-time-millis: 300000
+      validation-query: SELECT 1
+      test-while-idle: true
+      test-on-borrow: false
+      test-on-return: false
+      pool-prepared-statements: true
+      max-pool-prepared-statement-per-connection-size: 20
+
+# ==================== Redis配置 ====================
+spring:
+  redis:
+    host: localhost
+    port: 6379
+    password: 
+    database: 0
+    timeout: 5000ms
+    lettuce:
+      pool:
+        max-active: 8
+        max-wait: -1ms
+        max-idle: 8
+        min-idle: 0
+
+# ==================== Elasticsearch配置 ====================
+spring:
+  elasticsearch:
+      uris: http://localhost:9200
+    username: elastic
+    password: password
+    connection-timeout: 10000
+    read-timeout: 30000
+    max-connections: 100
+    max-connections-per-route: 10
+
+# ==================== 日志配置 ====================
 logging:
   level:
-    com.wmt.framework.log: DEBUG
-    org.elasticsearch: INFO
-    org.springframework.elasticsearch: INFO
+    root: INFO
+    com.wmt: DEBUG
+    org.springframework.log: DEBUG
   pattern:
-    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %highlight(%-5level) %cyan(%logger{50}:%L) - %msg%n"
-    file: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50}:%L - %msg%n"
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n"
+  file:
+    name: ./logs/wmt-log-demo.log
+    max-size: 100MB
+    max-history: 30
+
+# ==================== 监控配置 ====================
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus,log
+  endpoint:
+    health:
+      show-details: when-authorized
+    log:
+      enabled: true
+  info:
+    env:
+      enabled: true

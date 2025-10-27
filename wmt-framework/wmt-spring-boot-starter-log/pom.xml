@@ -82,8 +82,8 @@
 
         <!-- 可选依赖：Redis 用于缓存 -->
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-redis</artifactId>
+            <groupId>com.wmt</groupId>
+            <artifactId>wmt-spring-boot-starter-cache</artifactId>
             <optional>true</optional>
         </dependency>
 
@@ -96,8 +96,8 @@
 
         <!-- 测试依赖 -->
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-test</artifactId>
+            <groupId>com.wmt</groupId>
+            <artifactId>wmt-spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>

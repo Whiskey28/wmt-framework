@@ -1,0 +1,475 @@
+# WMT Protection Starter 配置示例
+# 基于 wmt-spring-boot-starter-protection 的完整配置示例
+
+# ==================== 基础配置 ====================
+spring:
+  application:
+    name: wmt-protection-demo
+  profiles:
+    active: dev
+
+# ==================== WMT Protection 配置 ====================
+wmt:
+  protection:
+    # 是否启用服务保护功能
+    enabled: true
+    
+    # 分布式锁配置
+    lock:
+      # 是否启用分布式锁
+      enabled: true
+      # 锁类型：redisson, redis, zookeeper
+      type: redisson
+      # 锁配置
+      config:
+        # 默认锁超时时间（秒）
+        default-timeout: 30
+        # 默认锁等待时间（秒）
+        default-wait-time: 10
+        # 是否启用锁重试
+        retry-enabled: true
+        # 重试次数
+        retry-count: 3
+        # 重试间隔（毫秒）
+        retry-interval: 100
+        # 是否启用锁监控
+        monitoring-enabled: true
+        # 监控间隔（秒）
+        monitoring-interval: 30
+        # 是否启用锁统计
+        statistics-enabled: true
+        # 统计保留天数
+        statistics-retention: 30
+        # 是否启用锁告警
+        alerting-enabled: true
+        # 告警阈值（锁等待时间秒）
+        alerting-threshold: 60
+        # 告警重试次数
+        alerting-retry-count: 3
+        # 告警重试间隔（秒）
+        alerting-retry-interval: 60
+        # 是否启用锁压缩
+        compression-enabled: true
+        # 锁压缩阈值（字节）
+        compression-threshold: 1024
+        # 锁压缩算法
+        compression-algorithm: gzip
+        # 是否启用锁加密
+        encryption-enabled: false
+        # 锁加密密钥
+        encryption-key: "your-encryption-key"
+        # 锁加密算法
+        encryption-algorithm: AES
+        # 是否启用锁签名
+        signature-enabled: false
+        # 锁签名密钥
+        signature-key: "your-signature-key"
+        # 锁签名算法
+        signature-algorithm: HMAC-SHA256
+    
+    # 幂等性配置
+    idempotency:
+      # 是否启用幂等性
+      enabled: true
+      # 幂等性类型：token, key, hash
+      type: token
+      # 幂等性配置
+      config:
+        # 默认过期时间（秒）
+        default-expire-time: 300
+        # 是否启用幂等性验证
+        validation-enabled: true
+        # 验证超时时间（秒）
+        validation-timeout: 30
+        # 是否启用幂等性缓存
+        cache-enabled: true
+        # 缓存过期时间（秒）
+        cache-expire-time: 300
+        # 缓存大小
+        cache-size: 10000
+        # 是否启用幂等性监控
+        monitoring-enabled: true
+        # 监控间隔（秒）
+        monitoring-interval: 30
+        # 是否启用幂等性统计
+        statistics-enabled: true
+        # 统计保留天数
+        statistics-retention: 30
+        # 是否启用幂等性告警
+        alerting-enabled: true
+        # 告警阈值（幂等性检查次数）
+        alerting-threshold: 1000
+        # 告警重试次数
+        alerting-retry-count: 3
+        # 告警重试间隔（秒）
+        alerting-retry-interval: 60
+        # 是否启用幂等性压缩
+        compression-enabled: true
+        # 幂等性压缩阈值（字节）
+        compression-threshold: 1024
+        # 幂等性压缩算法
+        compression-algorithm: gzip
+        # 是否启用幂等性加密
+        encryption-enabled: false
+        # 幂等性加密密钥
+        encryption-key: "your-encryption-key"
+        # 幂等性加密算法
+        encryption-algorithm: AES
+        # 是否启用幂等性签名
+        signature-enabled: false
+        # 幂等性签名密钥
+        signature-key: "your-signature-key"
+        # 幂等性签名算法
+        signature-algorithm: HMAC-SHA256
+    
+    # 限流配置
+    rate-limiting:
+      # 是否启用限流
+      enabled: true
+      # 限流类型：ip, user, api, global
+      type: ip
+      # 限流配置
+      config:
+        # 限流策略：token-bucket, sliding-window, fixed-window
+        strategy: token-bucket
+        # 限流速率（请求/秒）
+        rate: 10
+        # 限流容量
+        capacity: 100
+        # 限流时间窗口（秒）
+        time-window: 60
+        # 是否启用限流缓存
+        cache-enabled: true
+        # 缓存过期时间（秒）
+        cache-expire-time: 60
+        # 缓存大小
+        cache-size: 10000
+        # 是否启用限流监控
+        monitoring-enabled: true
+        # 监控间隔（秒）
+        monitoring-interval: 30
+        # 是否启用限流统计
+        statistics-enabled: true
+        # 统计保留天数
+        statistics-retention: 30
+        # 是否启用限流告警
+        alerting-enabled: true
+        # 告警阈值（限流触发次数）
+        alerting-threshold: 100
+        # 告警重试次数
+        alerting-retry-count: 3
+        # 告警重试间隔（秒）
+        alerting-retry-interval: 60
+        # 是否启用限流压缩
+        compression-enabled: true
+        # 限流压缩阈值（字节）
+        compression-threshold: 1024
+        # 限流压缩算法
+        compression-algorithm: gzip
+        # 是否启用限流加密
+        encryption-enabled: false
+        # 限流加密密钥
+        encryption-key: "your-encryption-key"
+        # 限流加密算法
+        encryption-algorithm: AES
+        # 是否启用限流签名
+        signature-enabled: false
+        # 限流签名密钥
+        signature-key: "your-signature-key"
+        # 限流签名算法
+        signature-algorithm: HMAC-SHA256
+    
+    # 熔断器配置
+    circuit-breaker:
+      # 是否启用熔断器
+      enabled: true
+      # 熔断器类型：hystrix, resilience4j, sentinel
+      type: resilience4j
+      # 熔断器配置
+      config:
+        # 熔断器状态：closed, open, half-open
+        state: closed
+        # 失败率阈值（百分比）
+        failure-rate-threshold: 50
+        # 慢调用率阈值（百分比）
+        slow-call-rate-threshold: 50
+        # 慢调用时间阈值（毫秒）
+        slow-call-duration-threshold: 1000
+        # 最小请求数
+        minimum-number-of-calls: 5
+        # 滑动窗口大小
+        sliding-window-size: 10
+        # 滑动窗口类型：count, time
+        sliding-window-type: count
+        # 等待时间（秒）
+        wait-duration-in-open-state: 60
+        # 是否启用熔断器监控
+        monitoring-enabled: true
+        # 监控间隔（秒）
+        monitoring-interval: 30
+        # 是否启用熔断器统计
+        statistics-enabled: true
+        # 统计保留天数
+        statistics-retention: 30
+        # 是否启用熔断器告警
+        alerting-enabled: true
+        # 告警阈值（熔断器打开次数）
+        alerting-threshold: 10
+        # 告警重试次数
+        alerting-retry-count: 3
+        # 告警重试间隔（秒）
+        alerting-retry-interval: 60
+        # 是否启用熔断器压缩
+        compression-enabled: true
+        # 熔断器压缩阈值（字节）
+        compression-threshold: 1024
+        # 熔断器压缩算法
+        compression-algorithm: gzip
+        # 是否启用熔断器加密
+        encryption-enabled: false
+        # 熔断器加密密钥
+        encryption-key: "your-encryption-key"
+        # 熔断器加密算法
+        encryption-algorithm: AES
+        # 是否启用熔断器签名
+        signature-enabled: false
+        # 熔断器签名密钥
+        signature-key: "your-signature-key"
+        # 熔断器签名算法
+        signature-algorithm: HMAC-SHA256
+    
+    # 重试配置
+    retry:
+      # 是否启用重试
+      enabled: true
+      # 重试类型：fixed, exponential, random
+      type: exponential
+      # 重试配置
+      config:
+        # 最大重试次数
+        max-attempts: 3
+        # 初始延迟时间（毫秒）
+        initial-delay: 1000
+        # 最大延迟时间（毫秒）
+        max-delay: 10000
+        # 延迟倍数
+        multiplier: 2
+        # 随机因子
+        random-factor: 0.5
+        # 是否启用重试监控
+        monitoring-enabled: true
+        # 监控间隔（秒）
+        monitoring-interval: 30
+        # 是否启用重试统计
+        statistics-enabled: true
+        # 统计保留天数
+        statistics-retention: 30
+        # 是否启用重试告警
+        alerting-enabled: true
+        # 告警阈值（重试次数）
+        alerting-threshold: 100
+        # 告警重试次数
+        alerting-retry-count: 3
+        # 告警重试间隔（秒）
+        alerting-retry-interval: 60
+        # 是否启用重试压缩
+        compression-enabled: true
+        # 重试压缩阈值（字节）
+        compression-threshold: 1024
+        # 重试压缩算法
+        compression-algorithm: gzip
+        # 是否启用重试加密
+        encryption-enabled: false
+        # 重试加密密钥
+        encryption-key: "your-encryption-key"
+        # 重试加密算法
+        encryption-algorithm: AES
+        # 是否启用重试签名
+        signature-enabled: false
+        # 重试签名密钥
+        signature-key: "your-signature-key"
+        # 重试签名算法
+        signature-algorithm: HMAC-SHA256
+    
+    # 超时配置
+    timeout:
+      # 是否启用超时
+      enabled: true
+      # 超时类型：fixed, adaptive
+      type: fixed
+      # 超时配置
+      config:
+        # 默认超时时间（毫秒）
+        default-timeout: 5000
+        # 最小超时时间（毫秒）
+        min-timeout: 1000
+        # 最大超时时间（毫秒）
+        max-timeout: 30000
+        # 超时时间步长（毫秒）
+        timeout-step: 1000
+        # 是否启用超时监控
+        monitoring-enabled: true
+        # 监控间隔（秒）
+        monitoring-interval: 30
+        # 是否启用超时统计
+        statistics-enabled: true
+        # 统计保留天数
+        statistics-retention: 30
+        # 是否启用超时告警
+        alerting-enabled: true
+        # 告警阈值（超时次数）
+        alerting-threshold: 100
+        # 告警重试次数
+        alerting-retry-count: 3
+        # 告警重试间隔（秒）
+        alerting-retry-interval: 60
+        # 是否启用超时压缩
+        compression-enabled: true
+        # 超时压缩阈值（字节）
+        compression-threshold: 1024
+        # 超时压缩算法
+        compression-algorithm: gzip
+        # 是否启用超时加密
+        encryption-enabled: false
+        # 超时加密密钥
+        encryption-key: "your-encryption-key"
+        # 超时加密算法
+        encryption-algorithm: AES
+        # 是否启用超时签名
+        signature-enabled: false
+        # 超时签名密钥
+        signature-key: "your-signature-key"
+        # 超时签名算法
+        signature-algorithm: HMAC-SHA256
+    
+    # 监控配置
+    monitoring:
+      # 是否启用服务保护监控
+      enabled: true
+      # 监控间隔（秒）
+      interval: 30
+      # 是否启用服务保护统计
+      statistics-enabled: true
+      # 服务保护统计保留天数
+      statistics-retention: 30
+      # 是否启用服务保护告警
+      alerting-enabled: true
+      # 服务保护告警阈值配置
+      alerting-thresholds:
+        # 分布式锁等待时间阈值（秒）
+        lock-wait-time: 60
+        # 幂等性检查次数阈值
+        idempotency-check-count: 1000
+        # 限流触发次数阈值
+        rate-limit-trigger-count: 100
+        # 熔断器打开次数阈值
+        circuit-breaker-open-count: 10
+        # 重试次数阈值
+        retry-count: 100
+        # 超时次数阈值
+        timeout-count: 100
+        # 服务保护响应时间阈值（毫秒）
+        protection-response-time: 1000
+        # 服务保护错误率阈值（百分比）
+        protection-error-rate: 5
+        # 服务保护成功率阈值（百分比）
+        protection-success-rate: 95
+        # 服务保护可用性阈值（百分比）
+        protection-availability: 99
+      # 告警重试次数
+      alerting-retry-count: 3
+      # 告警重试间隔（秒）
+      alerting-retry-interval: 60
+      # 告警通知方式：email, sms, webhook
+      alert-notification-types:
+        - email
+        - webhook
+      # 告警通知配置
+      alert-notification:
+        # 邮件配置
+        email:
+          enabled: true
+          smtp-host: smtp.gmail.com
+          smtp-port: 587
+          username: your-email@gmail.com
+          password: your-password
+          from: alerts@your-domain.com
+          to:
+            - admin@your-domain.com
+            - devops@your-domain.com
+          subject: "[WMT Protection] 服务保护监控告警"
+        # Webhook配置
+        webhook:
+          enabled: true
+          url: https://your-webhook-url.com/alerts
+          method: POST
+          headers:
+            Content-Type: application/json
+            Authorization: Bearer your-token
+          timeout: 10
+          retry-count: 3
+
+# ==================== 数据源配置 ====================
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/wmt_protection?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&useSSL=false
+    username: root
+    password: 123456
+    druid:
+      initial-size: 5
+      min-idle: 5
+      max-active: 20
+      max-wait: 60000
+      time-between-eviction-runs-millis: 60000
+      min-evictable-idle-time-millis: 300000
+      validation-query: SELECT 1
+      test-while-idle: true
+      test-on-borrow: false
+      test-on-return: false
+      pool-prepared-statements: true
+      max-pool-prepared-statement-per-connection-size: 20
+
+# ==================== Redis配置 ====================
+spring:
+  redis:
+    host: localhost
+    port: 6379
+    password: 
+    database: 0
+    timeout: 5000ms
+    lettuce:
+      pool:
+        max-active: 8
+        max-wait: -1ms
+        max-idle: 8
+        min-idle: 0
+
+# ==================== 日志配置 ====================
+logging:
+  level:
+    root: INFO
+    com.wmt: DEBUG
+    org.springframework.protection: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n"
+  file:
+    name: ./logs/wmt-protection-demo.log
+    max-size: 100MB
+    max-history: 30
+
+# ==================== 监控配置 ====================
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus,protection
+  endpoint:
+    health:
+      show-details: when-authorized
+    protection:
+      enabled: true
+  info:
+    env:
+      enabled: true

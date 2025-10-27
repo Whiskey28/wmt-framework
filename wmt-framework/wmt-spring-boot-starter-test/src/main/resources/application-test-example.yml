@@ -1,0 +1,395 @@
+# WMT Test Starter 配置示例
+# 基于 wmt-spring-boot-starter-test 的完整配置示例
+
+# ==================== 基础配置 ====================
+spring:
+  application:
+    name: wmt-test-demo
+  profiles:
+    active: test
+
+# ==================== WMT Test 配置 ====================
+wmt:
+  test:
+    # 是否启用测试功能
+    enabled: true
+    
+    # 单元测试配置
+    unit-test:
+      # 是否启用单元测试
+      enabled: true
+      # 测试包路径
+      base-package: com.wmt.demo.test
+      # 测试类命名模式
+      class-name-pattern: "*Test"
+      # 测试方法命名模式
+      method-name-pattern: "test*"
+      # 是否启用测试覆盖
+      coverage-enabled: true
+      # 测试覆盖阈值
+      coverage-threshold: 80
+      # 是否启用测试报告
+      reporting-enabled: true
+      # 测试报告格式
+      report-format: html
+      # 测试报告路径
+      report-path: ./target/test-reports
+      # 是否启用测试并行
+      parallel-enabled: true
+      # 并行线程数
+      parallel-threads: 4
+      # 是否启用测试重试
+      retry-enabled: true
+      # 重试次数
+      retry-count: 3
+      # 重试间隔（秒）
+      retry-interval: 1
+      # 是否启用测试超时
+      timeout-enabled: true
+      # 测试超时时间（秒）
+      timeout: 30
+      # 是否启用测试监控
+      monitoring-enabled: true
+      # 监控间隔（秒）
+      monitoring-interval: 10
+      # 是否启用测试统计
+      statistics-enabled: true
+      # 统计保留天数
+      statistics-retention: 30
+    
+    # 集成测试配置
+    integration-test:
+      # 是否启用集成测试
+      enabled: true
+      # 测试包路径
+      base-package: com.wmt.demo.integration
+      # 测试类命名模式
+      class-name-pattern: "*IT"
+      # 测试方法命名模式
+      method-name-pattern: "test*"
+      # 是否启用测试覆盖
+      coverage-enabled: true
+      # 测试覆盖阈值
+      coverage-threshold: 70
+      # 是否启用测试报告
+      reporting-enabled: true
+      # 测试报告格式
+      report-format: html
+      # 测试报告路径
+      report-path: ./target/integration-test-reports
+      # 是否启用测试并行
+      parallel-enabled: false
+      # 并行线程数
+      parallel-threads: 2
+      # 是否启用测试重试
+      retry-enabled: true
+      # 重试次数
+      retry-count: 2
+      # 重试间隔（秒）
+      retry-interval: 5
+      # 是否启用测试超时
+      timeout-enabled: true
+      # 测试超时时间（秒）
+      timeout: 60
+      # 是否启用测试监控
+      monitoring-enabled: true
+      # 监控间隔（秒）
+      monitoring-interval: 15
+      # 是否启用测试统计
+      statistics-enabled: true
+      # 统计保留天数
+      statistics-retention: 30
+    
+    # 数据库测试配置
+    database-test:
+      # 是否启用数据库测试
+      enabled: true
+      # 数据库类型：h2, mysql, postgresql
+      type: h2
+      # 数据库配置
+      config:
+        # 数据库URL
+        url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+        # 数据库驱动
+        driver-class-name: org.h2.Driver
+        # 数据库用户名
+        username: sa
+        # 数据库密码
+        password: 
+        # 数据库初始化模式
+        initialization-mode: always
+        # 数据库初始化脚本
+        schema: classpath:sql/schema.sql
+        # 数据库初始化数据
+        data: classpath:sql/data.sql
+        # 是否启用数据库清理
+        cleanup-enabled: true
+        # 清理模式：before, after, before-and-after
+        cleanup-mode: before-and-after
+        # 是否启用事务回滚
+        transaction-rollback: true
+        # 是否启用数据库重置
+        reset-enabled: true
+        # 重置模式：before, after, before-and-after
+        reset-mode: before-and-after
+        # 是否启用数据库验证
+        validation-enabled: true
+        # 验证超时时间（秒）
+        validation-timeout: 30
+        # 是否启用数据库监控
+        monitoring-enabled: true
+        # 监控间隔（秒）
+        monitoring-interval: 10
+        # 是否启用数据库统计
+        statistics-enabled: true
+        # 统计保留天数
+        statistics-retention: 30
+    
+    # Redis测试配置
+    redis-test:
+      # 是否启用Redis测试
+      enabled: true
+      # Redis类型：jedis-mock, embedded
+      type: jedis-mock
+      # Redis配置
+      config:
+        # Redis主机
+        host: localhost
+        # Redis端口
+        port: 6379
+        # Redis密码
+        password: 
+        # Redis数据库
+        database: 0
+        # Redis超时时间（毫秒）
+        timeout: 5000
+        # 是否启用Redis清理
+        cleanup-enabled: true
+        # 清理模式：before, after, before-and-after
+        cleanup-mode: before-and-after
+        # 是否启用Redis重置
+        reset-enabled: true
+        # 重置模式：before, after, before-and-after
+        reset-mode: before-and-after
+        # 是否启用Redis验证
+        validation-enabled: true
+        # 验证超时时间（秒）
+        validation-timeout: 30
+        # 是否启用Redis监控
+        monitoring-enabled: true
+        # 监控间隔（秒）
+        monitoring-interval: 10
+        # 是否启用Redis统计
+        statistics-enabled: true
+        # 统计保留天数
+        statistics-retention: 30
+    
+    # Mock配置
+    mock:
+      # 是否启用Mock功能
+      enabled: true
+      # Mock类型：mockito, easy-mock
+      type: mockito
+      # Mock配置
+      config:
+        # 是否启用Mock验证
+        verification-enabled: true
+        # 验证超时时间（秒）
+        verification-timeout: 30
+        # 是否启用Mock统计
+        statistics-enabled: true
+        # 统计保留天数
+        statistics-retention: 30
+        # 是否启用Mock监控
+        monitoring-enabled: true
+        # 监控间隔（秒）
+        monitoring-interval: 10
+        # 是否启用Mock清理
+        cleanup-enabled: true
+        # 清理模式：before, after, before-and-after
+        cleanup-mode: before-and-after
+        # 是否启用Mock重置
+        reset-enabled: true
+        # 重置模式：before, after, before-and-after
+        reset-mode: before-and-after
+    
+    # 数据生成配置
+    data-generation:
+      # 是否启用数据生成
+      enabled: true
+      # 数据生成器类型：podam, random-beans
+      type: podam
+      # 数据生成配置
+      config:
+        # 是否启用随机数据
+        random-enabled: true
+        # 随机种子
+        random-seed: 12345
+        # 是否启用数据验证
+        validation-enabled: true
+        # 验证超时时间（秒）
+        validation-timeout: 30
+        # 是否启用数据统计
+        statistics-enabled: true
+        # 统计保留天数
+        statistics-retention: 30
+        # 是否启用数据监控
+        monitoring-enabled: true
+        # 监控间隔（秒）
+        monitoring-interval: 10
+        # 是否启用数据清理
+        cleanup-enabled: true
+        # 清理模式：before, after, before-and-after
+        cleanup-mode: before-and-after
+        # 是否启用数据重置
+        reset-enabled: true
+        # 重置模式：before, after, before-and-after
+        reset-mode: before-and-after
+    
+    # 测试环境配置
+    environment:
+      # 是否启用测试环境
+      enabled: true
+      # 环境类型：test, integration, staging
+      type: test
+      # 环境配置
+      config:
+        # 是否启用环境隔离
+        isolation-enabled: true
+        # 隔离模式：class, method, suite
+        isolation-mode: class
+        # 是否启用环境清理
+        cleanup-enabled: true
+        # 清理模式：before, after, before-and-after
+        cleanup-mode: before-and-after
+        # 是否启用环境重置
+        reset-enabled: true
+        # 重置模式：before, after, before-and-after
+        reset-mode: before-and-after
+        # 是否启用环境验证
+        validation-enabled: true
+        # 验证超时时间（秒）
+        validation-timeout: 30
+        # 是否启用环境监控
+        monitoring-enabled: true
+        # 监控间隔（秒）
+        monitoring-interval: 10
+        # 是否启用环境统计
+        statistics-enabled: true
+        # 统计保留天数
+        statistics-retention: 30
+    
+    # 测试报告配置
+    reporting:
+      # 是否启用测试报告
+      enabled: true
+      # 报告格式
+      formats:
+        - html
+        - xml
+        - json
+      # 报告配置
+      config:
+        # 报告路径
+        path: ./target/test-reports
+        # 报告名称
+        name: test-report
+        # 报告标题
+        title: WMT Test Report
+        # 报告描述
+        description: WMT Test Framework Report
+        # 报告作者
+        author: WMT Team
+        # 报告版本
+        version: 1.0.0
+        # 报告时间
+        timestamp: true
+        # 报告时区
+        timezone: Asia/Shanghai
+        # 报告语言
+        language: zh_CN
+        # 报告编码
+        encoding: UTF-8
+        # 是否启用报告压缩
+        compression-enabled: true
+        # 压缩格式
+        compression-format: zip
+        # 是否启用报告加密
+        encryption-enabled: false
+        # 加密密钥
+        encryption-key: "your-encryption-key"
+        # 是否启用报告签名
+        signature-enabled: false
+        # 签名密钥
+        signature-key: "your-signature-key"
+        # 是否启用报告验证
+        verification-enabled: true
+        # 验证超时时间（秒）
+        verification-timeout: 30
+        # 是否启用报告监控
+        monitoring-enabled: true
+        # 监控间隔（秒）
+        monitoring-interval: 10
+        # 是否启用报告统计
+        statistics-enabled: true
+        # 统计保留天数
+        statistics-retention: 30
+
+# ==================== 测试数据源配置 ====================
+spring:
+  datasource:
+    driver-class-name: org.h2.Driver
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    username: sa
+    password: 
+    hikari:
+      maximum-pool-size: 5
+      minimum-idle: 1
+      connection-timeout: 20000
+      idle-timeout: 300000
+      max-lifetime: 1200000
+      leak-detection-threshold: 60000
+
+# ==================== 测试Redis配置 ====================
+spring:
+  redis:
+    host: localhost
+    port: 6379
+    password: 
+    database: 0
+    timeout: 5000ms
+    lettuce:
+      pool:
+        max-active: 8
+        max-wait: -1ms
+        max-idle: 8
+        min-idle: 0
+
+# ==================== 测试日志配置 ====================
+logging:
+  level:
+    root: INFO
+    com.wmt: DEBUG
+    org.springframework.test: DEBUG
+    org.mockito: DEBUG
+    org.h2: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n"
+  file:
+    name: ./logs/wmt-test-demo.log
+    max-size: 100MB
+    max-history: 30
+
+# ==================== 测试监控配置 ====================
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: when-authorized
+  info:
+    env:
+      enabled: true

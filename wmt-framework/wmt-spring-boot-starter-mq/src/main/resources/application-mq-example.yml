@@ -1,0 +1,408 @@
+# WMT MQ Starter 配置示例
+# 基于 wmt-spring-boot-starter-mq 的完整配置示例
+
+# ==================== 基础配置 ====================
+spring:
+  application:
+    name: wmt-mq-demo
+  profiles:
+    active: dev
+
+# ==================== WMT MQ 配置 ====================
+wmt:
+  mq:
+    # 是否启用消息队列功能
+    enabled: true
+    
+    # 消息队列类型：redis, rocketmq, kafka, rabbitmq
+    type: redis
+    
+    # Redis消息队列配置
+    redis:
+      # 是否启用
+      enabled: true
+      # 消息键前缀
+      key-prefix: "mq:message:"
+      # 消息过期时间（秒）
+      expire-time: 3600
+      # 是否启用消息持久化
+      persistence-enabled: true
+      # 是否启用消息压缩
+      compression-enabled: true
+      # 压缩阈值（字节）
+      compression-threshold: 1024
+      # 是否启用消息加密
+      encryption-enabled: false
+      # 加密密钥
+      encryption-key: "your-encryption-key"
+      # 是否启用消息监控
+      monitoring-enabled: true
+      # 监控间隔（秒）
+      monitoring-interval: 30
+      # 是否启用消息统计
+      statistics-enabled: true
+      # 统计保留天数
+      statistics-retention: 30
+      # 是否启用消息告警
+      alerting-enabled: true
+      # 告警阈值（消息积压数量）
+      alerting-threshold: 1000
+      # 告警重试次数
+      alerting-retry-count: 3
+      # 告警重试间隔（秒）
+      alerting-retry-interval: 60
+    
+    # RocketMQ配置
+    rocketmq:
+      # 是否启用
+      enabled: false
+      # 名称服务器地址
+      name-server: localhost:9876
+      # 生产者组
+      producer-group: wmt-producer
+      # 消费者组
+      consumer-group: wmt-consumer
+      # 发送消息超时时间（毫秒）
+      send-message-timeout: 3000
+      # 发送消息重试次数
+      retry-times-when-send-failed: 2
+      # 异步发送重试次数
+      retry-times-when-send-async-failed: 2
+      # 最大消息大小（字节）
+      max-message-size: 4194304
+      # 消息压缩阈值（字节）
+      compress-message-body-threshold: 4096
+      # 是否启用消息追踪
+      enable-msg-trace: true
+      # 自定义追踪主题
+      customized-trace-topic: RMQ_SYS_TRACE_TOPIC
+      # 访问密钥
+      access-key: 
+      # 秘密密钥
+      secret-key: 
+      # 是否启用消息监控
+      monitoring-enabled: true
+      # 监控间隔（秒）
+      monitoring-interval: 30
+      # 是否启用消息统计
+      statistics-enabled: true
+      # 统计保留天数
+      statistics-retention: 30
+      # 是否启用消息告警
+      alerting-enabled: true
+      # 告警阈值（消息积压数量）
+      alerting-threshold: 1000
+      # 告警重试次数
+      alerting-retry-count: 3
+      # 告警重试间隔（秒）
+      alerting-retry-interval: 60
+    
+    # Kafka配置
+    kafka:
+      # 是否启用
+      enabled: false
+      # 引导服务器地址
+      bootstrap-servers: localhost:9092
+      # 生产者配置
+      producer:
+        # 键序列化器
+        key-serializer: org.apache.kafka.common.serialization.StringSerializer
+        # 值序列化器
+        value-serializer: org.apache.kafka.common.serialization.StringSerializer
+        # 确认机制
+        acks: all
+        # 重试次数
+        retries: 3
+        # 批量大小
+        batch-size: 16384
+        # 延迟时间（毫秒）
+        linger-ms: 1
+        # 缓冲区大小
+        buffer-memory: 33554432
+        # 是否启用幂等性
+        enable-idempotence: true
+        # 最大请求大小
+        max-request-size: 1048576
+        # 请求超时时间
+        request-timeout-ms: 30000
+        # 是否启用消息监控
+        monitoring-enabled: true
+        # 监控间隔（秒）
+        monitoring-interval: 30
+        # 是否启用消息统计
+        statistics-enabled: true
+        # 统计保留天数
+        statistics-retention: 30
+        # 是否启用消息告警
+        alerting-enabled: true
+        # 告警阈值（消息积压数量）
+        alerting-threshold: 1000
+        # 告警重试次数
+        alerting-retry-count: 3
+        # 告警重试间隔（秒）
+        alerting-retry-interval: 60
+      # 消费者配置
+      consumer:
+        # 消费者组ID
+        group-id: wmt-consumer
+        # 键反序列化器
+        key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+        # 值反序列化器
+        value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+        # 自动偏移重置
+        auto-offset-reset: latest
+        # 是否启用自动提交
+        enable-auto-commit: true
+        # 自动提交间隔（毫秒）
+        auto-commit-interval-ms: 1000
+        # 会话超时时间（毫秒）
+        session-timeout-ms: 30000
+        # 心跳间隔（毫秒）
+        heartbeat-interval-ms: 3000
+        # 最大轮询记录数
+        max-poll-records: 500
+        # 是否启用消息监控
+        monitoring-enabled: true
+        # 监控间隔（秒）
+        monitoring-interval: 30
+        # 是否启用消息统计
+        statistics-enabled: true
+        # 统计保留天数
+        statistics-retention: 30
+        # 是否启用消息告警
+        alerting-enabled: true
+        # 告警阈值（消息积压数量）
+        alerting-threshold: 1000
+        # 告警重试次数
+        alerting-retry-count: 3
+        # 告警重试间隔（秒）
+        alerting-retry-interval: 60
+    
+    # RabbitMQ配置
+    rabbitmq:
+      # 是否启用
+      enabled: false
+      # 主机地址
+      host: localhost
+      # 端口
+      port: 5672
+      # 用户名
+      username: guest
+      # 密码
+      password: guest
+      # 虚拟主机
+      virtual-host: /
+      # 连接超时时间（毫秒）
+      connection-timeout: 15000
+      # 发布确认类型
+      publisher-confirm-type: correlated
+      # 是否启用发布返回
+      publisher-returns: true
+      # 监听器配置
+      listener:
+        simple:
+          # 确认模式
+          acknowledge-mode: auto
+          # 重试配置
+          retry:
+            # 是否启用重试
+            enabled: true
+            # 初始间隔（毫秒）
+            initial-interval: 1000
+            # 最大重试次数
+            max-attempts: 3
+            # 最大间隔（毫秒）
+            max-interval: 10000
+            # 倍数
+            multiplier: 1.2
+          # 并发配置
+          concurrency: 1
+          # 最大并发数
+          max-concurrency: 10
+          # 预取数量
+          prefetch: 1
+          # 是否启用消息监控
+          monitoring-enabled: true
+          # 监控间隔（秒）
+          monitoring-interval: 30
+          # 是否启用消息统计
+          statistics-enabled: true
+          # 统计保留天数
+          statistics-retention: 30
+          # 是否启用消息告警
+          alerting-enabled: true
+          # 告警阈值（消息积压数量）
+          alerting-threshold: 1000
+          # 告警重试次数
+          alerting-retry-count: 3
+          # 告警重试间隔（秒）
+          alerting-retry-interval: 60
+    
+    # 消息监控配置
+    monitoring:
+      # 是否启用消息监控
+      enabled: true
+      # 监控间隔（秒）
+      interval: 30
+      # 是否启用消息统计
+      statistics-enabled: true
+      # 消息统计保留天数
+      statistics-retention: 30
+      # 是否启用消息告警
+      alerting-enabled: true
+      # 消息告警阈值（消息积压数量）
+      alerting-threshold: 1000
+      # 消息告警重试次数
+      alerting-retry-count: 3
+      # 消息告警重试间隔（秒）
+      alerting-retry-interval: 60
+      # 告警通知方式：email, sms, webhook
+      alert-notification-types:
+        - email
+        - webhook
+      # 告警通知配置
+      alert-notification:
+        # 邮件配置
+        email:
+          enabled: true
+          smtp-host: smtp.gmail.com
+          smtp-port: 587
+          username: your-email@gmail.com
+          password: your-password
+          from: alerts@your-domain.com
+          to:
+            - admin@your-domain.com
+            - devops@your-domain.com
+          subject: "[WMT MQ] 消息队列告警"
+        # Webhook配置
+        webhook:
+          enabled: true
+          url: https://your-webhook-url.com/alerts
+          method: POST
+          headers:
+            Content-Type: application/json
+            Authorization: Bearer your-token
+          timeout: 10
+          retry-count: 3
+
+# ==================== Redis配置（用于消息队列） ====================
+spring:
+  redis:
+    host: localhost
+    port: 6379
+    password: 
+    database: 0
+    timeout: 5000ms
+    lettuce:
+      pool:
+        max-active: 8
+        max-wait: -1ms
+        max-idle: 8
+        min-idle: 0
+
+# ==================== RocketMQ配置（可选） ====================
+rocketmq:
+  name-server: localhost:9876
+  producer:
+    group: wmt-producer
+    send-message-timeout: 3000
+    retry-times-when-send-failed: 2
+    retry-times-when-send-async-failed: 2
+    max-message-size: 4194304
+    compress-message-body-threshold: 4096
+    retry-next-server: true
+    access-key: 
+    secret-key: 
+    enable-msg-trace: true
+    customized-trace-topic: RMQ_SYS_TRACE_TOPIC
+
+# ==================== Kafka配置（可选） ====================
+spring:
+  kafka:
+    bootstrap-servers: localhost:9092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+      acks: all
+      retries: 3
+      batch-size: 16384
+      linger-ms: 1
+      buffer-memory: 33554432
+    consumer:
+      group-id: wmt-consumer
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      auto-offset-reset: latest
+      enable-auto-commit: true
+      auto-commit-interval-ms: 1000
+
+# ==================== RabbitMQ配置（可选） ====================
+spring:
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+    virtual-host: /
+    connection-timeout: 15000
+    publisher-confirm-type: correlated
+    publisher-returns: true
+    listener:
+      simple:
+        acknowledge-mode: auto
+        retry:
+          enabled: true
+          initial-interval: 1000
+          max-attempts: 3
+          max-interval: 10000
+          multiplier: 1.2
+
+# ==================== 数据源配置（用于消息存储） ====================
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/wmt_mq?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&useSSL=false
+    username: root
+    password: 123456
+    druid:
+      initial-size: 5
+      min-idle: 5
+      max-active: 20
+      max-wait: 60000
+      time-between-eviction-runs-millis: 60000
+      min-evictable-idle-time-millis: 300000
+      validation-query: SELECT 1
+      test-while-idle: true
+      test-on-borrow: false
+      test-on-return: false
+      pool-prepared-statements: true
+      max-pool-prepared-statement-per-connection-size: 20
+
+# ==================== 日志配置 ====================
+logging:
+  level:
+    root: INFO
+    com.wmt: DEBUG
+    org.springframework.kafka: DEBUG
+    org.springframework.amqp: DEBUG
+    org.apache.rocketmq: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n"
+  file:
+    name: ./logs/wmt-mq-demo.log
+    max-size: 100MB
+    max-history: 30
+
+# ==================== 监控配置 ====================
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: when-authorized
+  info:
+    env:
+      enabled: true
