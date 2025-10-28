@@ -39,10 +39,9 @@ public class MultiLevelCacheManager {
             this.localCache = Caffeine.newBuilder()
                     .maximumSize(localConfig.getMaxSize())
                     .expireAfterWrite(localConfig.getTtl())
-                    .refreshAfterWrite(localConfig.getRefreshAfterWrite())
                     .recordStats()
                     .build();
-            log.info("多级缓存本地缓存初始化完成，最大条目数: {}, TTL: {}", 
+            log.info("多级缓存本地缓存初始化完成，最大条目数: {}, TTL: {}",
                     localConfig.getMaxSize(), localConfig.getTtl());
         }
     }
@@ -88,7 +87,7 @@ public class MultiLevelCacheManager {
                     // 回写到Redis缓存
                     if (cacheProperties.getMultiLevel().getRedis().isEnabled()) {
                         String redisKey = buildRedisKey(key);
-                        redisTemplate.opsForValue().set(redisKey, value, 
+                        redisTemplate.opsForValue().set(redisKey, value,
                                 cacheProperties.getMultiLevel().getRedis().getTtl());
                     }
                     // 回写到本地缓存
@@ -101,7 +100,7 @@ public class MultiLevelCacheManager {
                     Object nullValue = new Object();
                     if (cacheProperties.getMultiLevel().getRedis().isEnabled()) {
                         String redisKey = buildRedisKey(key);
-                        redisTemplate.opsForValue().set(redisKey, nullValue, 
+                        redisTemplate.opsForValue().set(redisKey, nullValue,
                                 cacheProperties.getMultiLevel().getDatabase().getNullValueTtl());
                     }
                     if (localCache != null) {
@@ -136,7 +135,7 @@ public class MultiLevelCacheManager {
         // 设置Redis缓存
         if (cacheProperties.getMultiLevel().getRedis().isEnabled()) {
             String redisKey = buildRedisKey(key);
-            redisTemplate.opsForValue().set(redisKey, value, 
+            redisTemplate.opsForValue().set(redisKey, value,
                     cacheProperties.getMultiLevel().getRedis().getTtl());
         }
     }
