@@ -501,11 +501,11 @@
                 <version>${revision}</version>
             </dependency>
 
-            <dependency>
-                <groupId>com.wmt</groupId>
-                <artifactId>wmt-spring-boot-starter-log</artifactId>
-                <version>${revision}</version>
-            </dependency>
+<!--            <dependency>-->
+<!--                <groupId>com.wmt</groupId>-->
+<!--                <artifactId>wmt-spring-boot-starter-log</artifactId>-->
+<!--                <version>${revision}</version>-->
+<!--            </dependency>-->
 
             <dependency>
                 <groupId>org.projectlombok</groupId>
