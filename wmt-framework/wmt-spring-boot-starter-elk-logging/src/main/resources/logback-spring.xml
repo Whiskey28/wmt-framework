@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration scan="true">
+    <!--
+        此配置提供默认的 ELK 日志输出能力。
+
+        使用方式 A（自动集成）：直接引入 wmt-spring-boot-starter-elk-logging，无需自定义 logback.xml
+        使用方式 B（自定义扩展）：在业务系统的 src/main/resources 新建 logback-spring.xml 引入组件 appender
+          示例：通过 <include> 或 <springProfile> 继承并扩展
+
+        优先级：业务自定义 > 组件默认（Spring Boot 资源加载顺序）
+    -->
+
+    <!-- 先声明可被引用的 Spring 配置属性（提前到文件顶部，确保后续 appender 可用） -->
+    <springProperty scope="context" name="output" source="wmt.logging.output" defaultValue="file"/>
+    <springProperty scope="context" name="logstashHost" source="wmt.logging.logstash-host" defaultValue="127.0.0.1"/>
+    <springProperty scope="context" name="logstashPort" source="wmt.logging.logstash-port" defaultValue="5000"/>
+    <springProperty scope="context" name="filePath" source="wmt.logging.file-path" defaultValue="/data/logs/${spring.application.name}/app.log"/>
+
+    <!-- 默认控制台输出（当未激活 logstash/file profile 时仍可正常打印） -->
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
+            <providers>
+                <timestamp/>
+                <pattern>
+                    <pattern>{"level":"%level","logger":"%logger","thread":"%thread"}</pattern>
+                </pattern>
+                <logstashMarkers/>
+                <message/>
+                <mdc/>
+                <stackTrace/>
+            </providers>
+        </encoder>
+    </appender>
+
+    <!-- 移除默认就定义且可能被意外引用的 WMT-LOGSTASH，避免在未开启 logstash 时尝试连接 -->
+
+    <root level="INFO">
+        <appender-ref ref="STDOUT"/>
+    </root>
+
+
+    <!-- 统一日志编码为 JSON（属性声明已提前） -->
+
+    <!--
+        自动装配场景（通过 profile 激活）
+        - 配置 wmt.logging.output=logstash 会激活 profile logstash，输出到 Logstash TCP
+        - 配置 wmt.logging.output=file 会激活 profile file，输出到本地文件供 Filebeat 采集
+        - 同时也可在 <root> 中同时配置 STDOUT + LOGSTASH/FILE，实现多端输出
+    -->
+    <springProfile name="logstash">
+        <!-- 兼容旧配置名，支持业务自定义配置引用此 appender -->
+        <appender name="LOGSTASH" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
+            <destination>${logstashHost:-127.0.0.1}:${logstashPort:-5000}</destination>
+            <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
+                <providers>
+                    <timestamp/>
+                    <pattern>
+                        <pattern>
+                            {"level":"%level","logger":"%logger","thread":"%thread"}
+                        </pattern>
+                    </pattern>
+                    <logstashMarkers/>
+                    <message/>
+                    <mdc/>
+                    <stackTrace/>
+                </providers>
+            </encoder>
+        </appender>
+        <root level="INFO">
+            <appender-ref ref="LOGSTASH"/>
+        </root>
+    </springProfile>
+
+    <springProfile name="file">
+        <!-- 支持业务自定义 logback-spring.xml 引用此 appender -->
+        <appender name="WMT-FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+            <file>${filePath:-/data/logs/${spring.application.name:-app}/app.log}</file>
+            <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+                <fileNamePattern>${filePath:-/data/logs/${spring.application.name:-app}/app.log}.%d{yyyy-MM-dd}.%i.gz</fileNamePattern>
+                <maxHistory>60</maxHistory>
+                <totalSizeCap>5GB</totalSizeCap>
+                <maxFileSize>200MB</maxFileSize>
+            </rollingPolicy>
+            <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
+                <providers>
+                    <timestamp/>
+                    <pattern>
+                        <pattern>
+                            {"level":"%level","logger":"%logger","thread":"%thread"}
+                        </pattern>
+                    </pattern>
+                    <logstashMarkers/>
+                    <message/>
+                    <mdc/>
+                    <stackTrace/>
+                </providers>
+            </encoder>
+        </appender>
+        <root level="INFO">
+            <appender-ref ref="WMT-FILE"/>
+        </root>
+    </springProfile>
+
+</configuration>
+
+

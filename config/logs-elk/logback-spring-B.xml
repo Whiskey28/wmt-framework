@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration scan="true">
+    <!-- 包含组件默认配置。包含后即具备 STDOUT + 可按 profile 启用的 LOGSTASH/WMT-FILE -->
+    <include resource="logback-spring.xml"/>
+
+    <!-- 这里追加你自己的 logger 即可（不要再定义另一个 <root>） -->
+    <logger name="com.example.demo" level="DEBUG"/>
+</configuration>
