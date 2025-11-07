@@ -28,6 +28,12 @@
             <artifactId>xxl-job-core</artifactId>
             <scope>compile</scope>
         </dependency>
+        <!-- Spring Boot Actuator 可选依赖，用于健康检查 -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+            <optional>true</optional>
+        </dependency>
     </dependencies>
 
 </project>
