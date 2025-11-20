@@ -1,0 +1,46 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    cluster: 'wmt-local'
+    environment: 'dev'
+
+rule_files:
+  - '/etc/prometheus/alert-rules.yml'
+
+scrape_configs:
+  # Prometheus 自身指标
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # 业务应用指标（VMware 虚拟机访问 Windows 主机）
+  # 场景说明：
+  # - Prometheus 运行在 VMware CentOS7 虚拟机中
+  # - Java 应用运行在 Windows 主机的 IDEA 中
+  # - 需要将下面的 IP 替换为 Windows 主机在 VMware 网络中的实际 IP
+  - job_name: 'wmt-application'
+    metrics_path: '/actuator/prometheus'
+    scrape_interval: 15s
+    static_configs:
+      # 方式 1：NAT 模式（通常 Windows 主机 IP 是网关 IP，如 192.168.x.1 或 10.0.2.2）
+      - targets: ['192.168.x.1:8080']  # 替换 x 为实际子网号，或使用 10.0.2.2
+        labels:
+          application: 'wmt-love'
+          service: 'love-service'
+          host: 'windows-idea'
+          environment: 'dev'
+      
+      # 方式 2：桥接模式（使用 Windows 主机的局域网 IP）
+      # - targets: ['192.168.1.100:8080']  # 替换为 Windows 主机的实际局域网 IP
+      #   labels:
+      #     application: 'wmt-love'
+      #     service: 'love-service'
+      #     host: 'windows-idea'
+
+  # PushGateway（用于短生命周期任务）
+  - job_name: 'pushgateway'
+    honor_labels: true
+    static_configs:
+      - targets: ['pushgateway:9091']
+
