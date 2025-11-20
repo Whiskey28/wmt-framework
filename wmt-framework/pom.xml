@@ -20,6 +20,7 @@
         <module>wmt-spring-boot-starter-websocket</module>
 
         <module>wmt-spring-boot-starter-monitor</module>
+        <module>wmt-spring-boot-starter-prometheus-grafana</module>
         <module>wmt-spring-boot-starter-protection</module>
         <module>wmt-spring-boot-starter-job</module>
         <module>wmt-spring-boot-starter-xxljob</module>

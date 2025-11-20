@@ -1,0 +1,39 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    cluster: 'wmt-local'
+    environment: 'dev'
+
+# Alertmanager 配置（可选）
+# alerting:
+#   alertmanagers:
+#     - static_configs:
+#         - targets: ['alertmanager:9093']
+
+# 告警规则文件
+rule_files:
+  - '/etc/prometheus/alert-rules.yml'
+
+# 抓取配置
+scrape_configs:
+  # Prometheus 自身指标
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # 业务应用指标（需要业务系统暴露 /actuator/prometheus 端点）
+  - job_name: 'wmt-application'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['host.docker.internal:8080']  # 业务系统地址，根据实际情况修改
+        labels:
+          application: 'wmt-demo'
+          service: 'demo-service'
+
+  # PushGateway（用于短生命周期任务）
+  - job_name: 'pushgateway'
+    honor_labels: true
+    static_configs:
+      - targets: ['pushgateway:9091']
+
