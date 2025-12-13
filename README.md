@@ -335,7 +335,7 @@ mvn deploy -P obfuscate
 
 ## 🔨 组件开发指南
 
-如果您需要为WMT框架开发新组件，请参阅 [组件开发指南](docs/COMPONENT_DEVELOPMENT.md)
+如果您需要为WMT框架开发新组件，请参阅 [组件开发指南](docs/wmt/COMPONENT_DEVELOPMENT.md)
 
 ## 🤝 贡献指南
 

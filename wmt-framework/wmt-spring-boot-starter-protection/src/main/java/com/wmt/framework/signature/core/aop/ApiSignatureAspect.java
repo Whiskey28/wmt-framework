@@ -28,7 +28,7 @@ import static com.wmt.framework.common.exception.enums.GlobalErrorCodeConstants.
 /**
  * 拦截声明了 {@link ApiSignature} 注解的方法，实现签名
  *
- * @author Zhougang
+ * @author Wmt
  */
 @Aspect
 @Slf4j

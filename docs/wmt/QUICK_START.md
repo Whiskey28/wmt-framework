@@ -433,7 +433,7 @@ debug: true
 ### 7.3 查看API文档
 
 组件文档和API文档请参考：
-- [README.md](../README.md)
+- [README.md](../../README.md)
 - [组件开发指南](COMPONENT_DEVELOPMENT.md)
 - 各组件的 `package-info.java` 文件
 
@@ -464,6 +464,6 @@ A: 参考 [组件开发指南](COMPONENT_DEVELOPMENT.md) 开发自定义组件�
 
 ## 10. 获取帮助
 
-- 查看文档：[README.md](../README.md)
+- 查看文档：[README.md](../../README.md)
 - 提交Issue：https://github.com/Wmt/wmt-framework/issues
 - 邮箱：support@wmt.com

@@ -34,6 +34,7 @@
         <module>wmt-spring-boot-starter-biz-ip</module>
 
         <module>wmt-spring-boot-starter-elk-logging</module>
+        <module>wmt-spring-boot-starter-sjb</module>
 
 <!--        <module>wmt-spring-boot-starter-file</module>-->
 <!--        <module>wmt-spring-boot-starter-storage</module>-->
