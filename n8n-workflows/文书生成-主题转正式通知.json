@@ -1,0 +1,168 @@
+{
+  "name": "文书生成-主题转正式通知",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "generate-notice",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-node",
+      "name": "接收主题Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1.1,
+      "position": [
+        240,
+        300
+      ],
+      "webhookId": "generate-notice-webhook"
+    },
+    {
+      "parameters": {
+        "jsCode": "// 提取输入参数\nconst input = $input.item.json;\nconst topic = input.topic || input.body?.topic || '';\nconst style = input.style || input.body?.style || '正式';\nconst length = input.length || input.body?.length || '中等';\n\n// 验证必填字段\nif (!topic) {\n  throw new Error('主题(topic)不能为空');\n}\n\n// 根据长度设置 max_tokens\nlet maxTokens = 2000;\nif (length === '简短' || length === '短') {\n  maxTokens = 500;\n} else if (length === '中等' || length === '中') {\n  maxTokens = 2000;\n} else if (length === '详细' || length === '长') {\n  maxTokens = 4000;\n}\n\n// 构建用户提示词\nconst userPrompt = `请根据以下主题，生成一份${style}风格的通知。\n\n主题：${topic}\n\n要求：\n1. 风格：${style}\n2. 长度：${length}（约${maxTokens <= 500 ? '200-300' : maxTokens <= 2000 ? '500-800' : '1000-1500'}字）\n3. 格式：标准的正式通知格式，包含标题、正文、落款等\n4. 内容：基于主题展开，逻辑清晰，表达准确\n\n请直接生成通知内容，不需要额外说明。`;\n\nreturn {\n  json: {\n    topic: topic,\n    style: style,\n    length: length,\n    maxTokens: maxTokens,\n    userPrompt: userPrompt\n  }\n};"
+      },
+      "id": "prepare-prompt",
+      "name": "准备提示词",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        460,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.deepseek.com/v1/chat/completions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({\n  model: 'deepseek-chat',\n  messages: [\n    {\n      role: 'system',\n      content: '你是一位专业的文书撰写专家，擅长将简单的主题扩展为规范、正式、逻辑清晰的通知文档。你熟悉各种正式文书的格式和表达方式，能够根据不同的风格要求（正式、简洁、详细等）生成相应的通知内容。'\n    },\n    {\n      role: 'user',\n      content: $json.userPrompt\n    }\n  ],\n  temperature: 0.7,\n  max_tokens: $json.maxTokens\n}) }}",
+        "options": {}
+      },
+      "id": "deepseek-request",
+      "name": "调用DeepSeek生成通知",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        680,
+        300
+      ],
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "AZ1aklY1RZIpED5g",
+          "name": "Deepseek"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// 解析DeepSeek响应\nconst aiResponse = $input.item.json;\nconst inputData = $('准备提示词').item.json;\n\n// 提取AI生成的文本\nlet noticeContent = '';\nif (aiResponse.choices && aiResponse.choices[0] && aiResponse.choices[0].message) {\n  noticeContent = aiResponse.choices[0].message.content;\n} else if (aiResponse.content) {\n  noticeContent = aiResponse.content;\n} else if (typeof aiResponse === 'string') {\n  noticeContent = aiResponse;\n}\n\n// 如果响应为空，返回错误\nif (!noticeContent || noticeContent.trim() === '') {\n  throw new Error('DeepSeek API 返回内容为空');\n}\n\n// 构建返回结果\nreturn {\n  json: {\n    success: true,\n    original_topic: inputData.topic,\n    style: inputData.style,\n    length: inputData.length,\n    formal_notice: noticeContent.trim(),\n    generated_at: new Date().toISOString(),\n    word_count: noticeContent.trim().length\n  }\n};"
+      },
+      "id": "parse-response",
+      "name": "解析响应结果",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        900,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {
+          "responseCode": 200,
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              }
+            ]
+          }
+        }
+      },
+      "id": "http-response",
+      "name": "返回结果",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        1120,
+        300
+      ]
+    }
+  ],
+  "connections": {
+    "接收主题Webhook": {
+      "main": [
+        [
+          {
+            "node": "准备提示词",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "准备提示词": {
+      "main": [
+        [
+          {
+            "node": "调用DeepSeek生成通知",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "调用DeepSeek生成通知": {
+      "main": [
+        [
+          {
+            "node": "解析响应结果",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "解析响应结果": {
+      "main": [
+        [
+          {
+            "node": "返回结果",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 0,
+  "updatedAt": "2025-01-13T12:00:00.000Z",
+  "versionId": "1"
+}
+
