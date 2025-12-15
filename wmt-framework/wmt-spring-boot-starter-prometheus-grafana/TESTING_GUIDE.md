@@ -445,9 +445,32 @@ sum(rate(biz_order_create_total[5m])) by (channel)
 **现象**：Dashboard 显示 "No data"
 
 **排查步骤**：
-1. 在 Prometheus UI 中先验证指标是否存在
-2. 检查 Grafana 数据源配置是否正确（**Configuration → Data Sources → Prometheus → Test**）
-3. 检查时间范围选择是否合理（切换到 **Last 5 minutes**）
+
+1. **验证 Grafana 数据源连接**：
+   - 进入 **Configuration → Data Sources → Prometheus → Test**
+   - 应该显示 "Data source is working"
+
+2. **在 Grafana Explore 中测试查询**：
+   ```promql
+   up{job="wmt-application"}
+   ```
+   - 如果返回 `1`，说明数据源正常
+   - 如果无数据，检查 Prometheus Target 状态
+
+3. **检查 Dashboard 的 job 变量**：
+   - **重要**：确保 Dashboard 顶部选择了 `job="wmt-application"`（不是 `prometheus`）
+   - 这是最常见的问题！
+
+4. **验证基础指标**：
+   ```promql
+   jvm_memory_used_bytes{job="wmt-application"}
+   http_server_requests_seconds_count{job="wmt-application"}
+   ```
+
+5. **检查时间范围**：
+   - 切换到 **Last 5 minutes** 或 **Last 1 hour**
+
+**详细排查指南**：参考 `GRAFANA_VERIFICATION.md` 文档
 
 ---
 

@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>裂空入狱 · Sky Rift</title>
+  <style>
+    :root {
+      color-scheme: dark;
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: "Segoe UI", "Microsoft YaHei", sans-serif;
+      background: radial-gradient(circle at 20% 20%, #060814, #010104 70%);
+      min-height: 100vh;
+      overflow: hidden;
+      color: #e8ecff;
+      user-select: none;
+    }
+    canvas {
+      position: fixed;
+      inset: 0;
+      width: 100vw;
+      height: 100vh;
+      display: block;
+      cursor: crosshair;
+    }
+    .hud {
+      position: fixed;
+      top: 4rem;
+      right: 5rem;
+      text-align: right;
+      pointer-events: none;
+      mix-blend-mode: lighten;
+    }
+    .hud h1 {
+      font-size: clamp(3rem, 5vw, 5.2rem);
+      letter-spacing: 0.35rem;
+      text-transform: uppercase;
+      color: #f0f4ff;
+      text-shadow: 0 0 18px rgba(130, 224, 255, 0.9);
+    }
+    .hud p {
+      letter-spacing: 0.4rem;
+      font-size: 0.9rem;
+      color: rgba(255, 255, 255, 0.7);
+    }
+    .hint {
+      position: fixed;
+      bottom: 3rem;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 0.95rem;
+      letter-spacing: 0.22rem;
+      text-transform: uppercase;
+      color: rgba(190, 217, 255, 0.75);
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="rift"></canvas>
+  <section class="hud">
+    <h1>裂空审判</h1>
+    <p>drag the blade / 划破天际</p>
+  </section>
+  <p class="hint">持续移动 1 秒，地狱之门显现三秒后闭合</p>
+  <script>
+    const canvas = document.getElementById("rift");
+    const ctx = canvas.getContext("2d");
+    const DPR = Math.min(window.devicePixelRatio || 1, 1.5);
+    const CAPTURE_WINDOW = 1000;
+    const GATE_DURATION = 3000;
+
+    let gate = null;
+    let sparks = [];
+    let capturing = false;
+    let captureStart = null;
+    let captureLast = null;
+
+    function resize() {
+      const { innerWidth: w, innerHeight: h } = window;
+      canvas.width = w * DPR;
+      canvas.height = h * DPR;
+      canvas.style.width = w + "px";
+      canvas.style.height = h + "px";
+      ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    }
+
+    function beginCapture(point) {
+      capturing = true;
+      captureStart = { ...point, time: performance.now() };
+      captureLast = { ...point };
+    }
+
+    function clearCapture() {
+      capturing = false;
+      captureStart = null;
+      captureLast = null;
+    }
+
+    function createGate(start, end) {
+      gate = {
+        start,
+        end,
+        createdAt: performance.now(),
+        hue: 180 + Math.random() * 90,
+        width: 16 + Math.random() * 12,
+      };
+      clearCapture();
+      spawnSparks(end);
+    }
+
+    function spawnSparks(source) {
+      for (let i = 0; i < 28; i++) {
+        sparks.push({
+          x: source.x,
+          y: source.y,
+          vx: (Math.random() - 0.5) * 2.2,
+          vy: (Math.random() - 0.5) * 2.2 - 0.15,
+          life: 600 + Math.random() * 600,
+          born: performance.now(),
+          hue: 8 + Math.random() * 35,
+        });
+      }
+      if (sparks.length > 220) {
+        sparks = sparks.slice(-180);
+      }
+    }
+
+    function drawBackground(time) {
+      const w = canvas.width / DPR;
+      const h = canvas.height / DPR;
+      ctx.save();
+      const gradient = ctx.createRadialGradient(
+        w * 0.3,
+        h * 0.2,
+        0,
+        w * 0.6,
+        h * 0.7,
+        Math.max(w, h)
+      );
+      gradient.addColorStop(0, "#0b1424");
+      gradient.addColorStop(0.5, "#050511");
+      gradient.addColorStop(1, "#010104");
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, w, h);
+      ctx.globalAlpha = 0.12;
+      ctx.fillStyle = "#161c38";
+      const bandWidth = w * 0.2;
+      for (let i = 0; i < 2; i++) {
+        const offset = ((time * 0.00003 + i * 0.6) % 1) * w;
+        ctx.fillRect(offset, 0, bandWidth, h);
+      }
+      ctx.restore();
+    }
+
+    function drawGate(time) {
+      if (!gate) return;
+      const progress = Math.min((time - gate.createdAt) / GATE_DURATION, 1);
+      if (progress >= 1) {
+        gate = null;
+        return;
+      }
+      const alpha = 1 - progress;
+      const width = gate.width * (1 - Math.pow(progress, 0.85));
+
+      ctx.save();
+      ctx.globalCompositeOperation = "lighter";
+      const gradient = ctx.createLinearGradient(
+        gate.start.x,
+        gate.start.y,
+        gate.end.x,
+        gate.end.y
+      );
+      gradient.addColorStop(0, `hsla(${gate.hue}, 95%, 65%, ${0.15 + alpha * 0.4})`);
+      gradient.addColorStop(0.5, `hsla(${gate.hue + 120}, 95%, 80%, ${0.35 + alpha * 0.45})`);
+      gradient.addColorStop(1, `hsla(${gate.hue}, 95%, 65%, ${0.15 + alpha * 0.4})`);
+      ctx.strokeStyle = gradient;
+      ctx.lineWidth = width;
+      ctx.lineCap = "round";
+      ctx.shadowBlur = 40;
+      ctx.shadowColor = `hsla(${gate.hue}, 95%, 70%, ${0.3 + alpha * 0.4})`;
+      ctx.beginPath();
+      ctx.moveTo(gate.start.x, gate.start.y);
+      ctx.lineTo(gate.end.x, gate.end.y);
+      ctx.stroke();
+
+      ctx.globalCompositeOperation = "screen";
+      ctx.lineWidth = Math.max(2, width * 0.2);
+      ctx.strokeStyle = `rgba(255, 255, 255, ${0.55 * alpha})`;
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function drawSparks(time) {
+      for (let i = sparks.length - 1; i >= 0; i--) {
+        const spark = sparks[i];
+        const age = time - spark.born;
+        if (age > spark.life) {
+          sparks.splice(i, 1);
+          continue;
+        }
+        spark.x += spark.vx;
+        spark.y += spark.vy;
+        spark.vy += 0.008;
+        const lifeRatio = 1 - age / spark.life;
+        ctx.save();
+        ctx.globalCompositeOperation = "lighter";
+        ctx.fillStyle = `hsla(${spark.hue}, 90%, 65%, ${0.68 * lifeRatio})`;
+        ctx.beginPath();
+        ctx.arc(spark.x, spark.y, 1 + (1 - lifeRatio) * 3, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+    }
+
+    function loop(time) {
+      drawBackground(time);
+      drawGate(time);
+      drawSparks(time);
+      requestAnimationFrame(loop);
+    }
+
+    function handlePointer(event) {
+      if (gate) return;
+      const point = { x: event.clientX, y: event.clientY };
+      if (!capturing) {
+        beginCapture(point);
+        return;
+      }
+      captureLast = { ...point };
+      const elapsed = performance.now() - captureStart.time;
+      if (elapsed >= CAPTURE_WINDOW) {
+        const dx = captureLast.x - captureStart.x;
+        const dy = captureLast.y - captureStart.y;
+        const distance = Math.hypot(dx, dy);
+        if (distance > 36) {
+          createGate(
+            { x: captureStart.x, y: captureStart.y },
+            { x: captureLast.x, y: captureLast.y }
+          );
+        } else {
+          beginCapture(point);
+        }
+      }
+    }
+
+    function handlePointerLeave() {
+      if (!gate) clearCapture();
+    }
+
+    window.addEventListener("pointermove", handlePointer, { passive: true });
+    window.addEventListener("pointerdown", handlePointer, { passive: true });
+    window.addEventListener("pointerleave", handlePointerLeave);
+    window.addEventListener("resize", resize);
+
+    resize();
+    loop(performance.now());
+  </script>
+</body>
+</html>
+
