@@ -82,6 +82,34 @@
                     </execution>
                 </executions>
             </plugin>
+
+            <!-- ProGuard代码混淆插件（只在jar类型的子模块中执行） -->
+            <!-- 注意：wmt-framework是pom类型，会自动跳过混淆 -->
+            <plugin>
+                <groupId>com.github.wvengen</groupId>
+                <artifactId>proguard-maven-plugin</artifactId>
+                <dependencies>
+                    <!-- 添加ProGuard依赖，解决 "ProGuard not found in classpath" 错误 -->
+                    <dependency>
+                        <groupId>com.guardsquare</groupId>
+                        <artifactId>proguard-base</artifactId>
+                        <version>7.4.2</version>
+                    </dependency>
+                </dependencies>
+                <configuration>
+                    <!-- pom类型的模块自动跳过混淆 -->
+                    <skip>true</skip>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>proguard</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>proguard</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 

@@ -10,7 +10,6 @@
     <modules>
         <module>wmt-dependencies</module>
         <module>wmt-framework</module>
-<!--        <module>wmt-demo</module>-->
     </modules>
 
     <name>${project.artifactId}</name>
@@ -35,7 +34,9 @@
         <mapstruct.version>1.6.3</mapstruct.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <!-- 是否启用代码混淆，默认false，发布时设置为true -->
-        <enable.proguard>false</enable.proguard>
+        <!-- 注意：proguard-maven-plugin的skip参数：true=跳过混淆，false=执行混淆 -->
+        <!-- 所以skip.proguard=true表示跳过混淆，skip.proguard=false表示执行混淆 -->
+        <skip.proguard>true</skip.proguard>
     </properties>
 
     <dependencyManagement>
@@ -114,6 +115,40 @@
                     <groupId>com.github.wvengen</groupId>
                     <artifactId>proguard-maven-plugin</artifactId>
                     <version>${proguard-maven-plugin.version}</version>
+                    <dependencies>
+                        <!-- 添加ProGuard依赖，解决 "ProGuard not found in classpath" 错误 -->
+                        <dependency>
+                            <groupId>com.guardsquare</groupId>
+                            <artifactId>proguard-base</artifactId>
+                            <version>7.4.2</version>
+                        </dependency>
+                    </dependencies>
+                    <configuration>
+                        <!-- skip=true表示跳过混淆，skip=false表示执行混淆 -->
+                        <!-- 对于pom类型的模块，自动跳过混淆 -->
+                        <skip>${skip.proguard}</skip>
+                        <proguardVersion>7.4.2</proguardVersion>
+                        <injar>${project.build.finalName}.jar</injar>
+                        <outjar>${project.build.finalName}.jar</outjar>
+                        <outputDirectory>${project.build.directory}</outputDirectory>
+                        <libs>
+                            <lib>${java.home}/lib/rt.jar</lib>
+                            <lib>${java.home}/lib/jce.jar</lib>
+                        </libs>
+                        <includeDependency>false</includeDependency>
+                        <options>
+                            <!-- 使用父项目的proguard.conf配置文件 -->
+                            <option>${project.parent.basedir}/proguard.conf</option>
+                        </options>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <phase>package</phase>
+                            <goals>
+                                <goal>proguard</goal>
+                            </goals>
+                        </execution>
+                    </executions>
                 </plugin>
             </plugins>
         </pluginManagement>
@@ -216,7 +251,8 @@
         <profile>
             <id>obfuscate</id>
             <properties>
-                <enable.proguard>true</enable.proguard>
+                <!-- 启用混淆：skip.proguard=false表示执行混淆 -->
+                <skip.proguard>false</skip.proguard>
             </properties>
         </profile>
     </profiles>

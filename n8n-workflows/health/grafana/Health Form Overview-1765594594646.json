@@ -22,6 +22,19 @@
   "links": [],
   "panels": [
     {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 22,
+      "panels": [],
+      "title": "工作流情况",
+      "type": "row"
+    },
+    {
       "datasource": {
         "type": "mysql",
         "uid": "af6jm3e070xdsd"
@@ -49,7 +62,7 @@
         "h": 4,
         "w": 6,
         "x": 0,
-        "y": 0
+        "y": 1
       },
       "id": 1,
       "options": {
@@ -108,7 +121,7 @@
         "h": 4,
         "w": 6,
         "x": 6,
-        "y": 0
+        "y": 1
       },
       "id": 2,
       "options": {
@@ -168,7 +181,7 @@
         "h": 4,
         "w": 6,
         "x": 12,
-        "y": 0
+        "y": 1
       },
       "id": 3,
       "options": {
@@ -227,7 +240,7 @@
         "h": 4,
         "w": 6,
         "x": 18,
-        "y": 0
+        "y": 1
       },
       "id": 4,
       "options": {
@@ -323,7 +336,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 4
+        "y": 5
       },
       "id": 5,
       "options": {
@@ -415,7 +428,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 4
+        "y": 5
       },
       "id": 6,
       "options": {
@@ -494,7 +507,7 @@
         "h": 6,
         "w": 6,
         "x": 0,
-        "y": 12
+        "y": 13
       },
       "id": 7,
       "options": {
@@ -583,7 +596,7 @@
         "h": 6,
         "w": 12,
         "x": 6,
-        "y": 12
+        "y": 13
       },
       "id": 8,
       "options": {
@@ -612,9 +625,28 @@
       "pluginVersion": "12.3.0",
       "targets": [
         {
+          "editorMode": "code",
           "format": "table",
-          "rawSql": "SELECT CONCAT(FLOOR(d/600)*600, '-', FLOOR(d/600)*600 + 599) AS bucket_sec, COUNT(*) AS cnt FROM ( SELECT TIMESTAMPDIFF(SECOND, created_at, processed_at) AS d FROM health_form_submissions WHERE $__timeFilter(created_at) AND processed_at IS NOT NULL ) t GROUP BY FLOOR(d/600) ORDER BY FLOOR(d/600);",
-          "refId": "A"
+          "rawQuery": true,
+          "rawSql": "  SELECT \r\n    bucket_id,\r\n    CONCAT(bucket_id*600, '-', bucket_id*600+599) AS bucket_sec,\r\n    COUNT(*) AS cnt\r\n  FROM (\r\n    SELECT \r\n      TIMESTAMPDIFF(SECOND, created_at, updated_at) AS d,\r\n      FLOOR(TIMESTAMPDIFF(SECOND, created_at, updated_at)/600) AS bucket_id\r\n    FROM health_form_submissions\r\n    WHERE $__timeFilter(updated_at) AND updated_at IS NOT NULL\r\n  ) t\r\n  WHERE d >= 0\r\n  GROUP BY bucket_id\r\n  ORDER BY bucket_id;\r\n",
+          "refId": "A",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          }
         }
       ],
       "title": "处理时长分布 (秒)",
@@ -645,7 +677,7 @@
         "h": 6,
         "w": 6,
         "x": 18,
-        "y": 12
+        "y": 13
       },
       "id": 9,
       "options": {
@@ -672,9 +704,28 @@
       "pluginVersion": "12.3.0",
       "targets": [
         {
+          "editorMode": "code",
           "format": "table",
-          "rawSql": "SELECT gender, COUNT(*) AS cnt FROM health_form_submissions WHERE $__timeFilter(created_at) GROUP BY gender;",
-          "refId": "A"
+          "rawQuery": true,
+          "rawSql": "SELECT\r\n  CASE\r\n    WHEN gender IN ('男','女') THEN gender\r\n    WHEN gender IS NULL OR gender = '' THEN '未知'\r\n    ELSE '其他'\r\n  END AS gender,\r\n  COUNT(*) AS cnt\r\nFROM health_form_submissions\r\nWHERE $__timeFilter(created_at)\r\nGROUP BY gender\r\nORDER BY cnt DESC;",
+          "refId": "A",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          }
         }
       ],
       "title": "性别分布",
@@ -715,10 +766,10 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 6,
+        "h": 8,
         "w": 12,
         "x": 0,
-        "y": 18
+        "y": 19
       },
       "id": 10,
       "options": {
@@ -760,7 +811,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 18
+        "y": 19
       },
       "id": 11,
       "options": {
@@ -810,6 +861,19 @@
       "type": "heatmap"
     },
     {
+      "collapsed": true,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 27
+      },
+      "id": 23,
+      "panels": [],
+      "title": "数据分析",
+      "type": "row"
+    },
+    {
       "datasource": {
         "type": "mysql",
         "uid": "af6jm3e070xdsd"
@@ -837,7 +901,7 @@
         "h": 4,
         "w": 6,
         "x": 0,
-        "y": 26
+        "y": 28
       },
       "id": 12,
       "options": {
@@ -896,7 +960,7 @@
         "h": 4,
         "w": 6,
         "x": 6,
-        "y": 26
+        "y": 28
       },
       "id": 13,
       "options": {
@@ -956,7 +1020,7 @@
         "h": 4,
         "w": 6,
         "x": 12,
-        "y": 26
+        "y": 28
       },
       "id": 14,
       "options": {
@@ -1016,7 +1080,7 @@
         "h": 4,
         "w": 6,
         "x": 18,
-        "y": 26
+        "y": 28
       },
       "id": 15,
       "options": {
@@ -1099,7 +1163,7 @@
         "h": 8,
         "w": 8,
         "x": 0,
-        "y": 30
+        "y": 32
       },
       "id": 16,
       "options": {
@@ -1188,7 +1252,7 @@
         "h": 8,
         "w": 8,
         "x": 8,
-        "y": 30
+        "y": 32
       },
       "id": 17,
       "options": {
@@ -1277,7 +1341,7 @@
         "h": 8,
         "w": 8,
         "x": 16,
-        "y": 30
+        "y": 32
       },
       "id": 18,
       "options": {
@@ -1364,9 +1428,9 @@
       },
       "gridPos": {
         "h": 8,
-        "w": 8,
+        "w": 11,
         "x": 0,
-        "y": 38
+        "y": 40
       },
       "id": 19,
       "options": {
@@ -1402,62 +1466,6 @@
       ],
       "title": "BMI 分类分布",
       "type": "barchart"
-    },
-    {
-      "datasource": {
-        "type": "mysql",
-        "uid": "af6jm3e070xdsd"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "custom": {
-            "align": "auto",
-            "cellOptions": {
-              "type": "auto"
-            },
-            "footer": {
-              "reducers": []
-            },
-            "inspect": false
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": 0
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          }
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 8,
-        "x": 8,
-        "y": 38
-      },
-      "id": 20,
-      "options": {
-        "cellHeight": "sm",
-        "showHeader": true
-      },
-      "pluginVersion": "12.3.0",
-      "targets": [
-        {
-          "format": "table",
-          "rawSql": "SELECT '年龄' AS metric, ROUND(AVG(age), 1) AS avg_val, ROUND(MIN(age), 1) AS min_val, ROUND(MAX(age), 1) AS max_val, ROUND(STDDEV(age), 1) AS stddev_val FROM health_form_submissions WHERE $__timeFilter(created_at) UNION ALL SELECT '体重(kg)', ROUND(AVG(weight), 1), ROUND(MIN(weight), 1), ROUND(MAX(weight), 1), ROUND(STDDEV(weight), 1) FROM health_form_submissions WHERE $__timeFilter(created_at) UNION ALL SELECT '身高(cm)', ROUND(AVG(height), 1), ROUND(MIN(height), 1), ROUND(MAX(height), 1), ROUND(STDDEV(height), 1) FROM health_form_submissions WHERE $__timeFilter(created_at) UNION ALL SELECT 'BMI', ROUND(AVG(weight / POWER(height/100, 2)), 1), ROUND(MIN(weight / POWER(height/100, 2)), 1), ROUND(MAX(weight / POWER(height/100, 2)), 1), ROUND(STDDEV(weight / POWER(height/100, 2)), 1) FROM health_form_submissions WHERE $__timeFilter(created_at) AND height > 0;",
-          "refId": "A"
-        }
-      ],
-      "title": "统计摘要 (均值/最小/最大/标准差)",
-      "type": "table"
     },
     {
       "datasource": {
@@ -1509,9 +1517,9 @@
       },
       "gridPos": {
         "h": 8,
-        "w": 8,
-        "x": 16,
-        "y": 38
+        "w": 13,
+        "x": 11,
+        "y": 40
       },
       "id": 21,
       "options": {
@@ -1547,6 +1555,62 @@
       ],
       "title": "厨房条件分布",
       "type": "barchart"
+    },
+    {
+      "datasource": {
+        "type": "mysql",
+        "uid": "af6jm3e070xdsd"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "footer": {
+              "reducers": []
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 14,
+        "x": 0,
+        "y": 48
+      },
+      "id": 20,
+      "options": {
+        "cellHeight": "sm",
+        "showHeader": true
+      },
+      "pluginVersion": "12.3.0",
+      "targets": [
+        {
+          "format": "table",
+          "rawSql": "SELECT '年龄' AS metric, ROUND(AVG(age), 1) AS avg_val, ROUND(MIN(age), 1) AS min_val, ROUND(MAX(age), 1) AS max_val, ROUND(STDDEV(age), 1) AS stddev_val FROM health_form_submissions WHERE $__timeFilter(created_at) UNION ALL SELECT '体重(kg)', ROUND(AVG(weight), 1), ROUND(MIN(weight), 1), ROUND(MAX(weight), 1), ROUND(STDDEV(weight), 1) FROM health_form_submissions WHERE $__timeFilter(created_at) UNION ALL SELECT '身高(cm)', ROUND(AVG(height), 1), ROUND(MIN(height), 1), ROUND(MAX(height), 1), ROUND(STDDEV(height), 1) FROM health_form_submissions WHERE $__timeFilter(created_at) UNION ALL SELECT 'BMI', ROUND(AVG(weight / POWER(height/100, 2)), 1), ROUND(MIN(weight / POWER(height/100, 2)), 1), ROUND(MAX(weight / POWER(height/100, 2)), 1), ROUND(STDDEV(weight / POWER(height/100, 2)), 1) FROM health_form_submissions WHERE $__timeFilter(created_at) AND height > 0;",
+          "refId": "A"
+        }
+      ],
+      "title": "统计摘要 (均值/最小/最大/标准差)",
+      "type": "table"
     }
   ],
   "preload": false,
@@ -1557,9 +1621,7 @@
     "list": [
       {
         "current": {
-          "text": [
-            "All"
-          ],
+          "text": "All",
           "value": [
             "$__all"
           ]
@@ -1587,5 +1649,5 @@
   "timezone": "",
   "title": "Health Form Overview",
   "uid": "health-form-dashboard",
-  "version": 4
+  "version": 8
 }
