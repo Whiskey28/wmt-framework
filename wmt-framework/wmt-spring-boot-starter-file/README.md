@@ -28,7 +28,7 @@ WMT文件处理组件提供丰富的文件处理功能，支持文件转换、�
 <dependency>
     <groupId>com.wmt</groupId>
     <artifactId>wmt-spring-boot-starter-file</artifactId>
-    <version>2025.10-jdk8-SNAPSHOT</version>
+    <version>2025.12-jdk8-SNAPSHOT</version>
 </dependency>
 ```
 

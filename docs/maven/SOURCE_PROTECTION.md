@@ -99,9 +99,9 @@ mvn clean package
 ```
 
 **验证结果：**
-- ✅ 只生成 `wmt-spring-boot-starter-xxljob-2025.10-jdk8-SNAPSHOT.jar`
-- ✅ **不会生成** `wmt-spring-boot-starter-xxljob-2025.10-jdk8-SNAPSHOT-sources.jar`
-- ✅ **不会生成** `wmt-spring-boot-starter-xxljob-2025.10-jdk8-SNAPSHOT-javadoc.jar`
+- ✅ 只生成 `wmt-spring-boot-starter-xxljob-2025.12-jdk8-SNAPSHOT.jar`
+- ✅ **不会生成** `wmt-spring-boot-starter-xxljob-2025.12-jdk8-SNAPSHOT-sources.jar`
+- ✅ **不会生成** `wmt-spring-boot-starter-xxljob-2025.12-jdk8-SNAPSHOT-javadoc.jar`
 
 ### 2. 部署验证
 
@@ -110,7 +110,7 @@ mvn clean package
 <dependency>
     <groupId>com.wmt</groupId>
     <artifactId>wmt-spring-boot-starter-xxljob</artifactId>
-    <version>2025.10-jdk8-SNAPSHOT</version>
+    <version>2025.12-jdk8-SNAPSHOT</version>
 </dependency>
 ```
 

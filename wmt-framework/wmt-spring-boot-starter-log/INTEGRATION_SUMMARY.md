@@ -78,7 +78,7 @@ wmt:
 <dependency>
     <groupId>com.wmt</groupId>
     <artifactId>wmt-spring-boot-starter-log</artifactId>
-    <version>2025.10-jdk8-SNAPSHOT</version>
+    <version>2025.12-jdk8-SNAPSHOT</version>
 </dependency>
 ```
 

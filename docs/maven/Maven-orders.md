@@ -105,8 +105,8 @@ mvn clean install -pl wmt-framework/wmt-spring-boot-starter-storage -am
 
 ### 📁 生成的文件位置
 打包成功后，JAR文件会生成在对应模块的`target`目录下：
-- `wmt-framework/wmt-spring-boot-starter-storage/target/wmt-spring-boot-starter-storage-2025.10-jdk8-SNAPSHOT.jar`
-- `wmt-framework/wmt-spring-boot-starter-file/target/wmt-spring-boot-starter-file-2025.10-jdk8-SNAPSHOT.jar`
-- `wmt-framework/wmt-spring-boot-starter-web/target/wmt-spring-boot-starter-web-2025.10-jdk8-SNAPSHOT.jar`
+- `wmt-framework/wmt-spring-boot-starter-storage/target/wmt-spring-boot-starter-storage-2025.12-jdk8-SNAPSHOT.jar`
+- `wmt-framework/wmt-spring-boot-starter-file/target/wmt-spring-boot-starter-file-2025.12-jdk8-SNAPSHOT.jar`
+- `wmt-framework/wmt-spring-boot-starter-web/target/wmt-spring-boot-starter-web-2025.12-jdk8-SNAPSHOT.jar`
 
 这样你就可以单独测试和打包任何一个组件模块，而不需要构建整个项目！

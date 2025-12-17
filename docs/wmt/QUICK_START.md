@@ -21,7 +21,7 @@
 ```xml
 <project>
     <properties>
-        <wmt.version>2025.10-jdk8-SNAPSHOT</wmt.version>
+        <wmt.version>2025.12-jdk8-SNAPSHOT</wmt.version>
     </properties>
     
     <dependencyManagement>
@@ -67,7 +67,7 @@
     <dependency>
         <groupId>com.wmt</groupId>
         <artifactId>wmt-spring-boot-starter-web</artifactId>
-        <version>2025.10-jdk8-SNAPSHOT</version>
+        <version>2025.12-jdk8-SNAPSHOT</version>
     </dependency>
 </dependencies>
 ```

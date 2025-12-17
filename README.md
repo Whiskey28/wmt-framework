@@ -39,7 +39,7 @@ wmt-common (基础层)
         <dependency>
             <groupId>com.wmt</groupId>
             <artifactId>wmt-dependencies</artifactId>
-            <version>2025.10-jdk8-SNAPSHOT</version>
+            <version>2025.12-jdk8-SNAPSHOT</version>
             <type>pom</type>
             <scope>import</scope>
         </dependency>
@@ -81,14 +81,14 @@ wmt-common (基础层)
     <dependency>
         <groupId>com.wmt</groupId>
         <artifactId>wmt-spring-boot-starter-web</artifactId>
-        <version>2025.10-jdk8-SNAPSHOT</version>
+        <version>2025.12-jdk8-SNAPSHOT</version>
     </dependency>
     
     <!-- MyBatis组件 -->
     <dependency>
         <groupId>com.wmt</groupId>
         <artifactId>wmt-spring-boot-starter-mybatis</artifactId>
-        <version>2025.10-jdk8-SNAPSHOT</version>
+        <version>2025.12-jdk8-SNAPSHOT</version>
     </dependency>
 </dependencies>
 ```
@@ -112,23 +112,32 @@ spring:
 
 ## 📦 组件清单
 
+### 基础组件
+
+| 组件名称 | 说明 | Maven坐标 |
+|---------|------|----------|
+| wmt-common | 公共工具类和基础组件（POJO、异常、枚举、工具类等） | `com.wmt:wmt-common` |
+
 ### 框架技术组件
 
 | 组件名称 | 说明 | Maven坐标 |
 |---------|------|----------|
-| wmt-common | 公共工具类和基础组件 | `com.wmt:wmt-common` |
 | wmt-spring-boot-starter-web | Web增强组件（统一异常处理、参数校验、API日志等） | `com.wmt:wmt-spring-boot-starter-web` |
 | wmt-spring-boot-starter-mybatis | MyBatis增强组件（分页、数据源等） | `com.wmt:wmt-spring-boot-starter-mybatis` |
 | wmt-spring-boot-starter-cache | Redis组件（缓存、分布式锁等） | `com.wmt:wmt-spring-boot-starter-cache` |
+| wmt-spring-boot-starter-redis | Redis组件（兼容旧版本） | `com.wmt:wmt-spring-boot-starter-redis` |
 | wmt-spring-boot-starter-security | 安全组件（认证、授权等） | `com.wmt:wmt-spring-boot-starter-security` |
 | wmt-spring-boot-starter-websocket | WebSocket组件 | `com.wmt:wmt-spring-boot-starter-websocket` |
 | wmt-spring-boot-starter-monitor | 监控组件（链路追踪等） | `com.wmt:wmt-spring-boot-starter-monitor` |
+| wmt-spring-boot-starter-prometheus-grafana | Prometheus和Grafana监控组件 | `com.wmt:wmt-spring-boot-starter-prometheus-grafana` |
 | wmt-spring-boot-starter-protection | 服务保护组件（限流、熔断、幂等等） | `com.wmt:wmt-spring-boot-starter-protection` |
 | wmt-spring-boot-starter-job | 定时任务组件（基于Quartz） | `com.wmt:wmt-spring-boot-starter-job` |
 | wmt-spring-boot-starter-xxljob | XXL-JOB集成组件 | `com.wmt:wmt-spring-boot-starter-xxljob` |
 | wmt-spring-boot-starter-mq | 消息队列组件 | `com.wmt:wmt-spring-boot-starter-mq` |
 | wmt-spring-boot-starter-excel | Excel导入导出组件 | `com.wmt:wmt-spring-boot-starter-excel` |
 | wmt-spring-boot-starter-test | 测试组件 | `com.wmt:wmt-spring-boot-starter-test` |
+| wmt-spring-boot-starter-elk-logging | ELK日志组件 | `com.wmt:wmt-spring-boot-starter-elk-logging` |
+| wmt-spring-boot-starter-sjb | SJB组件 | `com.wmt:wmt-spring-boot-starter-sjb` |
 
 ### 业务技术组件
 
@@ -310,10 +319,10 @@ deploy.bat
 
 ```bash
 # 使用混淆方式打包
-mvn clean package -P obfuscate
+mvn clean package -Pobfuscate -DskipTests=true
 
 # 使用混淆方式部署
-mvn deploy -P obfuscate
+mvn deploy -Pobfuscate -DskipTests=true
 ```
 
 ### 混淆配置
@@ -331,7 +340,7 @@ mvn deploy -P obfuscate
 - `x.x-jdk8-SNAPSHOT`：快照版本，用于开发和测试
 - `x.x-jdk8`：正式版本，用于生产环境
 
-当前版本：`2025.10-jdk8-SNAPSHOT`
+当前版本：`2025.12-jdk8-SNAPSHOT`
 
 ## 🔨 组件开发指南
 
@@ -350,7 +359,7 @@ mvn deploy -P obfuscate
 如有问题或建议，请通过以下方式联系：
 
 - 提交Issue：https://github.com/Wmt/wmt-framework/issues
-- 邮箱：support@wmt.com
+- 邮箱：wangmingteng@mail.ustc.edu.cn
 
 ## 🙏 致谢
 

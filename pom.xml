@@ -16,7 +16,7 @@
     <description>WMT技术组件库 - 提供企业级Spring Boot技术组件封装</description>
 
     <properties>
-        <revision>2025.10-jdk8-SNAPSHOT</revision>
+        <revision>2025.12-jdk8-SNAPSHOT</revision>
         <!-- Maven 相关 -->
         <java.version>1.8</java.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>

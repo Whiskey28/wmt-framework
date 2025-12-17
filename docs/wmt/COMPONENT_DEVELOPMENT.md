@@ -403,7 +403,7 @@ mvn clean install -DskipTests
 <dependency>
     <groupId>com.wmt</groupId>
     <artifactId>wmt-spring-boot-starter-xxx</artifactId>
-    <version>2025.10-jdk8-SNAPSHOT</version>
+    <version>2025.12-jdk8-SNAPSHOT</version>
 </dependency>
 ```
 
