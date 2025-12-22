@@ -1,0 +1,2178 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": 0,
+  "links": [],
+  "panels": [
+    {
+      "datasource": {
+        "type": "mysql",
+        "uid": "af7fx0o982qrkf"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "footer": {
+              "reducers": []
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "leak_name"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 350
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "hit_times"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 96
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "severity"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 133
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 12,
+        "w": 12,
+        "x": 0,
+        "y": 0
+      },
+      "id": 61,
+      "options": {
+        "cellHeight": "sm",
+        "showHeader": true,
+        "sortBy": []
+      },
+      "pluginVersion": "12.3.0",
+      "targets": [
+        {
+          "dataset": "yanlian_dop_pipeline",
+          "datasource": {
+            "type": "mysql",
+            "uid": "af7fx0o982qrkf"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT \r\n  l.LEAK_CODE            AS leak_code,        -- 漏洞编号（如 CVE）\r\n  l.LEAK_NAME            AS leak_name,        -- 漏洞名称\r\n  l.LEAK_SEVERITY_V3     AS severity,         -- 严重等级（v3）\r\n  COUNT(*)               AS hit_times,        -- 被命中次数（按扫描历史次数统计）\r\n  COUNT(DISTINCT h.APP_ID) AS affected_app_cnt -- 受影响的应用数\r\nFROM yanlian_devops_trustworthy.devops_app_scan_history h\r\nJOIN yanlian_devops_trustworthy.devops_app_dp_relation adr\r\n  ON adr.APP_HISTORY_ID = h.ID\r\nJOIN yanlian_devops_trustworthy.devops_dependency_detail dd\r\n  ON dd.ID = adr.DP_DETAIL_ID\r\nJOIN yanlian_devops_trustworthy.devops_leak_dp_relation ldr\r\n  ON ldr.DP_DETAIL_ID = dd.ID\r\nJOIN yanlian_devops_trustworthy.devops_leak l\r\n  ON l.ID = ldr.LEAK_ID\r\nWHERE h.STATUS = 2                      -- 扫描完成\r\n  -- AND YEAR(h.CREATE_TIME) = 2025\r\n  AND dd.DEL_FLAG = 0\r\n  AND l.DEL_FLAG = 0\r\nGROUP BY l.ID, l.LEAK_CODE, l.LEAK_NAME, l.LEAK_SEVERITY_V3\r\nORDER BY hit_times DESC\r\nLIMIT 10;      -- Top10 漏洞，可按需改成 5 或 20",
+          "refId": "A",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          }
+        }
+      ],
+      "title": "命中次数最多的漏洞 TopN",
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "mysql",
+        "uid": "af7fx0o982qrkf"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "footer": {
+              "reducers": []
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 12,
+        "w": 12,
+        "x": 12,
+        "y": 0
+      },
+      "id": 62,
+      "options": {
+        "cellHeight": "sm",
+        "showHeader": true
+      },
+      "pluginVersion": "12.3.0",
+      "targets": [
+        {
+          "dataset": "yanlian_devops_knowledge",
+          "datasource": {
+            "type": "mysql",
+            "uid": "af7fx0o982qrkf"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT\r\n  d.DP_NAME                       AS dp_name,         -- 依赖名\r\n  dd.DP_VERSION                   AS dp_version,      -- 版本号\r\n  COUNT(*)                        AS hit_times,       -- 在扫描结果中被命中的总次数\r\n  COUNT(DISTINCT h.APP_ID)        AS affected_app_cnt,-- 受影响的应用数\r\n  SUM(dd.LEAK_NUM)                AS total_leak_num   -- 该版本关联的漏洞数（元数据）\r\nFROM yanlian_devops_trustworthy.devops_app_scan_history h\r\nJOIN yanlian_devops_trustworthy.devops_app_dp_relation adr\r\n  ON adr.APP_HISTORY_ID = h.ID\r\nJOIN yanlian_devops_trustworthy.devops_dependency_detail dd\r\n  ON dd.ID = adr.DP_DETAIL_ID\r\nJOIN yanlian_devops_trustworthy.devops_dependency d\r\n  ON d.ID = dd.DP_ID\r\nWHERE h.STATUS = 2                      -- 扫描完成\r\n  AND YEAR(h.CREATE_TIME) = 2025\r\n  AND dd.DEL_FLAG = 0\r\n  AND d.DEL_FLAG = 0\r\nGROUP BY d.DP_NAMESPACE, d.DP_NAME, dd.DP_VERSION\r\nORDER BY hit_times DESC\r\nLIMIT 10;    -- Top10 依赖版本",
+          "refId": "A",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          }
+        }
+      ],
+      "title": "命中次数最多的依赖版本 TopN",
+      "type": "table"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 12
+      },
+      "id": 52,
+      "panels": [],
+      "title": "全年节约报告",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "mysql",
+        "uid": "af7fx0o982qrkf"
+      },
+      "description": "传统人工部署10 分钟/次，平台自动部署仅需 0.5 分钟，每次节省约 9.5分钟。",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 6,
+        "x": 0,
+        "y": 13
+      },
+      "id": 53,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "12.3.0",
+      "targets": [
+        {
+          "dataset": "yanlian_dop_pipeline",
+          "datasource": {
+            "type": "mysql",
+            "uid": "af7fx0o982qrkf"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT \r\n  COUNT(*) AS 全年自动化部署次数,\r\n  ROUND(COUNT(*) * 9.5 / (60 * 8), 1) AS 节省人天\r\nFROM yanlian_dop_pipeline.devops_build_deploy_rel b\r\nWHERE b.status = 'SUCCESS'\r\n  AND STR_TO_DATE(b.start_time, '%Y-%m-%d %H:%i:%s') IS NOT NULL\r\n  AND YEAR(STR_TO_DATE(b.start_time, '%Y-%m-%d %H:%i:%s')) = 2025;",
+          "refId": "A",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          }
+        }
+      ],
+      "title": "自动化部署节省人天",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "mysql",
+        "uid": "af7fx0o982qrkf"
+      },
+      "description": "若无流水线，每次人工执行构建脚本/打包等约需 6分钟。",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 6,
+        "x": 6,
+        "y": 13
+      },
+      "id": 54,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "12.3.0",
+      "targets": [
+        {
+          "dataset": "yanlian_dop_pipeline",
+          "datasource": {
+            "type": "mysql",
+            "uid": "af7fx0o982qrkf"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT\r\n  COUNT(*) AS 全年构建次数,\r\n  ROUND(COUNT(*) * 6.0 / (60 * 8), 1) AS 节省人天\r\nFROM yanlian_dop_pipeline.devops_job_build_info b\r\nWHERE b.del_flag = 0\r\n  AND b.status IS NOT NULL\r\n  AND b.start_time IS NOT NULL\r\n  AND YEAR(STR_TO_DATE(b.start_time, '%Y-%m-%d %H:%i:%s')) = 2025;",
+          "refId": "A",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          }
+        }
+      ],
+      "title": "流水线构建节省人天",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "mysql",
+        "uid": "af7fx0o982qrkf"
+      },
+      "description": "一次相当规模的人工代码检查（按同样代码量）约需 30 分钟，自动扫描全部由工具完成 → 每次节省 30 分钟。",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 6,
+        "x": 12,
+        "y": 13
+      },
+      "id": 55,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "12.3.0",
+      "targets": [
+        {
+          "dataset": "yanlian_devops_code_inspect",
+          "datasource": {
+            "type": "mysql",
+            "uid": "af7fx0o982qrkf"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT\r\n  COUNT(*) AS 全年扫描次数,\r\n  ROUND(COUNT(*) * 30.0 / (60 * 8), 1) AS 节省人天\r\nFROM yanlian_devops_code_inspect.scan_history h\r\nWHERE YEAR(h.scan_time) = 2025;",
+          "refId": "A",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          }
+        }
+      ],
+      "title": "静态扫描节省人天",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "mysql",
+        "uid": "af7fx0o982qrkf"
+      },
+      "description": "本年度所有静态扫描中发现的问题条数（不区分严重程度）。",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 6,
+        "x": 18,
+        "y": 13
+      },
+      "id": 56,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "12.3.0",
+      "targets": [
+        {
+          "dataset": "yanlian_devops_code_inspect",
+          "datasource": {
+            "type": "mysql",
+            "uid": "af7fx0o982qrkf"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT \r\n  COUNT(*) AS issue_cnt\r\nFROM yanlian_devops_code_inspect.scan_issue i\r\nJOIN yanlian_devops_code_inspect.scan_history h\r\n  ON h.id = i.history_id\r\nWHERE YEAR(h.scan_time) = 2025;",
+          "refId": "A",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          }
+        }
+      ],
+      "title": "自动发现质量问题数量",
+      "type": "stat"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 20
+      },
+      "id": 51,
+      "panels": [],
+      "title": "devops运营指标",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "mysql",
+        "uid": "af7fx0o982qrkf"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "decimals": 1,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 0,
+        "y": 21
+      },
+      "id": 1,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "12.3.0",
+      "targets": [
+        {
+          "dataset": "yanlian_devops_development",
+          "datasource": {
+            "type": "mysql",
+            "uid": "af7fx0o982qrkf"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT ROUND(\r\n  IFNULL(use_cnt,0) / NULLIF(total_cnt,0) * 100\r\n, 1) AS coverage\r\nFROM (\r\n  -- 全部子系统数量（未删除）\r\n  SELECT COUNT(DISTINCT s.id) AS total_cnt\r\n  FROM yanlian_devops_development.devops_sub_system s\r\n  WHERE s.del_flag = 0\r\n) t_all\r\nCROSS JOIN (\r\n  -- 本年度有特性 或 有流水线 的子系统数量\r\n  SELECT COUNT(DISTINCT s.id) AS use_cnt\r\n  FROM yanlian_devops_development.devops_sub_system s\r\n  LEFT JOIN yanlian_devops_development.devops_feature f\r\n         ON f.sub_system_id = s.id\r\n        AND f.del_flag = 0\r\n        AND YEAR(f.create_time) = 2025\r\n  LEFT JOIN yanlian_dop_pipeline.devops_jenkins_job j\r\n         ON j.sub_system_id = s.id\r\n        AND j.del_flag = 0\r\n        AND YEAR(j.create_time) = 2025\r\n  WHERE f.id IS NOT NULL\r\n     OR j.id IS NOT NULL\r\n) t_use;",
+          "refId": "A",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          }
+        }
+      ],
+      "title": "DevOps 项目覆盖率",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "mysql",
+        "uid": "af7fx0o982qrkf"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "decimals": 1,
+          "mappings": [],
+          "max": 100,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 6,
+        "y": 21
+      },
+      "id": 2,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "12.3.0",
+      "targets": [
+        {
+          "dataset": "yanlian_app_management",
+          "datasource": {
+            "type": "mysql",
+            "uid": "af7fx0o982qrkf"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT ROUND( IFNULL(use_cnt,0) / NULLIF(total_cnt,0) * 100, 1) AS coverage\r\nFROM (\r\n  -- 全部在职组织\r\n  SELECT COUNT(DISTINCT o.id) AS total_cnt\r\n  FROM yanlian_app_management.sys_organization o\r\n  WHERE o.is_deleted = 0\r\n) t_all\r\nCROSS JOIN (\r\n  -- 至少有一个系统登记在该租户下\r\n  SELECT COUNT(DISTINCT s.tenant_id) AS use_cnt\r\n  FROM yanlian_devops_development.devops_system s\r\n  WHERE s.del_flag = 0\r\n    AND s.tenant_id IS NOT NULL\r\n) t_use;",
+          "refId": "A",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          }
+        }
+      ],
+      "title": "DevOps 部门覆盖率",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "mysql",
+        "uid": "af7fx0o982qrkf"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "decimals": 1,
+          "mappings": [],
+          "max": 100,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 12,
+        "y": 21
+      },
+      "id": 3,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "12.3.0",
+      "targets": [
+        {
+          "dataset": "yanlian_app_management",
+          "datasource": {
+            "type": "mysql",
+            "uid": "af7fx0o982qrkf"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "WITH active_users AS (\r\n  /* 系统、子系统、特性、大版本、构建实例、测试管理单的创建人 */\r\n  SELECT DISTINCT s.create_by AS user_id\r\n  FROM yanlian_devops_development.devops_system s\r\n  WHERE s.create_by IS NOT NULL AND YEAR(s.create_time) = 2025\r\n\r\n  UNION\r\n  SELECT DISTINCT ss.create_by AS user_id\r\n  FROM yanlian_devops_development.devops_sub_system ss\r\n  WHERE ss.create_by IS NOT NULL AND YEAR(ss.create_time) = 2025\r\n\r\n  UNION\r\n  SELECT DISTINCT f.create_by AS user_id\r\n  FROM yanlian_devops_development.devops_feature f\r\n  WHERE f.create_by IS NOT NULL AND YEAR(f.create_time) = 2025\r\n\r\n  UNION\r\n  SELECT DISTINCT vm.create_by AS user_id\r\n  FROM yanlian_devops_development.version_management vm\r\n  WHERE vm.create_by IS NOT NULL AND YEAR(vm.create_time) = 2025\r\n\r\n  UNION\r\n  SELECT DISTINCT bi.create_by AS user_id\r\n  FROM yanlian_devops_development.build_instance bi\r\n  WHERE bi.create_by IS NOT NULL AND YEAR(bi.create_time) = 2025\r\n\r\n  UNION\r\n  SELECT DISTINCT tm.create_by AS user_id\r\n  FROM yanlian_devops_development.test_management tm\r\n  WHERE tm.create_by IS NOT NULL AND YEAR(tm.create_time) = 2025\r\n\r\n  /* 知识文档：创建 / 评论 / 收藏 */\r\n  UNION\r\n  SELECT DISTINCT d.user_id AS user_id\r\n  FROM yanlian_devops_knowledge.knowledge_document d\r\n  WHERE d.user_id IS NOT NULL AND YEAR(d.create_time) = 2025\r\n\r\n  UNION\r\n  SELECT DISTINCT c.user_id AS user_id\r\n  FROM yanlian_devops_knowledge.knowledge_comment c\r\n  WHERE c.user_id IS NOT NULL AND YEAR(c.create_time) = 2025\r\n\r\n  UNION\r\n  SELECT DISTINCT uc.user_id AS user_id\r\n  FROM yanlian_devops_knowledge.knowledge_user_collect uc\r\n  WHERE uc.user_id IS NOT NULL AND YEAR(uc.create_time) = 2025\r\n\r\n  /* 流水线：创建人 */\r\n  UNION\r\n  SELECT DISTINCT j.create_by AS user_id\r\n  FROM yanlian_dop_pipeline.devops_jenkins_job j\r\n  WHERE j.create_by IS NOT NULL AND YEAR(j.create_time) = 2025\r\n\r\n  /* 流水线：触发人（trigger_user 是用户名，需与 sys_user.username 匹配） */\r\n  UNION\r\n  SELECT DISTINCT u.id AS user_id\r\n  FROM yanlian_dop_pipeline.devops_job_build_info b\r\n  JOIN yanlian_app_management.sys_user u\r\n    ON u.username = b.trigger_user\r\n  WHERE b.trigger_user IS NOT NULL\r\n    AND STR_TO_DATE(b.start_time, '%Y-%m-%d %H:%i:%s') IS NOT NULL\r\n    AND YEAR(STR_TO_DATE(b.start_time, '%Y-%m-%d %H:%i:%s')) = 2025\r\n),\r\nall_users AS (\r\n  SELECT COUNT(DISTINCT u.id) AS cnt\r\n  FROM yanlian_app_management.sys_user u\r\n  WHERE u.is_deleted = 0\r\n)\r\nSELECT ROUND(\r\n  (SELECT COUNT(*) FROM active_users)\r\n  / NULLIF((SELECT cnt FROM all_users), 0) * 100\r\n, 1) AS active_ratio;",
+          "refId": "A",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          }
+        }
+      ],
+      "title": "年度 DevOps 活跃用户占比",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "mysql",
+        "uid": "af7fx0o982qrkf"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "decimals": 1,
+          "mappings": [],
+          "max": 100,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 18,
+        "y": 21
+      },
+      "id": 4,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "12.3.0",
+      "targets": [
+        {
+          "dataset": "yanlian_devops_development",
+          "datasource": {
+            "type": "mysql",
+            "uid": "af7fx0o982qrkf"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "WITH days AS (\r\n  SELECT DATE(f.create_time) AS d\r\n  FROM yanlian_devops_development.devops_feature f\r\n  WHERE YEAR(f.create_time) = 2025\r\n\r\n  UNION\r\n\r\n  SELECT DATE(STR_TO_DATE(b.start_time, '%Y-%m-%d %H:%i:%s')) AS d\r\n  FROM yanlian_dop_pipeline.devops_job_build_info b\r\n  WHERE YEAR(STR_TO_DATE(b.start_time, '%Y-%m-%d %H:%i:%s')) = 2025\r\n\r\n  UNION\r\n\r\n  SELECT DATE(c.create_time) AS d\r\n  FROM yanlian_devops_scm.commit_info c\r\n  WHERE YEAR(c.create_time) = 2025\r\n)\r\nSELECT ROUND(COUNT(DISTINCT d) / 365 * 100, 1) AS active_day_ratio\r\nFROM days;",
+          "refId": "A",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          }
+        }
+      ],
+      "title": "平台活跃天数占比",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "mysql",
+        "uid": "af7fx0o982qrkf"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "decimals": 1,
+          "mappings": [],
+          "max": 100,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 0,
+        "y": 26
+      },
+      "id": 5,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "12.3.0",
+      "targets": [
+        {
+          "dataset": "yanlian_devops_code_inspect",
+          "datasource": {
+            "type": "mysql",
+            "uid": "af7fx0o982qrkf"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT ROUND( IFNULL(scan_cnt,0) / NULLIF(repo_cnt,0) * 100, 1) AS coverage\r\nFROM (\r\n  SELECT COUNT(DISTINCT r.id) AS repo_cnt\r\n  FROM yanlian_devops_code_inspect.code_repository r\r\n) t_all\r\nCROSS JOIN (\r\n  SELECT COUNT(DISTINCT h.scan_task_id) AS scan_cnt\r\n  FROM yanlian_devops_code_inspect.scan_history h\r\n  WHERE YEAR(h.scan_time) = 2025\r\n) t_scan;",
+          "refId": "A",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          }
+        }
+      ],
+      "title": "代码扫描覆盖率",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "mysql",
+        "uid": "af7fx0o982qrkf"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "decimals": 1,
+          "mappings": [],
+          "max": 100,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 6,
+        "y": 26
+      },
+      "id": 6,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "12.3.0",
+      "targets": [
+        {
+          "dataset": "yanlian_devops_development",
+          "datasource": {
+            "type": "mysql",
+            "uid": "af7fx0o982qrkf"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT ROUND( IFNULL(scan_app_cnt,0) / NULLIF(app_cnt,0) * 100, 1) AS coverage\r\nFROM (\r\n  SELECT COUNT(DISTINCT a.ID) AS app_cnt\r\n  FROM yanlian_devops_trustworthy.devops_app a\r\n  WHERE a.DEL_FLAG = 0\r\n) t_all\r\nCROSS JOIN (\r\n  SELECT COUNT(DISTINCT h.APP_ID) AS scan_app_cnt\r\n  FROM yanlian_devops_trustworthy.devops_app_scan_history h\r\n  WHERE YEAR(h.CREATE_TIME) = 2025\r\n    AND h.STATUS = 2   -- 扫描完成\r\n) t_scan;",
+          "refId": "A",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          }
+        }
+      ],
+      "title": "可信扫描覆盖应用占比",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "mysql",
+        "uid": "af7fx0o982qrkf"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "decimals": 1,
+          "mappings": [],
+          "max": 100,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 12,
+        "y": 26
+      },
+      "id": 7,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "12.3.0",
+      "targets": [
+        {
+          "dataset": "yanlian_devops_code_inspect",
+          "datasource": {
+            "type": "mysql",
+            "uid": "af7fx0o982qrkf"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT ROUND(\r\n  SUM(CASE WHEN h.result = 1 THEN 1 ELSE 0 END)\r\n  / NULLIF(COUNT(*),0) * 100\r\n, 1) AS pass_ratio\r\nFROM yanlian_devops_code_inspect.scan_history h\r\nWHERE h.quality_gate_id IS NOT NULL\r\n  AND YEAR(h.scan_time) = 2025;",
+          "refId": "A",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          }
+        }
+      ],
+      "title": "质量红线通过率",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "mysql",
+        "uid": "af7fx0o982qrkf"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "decimals": 1,
+          "mappings": [],
+          "max": 100,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 18,
+        "y": 26
+      },
+      "id": 8,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "/^all_high_risk_dp_cnt$/",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "12.3.0",
+      "targets": [
+        {
+          "dataset": "yanlian_devops_trustworthy",
+          "datasource": {
+            "type": "mysql",
+            "uid": "af7fx0o982qrkf"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "WITH high_risk_dp AS (\r\n  -- 所有被标记为高危的依赖版本（通过漏洞关联）\r\n  SELECT DISTINCT dd.ID AS dp_detail_id\r\n  FROM yanlian_devops_trustworthy.devops_dependency_detail dd\r\n  JOIN yanlian_devops_trustworthy.devops_leak_dp_relation ldr\r\n    ON ldr.DP_DETAIL_ID = dd.ID\r\n  JOIN yanlian_devops_trustworthy.devops_leak l\r\n    ON l.ID = ldr.LEAK_ID\r\n  WHERE dd.DEL_FLAG = 0\r\n    AND l.DEL_FLAG = 0\r\n    -- 根据实际枚举值调整，这里假设 v3 等级字段用 HIGH/CRITICAL\r\n    AND l.LEAK_SEVERITY_V3 IN ('HIGH', 'CRITICAL')\r\n),\r\nscanned_high_risk_dp AS (\r\n  -- 本年度扫描中实际命中的高危依赖版本\r\n  SELECT DISTINCT adr.DP_DETAIL_ID AS dp_detail_id\r\n  FROM yanlian_devops_trustworthy.devops_app_scan_history h\r\n  JOIN yanlian_devops_trustworthy.devops_app_dp_relation adr\r\n    ON adr.APP_HISTORY_ID = h.ID\r\n  WHERE YEAR(h.CREATE_TIME) = 2025\r\n    AND h.STATUS = 2      -- 2：扫描完成\r\n)\r\nSELECT \r\n  COUNT(DISTINCT s.dp_detail_id)                         AS scanned_high_risk_dp_cnt,\r\n  COUNT(DISTINCT h.dp_detail_id)                         AS all_high_risk_dp_cnt,\r\n  ROUND(\r\n    COUNT(DISTINCT s.dp_detail_id) \r\n    / NULLIF(COUNT(DISTINCT h.dp_detail_id), 0) * 100, 1\r\n  ) AS coverage_percent\r\nFROM high_risk_dp h\r\nLEFT JOIN scanned_high_risk_dp s\r\n  ON s.dp_detail_id = h.dp_detail_id;",
+          "refId": "A",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          }
+        }
+      ],
+      "title": "高危漏洞覆盖扫描率（依赖维度）",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "mysql",
+        "uid": "af7fx0o982qrkf"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "showValues": false,
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "decimals": 0,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 31
+      },
+      "id": 20,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "maxHeight": 600,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.3.0",
+      "targets": [
+        {
+          "dataset": "yanlian_dop_pipeline",
+          "datasource": {
+            "type": "mysql",
+            "uid": "af7fx0o982qrkf"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT \r\n  DATE_SUB(\r\n    DATE(STR_TO_DATE(b.start_time, '%Y-%m-%d %H:%i:%s')),\r\n    INTERVAL WEEKDAY(STR_TO_DATE(b.start_time, '%Y-%m-%d %H:%i:%s')) DAY\r\n  ) AS time,\r\n  COUNT(*) AS deploy_cnt\r\nFROM yanlian_dop_pipeline.devops_build_deploy_rel b\r\nWHERE b.status = 'SUCCESS'\r\n  AND STR_TO_DATE(b.start_time, '%Y-%m-%d %H:%i:%s') IS NOT NULL\r\n  AND YEAR(STR_TO_DATE(b.start_time, '%Y-%m-%d %H:%i:%s')) = 2025\r\nGROUP BY time\r\nORDER BY time;",
+          "refId": "A",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          }
+        },
+        {
+          "dataset": "yanlian_dop_pipeline",
+          "datasource": {
+            "type": "mysql",
+            "uid": "af7fx0o982qrkf"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "hide": false,
+          "rawQuery": true,
+          "rawSql": "SELECT \r\n  DATE_SUB(\r\n    DATE(STR_TO_DATE(b.start_time, '%Y-%m-%d %H:%i:%s')),\r\n    INTERVAL WEEKDAY(STR_TO_DATE(b.start_time, '%Y-%m-%d %H:%i:%s')) DAY\r\n  ) AS time,\r\n  COUNT(*) AS deploy_cnt\r\nFROM yanlian_dop_pipeline.devops_build_deploy_rel b\r\nWHERE b.status = 'SUCCESS'\r\n  AND STR_TO_DATE(b.start_time, '%Y-%m-%d %H:%i:%s') IS NOT NULL\r\n  AND YEAR(STR_TO_DATE(b.start_time, '%Y-%m-%d %H:%i:%s')) = 2024\r\nGROUP BY time\r\nORDER BY time;",
+          "refId": "B",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          }
+        }
+      ],
+      "title": "部署频率趋势（今年 vs 去年）",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "mysql",
+        "uid": "af7fx0o982qrkf"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "showValues": false,
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "decimals": 1,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 31
+      },
+      "id": 21,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "maxHeight": 600,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.3.0",
+      "targets": [
+        {
+          "dataset": "yanlian_devops_code_inspect",
+          "datasource": {
+            "type": "mysql",
+            "uid": "af7fx0o982qrkf"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "WITH task_cnt AS (\r\n  SELECT COUNT(DISTINCT t.id) AS c \r\n  FROM yanlian_devops_code_inspect.scan_task t\r\n),\r\nmonth_cov AS (\r\n  SELECT \r\n    DATE_FORMAT(\r\n      COALESCE(STR_TO_DATE(h.scan_time, '%Y-%m-%d %H:%i:%s'), h.scan_time),\r\n      '%Y-%m-01'\r\n    ) AS month_str,\r\n    ROUND(\r\n      COUNT(DISTINCT h.scan_task_id) \r\n      / NULLIF((SELECT c FROM task_cnt), 0) * 100,\r\n    1) AS coverage\r\n  FROM yanlian_devops_code_inspect.scan_history h\r\n  WHERE h.scan_time IS NOT NULL\r\n    AND YEAR(COALESCE(STR_TO_DATE(h.scan_time, '%Y-%m-%d %H:%i:%s'), h.scan_time)) = 2025\r\n  GROUP BY month_str\r\n)\r\nSELECT \r\n  UNIX_TIMESTAMP(CONCAT(month_str, ' 00:00:00')) * 1000 AS time,\r\n  coverage\r\nFROM month_cov\r\nORDER BY month_str;",
+          "refId": "A",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          }
+        }
+      ],
+      "title": "代码扫描覆盖率（月度）",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "mysql",
+        "uid": "af7fx0o982qrkf"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "fillOpacity": 71,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineWidth": 3,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "decimals": 1,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 39
+      },
+      "id": 30,
+      "options": {
+        "barRadius": 0,
+        "barWidth": 0.62,
+        "fullHighlight": false,
+        "groupWidth": 0.7,
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "orientation": "auto",
+        "showValue": "auto",
+        "stacking": "none",
+        "tooltip": {
+          "hideZeros": false,
+          "maxHeight": 600,
+          "mode": "single",
+          "sort": "none"
+        },
+        "xTickLabelRotation": 0,
+        "xTickLabelSpacing": 0
+      },
+      "pluginVersion": "12.3.0",
+      "targets": [
+        {
+          "dataset": "yanlian_devops_trustworthy",
+          "datasource": {
+            "type": "mysql",
+            "uid": "af7fx0o982qrkf"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT \r\n  o.name AS org_name,\r\n  ROUND( \r\n    COUNT(DISTINCT h.APP_ID) \r\n    / NULLIF(COUNT(DISTINCT a.ID),0) * 100\r\n  , 1) AS coverage\r\nFROM yanlian_devops_trustworthy.devops_app a\r\nLEFT JOIN yanlian_devops_trustworthy.devops_app_scan_history h \r\n       ON h.APP_ID = a.ID \r\n      AND YEAR(h.CREATE_TIME) = 2025\r\n      AND h.STATUS = 2   -- 扫描完成\r\nLEFT JOIN yanlian_app_management.sys_organization o \r\n       ON o.id = a.TENANT_ID\r\nWHERE a.DEL_FLAG = 0\r\n  AND o.is_deleted = 0\r\n  AND o.name != '样板间'\r\nGROUP BY o.name\r\nORDER BY coverage DESC\r\nLIMIT 10;",
+          "refId": "A",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          }
+        }
+      ],
+      "title": "可信扫描覆盖应用占比（按业务线）",
+      "type": "barchart"
+    },
+    {
+      "datasource": {
+        "type": "mysql",
+        "uid": "af7fx0o982qrkf"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "fillOpacity": 80,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineWidth": 1,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 39
+      },
+      "id": 31,
+      "options": {
+        "barRadius": 0,
+        "barWidth": 0.97,
+        "fullHighlight": false,
+        "groupWidth": 0.7,
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "orientation": "auto",
+        "showValue": "auto",
+        "stacking": "none",
+        "tooltip": {
+          "hideZeros": false,
+          "maxHeight": 600,
+          "mode": "single",
+          "sort": "none"
+        },
+        "xTickLabelRotation": 0,
+        "xTickLabelSpacing": 0
+      },
+      "pluginVersion": "12.3.0",
+      "targets": [
+        {
+          "dataset": "yanlian_devops_trustworthy",
+          "datasource": {
+            "type": "mysql",
+            "uid": "af7fx0o982qrkf"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT bucket, COUNT(*) AS cnt\r\nFROM (\r\n  SELECT CASE \r\n           WHEN DATEDIFF(NOW(), l.LEAK_RELEASE_TIME) <= 7 THEN '7日内发布'\r\n           WHEN DATEDIFF(NOW(), l.LEAK_RELEASE_TIME) <= 30 THEN '30日内发布'\r\n           ELSE '更早发布'\r\n         END AS bucket\r\n  FROM yanlian_devops_trustworthy.devops_leak l\r\n  WHERE l.DEL_FLAG = 0\r\n    AND l.LEAK_SEVERITY_V3 IN ('CRITICAL','HIGH')  -- 视你实际存的值而定\r\n) t\r\nGROUP BY bucket\r\nORDER BY CASE bucket \r\n           WHEN '7日内发布' THEN 1\r\n           WHEN '30日内发布' THEN 2\r\n           ELSE 3\r\n         END;",
+          "refId": "A",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          }
+        }
+      ],
+      "title": "高危问题处理及时性分布",
+      "type": "barchart"
+    },
+    {
+      "datasource": {
+        "type": "mysql",
+        "uid": "af7fx0o982qrkf"
+      },
+      "description": "以 devops_app_scan_history 为依赖门禁执行记录：\nSTATUS = 2：扫描完成；\nRESULT = 1：通过门禁；\nRESULT = 0：门禁未通过（被拦截）。",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 0,
+        "y": 47
+      },
+      "id": 59,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "12.3.0",
+      "targets": [
+        {
+          "dataset": "yanlian_devops_trustworthy",
+          "datasource": {
+            "type": "mysql",
+            "uid": "af7fx0o982qrkf"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT \r\n  ROUND(\r\n    SUM(CASE WHEN h.RESULT = 1 THEN 1 ELSE 0 END)\r\n    / NULLIF(COUNT(*), 0) * 100\r\n  , 1) AS pass_ratio\r\nFROM yanlian_devops_trustworthy.devops_app_scan_history h\r\nWHERE h.STATUS = 2\r\n  AND YEAR(h.CREATE_TIME) = 2025;",
+          "refId": "A",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          }
+        }
+      ],
+      "title": "安全门禁通过率",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "mysql",
+        "uid": "af7fx0o982qrkf"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 6,
+        "y": 47
+      },
+      "id": 60,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "12.3.0",
+      "targets": [
+        {
+          "dataset": "yanlian_devops_trustworthy",
+          "datasource": {
+            "type": "mysql",
+            "uid": "af7fx0o982qrkf"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT \r\n  COUNT(*) AS blocked_cnt\r\nFROM yanlian_devops_trustworthy.devops_app_scan_history h\r\nWHERE h.STATUS = 2\r\n  AND h.RESULT = 0     -- 未通过门禁，视为被拦截\r\n  AND YEAR(h.CREATE_TIME) = 2025;",
+          "refId": "A",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          }
+        }
+      ],
+      "title": "依赖安全门禁拦截次数",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "mysql",
+        "uid": "af7fx0o982qrkf"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "decimals": 1,
+          "mappings": [],
+          "max": 100,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 12,
+        "y": 47
+      },
+      "id": 40,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "12.3.0",
+      "targets": [
+        {
+          "dataset": "yanlian_devops_knowledge",
+          "datasource": {
+            "type": "mysql",
+            "uid": "af7fx0o982qrkf"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT\r\n\tROUND( IFNULL( with_space, 0 ) / NULLIF( total_proj, 0 ) * 100, 1 ) AS project_space_ratio \r\nFROM\r\n\t( SELECT count( DISTINCT p.id ) AS total_proj FROM yanlian_devops_issues_track_v2.project p WHERE p.del_flag = 0 ) t_all\r\n\tCROSS JOIN (\r\n\tSELECT\r\n\t\tCOUNT( DISTINCT s.project_id ) AS with_space \r\n\tFROM\r\n\t\tyanlian_devops_knowledge.knowledge_space s \r\n\tWHERE\r\n\t\ts.project_id IS NOT NULL \r\n\t\tAND s.del_flag = 0 \r\n\t) t_space ;",
+          "refId": "A",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          }
+        }
+      ],
+      "title": "有知识空间的项目占比",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "mysql",
+        "uid": "af7fx0o982qrkf"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "decimals": 1,
+          "mappings": [],
+          "max": 100,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 18,
+        "y": 47
+      },
+      "id": 41,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "12.3.0",
+      "targets": [
+        {
+          "dataset": "yanlian_devops_knowledge",
+          "datasource": {
+            "type": "mysql",
+            "uid": "af7fx0o982qrkf"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT ROUND( IFNULL(active_doc,0) / NULLIF(total_doc,0) * 100, 1) AS ratio\r\nFROM (\r\n  SELECT COUNT(DISTINCT d.id) AS total_doc\r\n  FROM yanlian_devops_knowledge.knowledge_document d\r\n) t_all\r\nCROSS JOIN (\r\n  SELECT COUNT(DISTINCT d.id) AS active_doc\r\n  FROM yanlian_devops_knowledge.knowledge_document d\r\n  LEFT JOIN yanlian_devops_knowledge.knowledge_comment c \r\n         ON c.document_id = d.id\r\n  LEFT JOIN yanlian_devops_knowledge.knowledge_user_collect uc \r\n         ON uc.document_id = d.id\r\n  WHERE c.ID IS NOT NULL OR uc.ID IS NOT NULL\r\n) t_active;",
+          "refId": "A",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          }
+        }
+      ],
+      "title": "知识参与度（有评论/收藏的文档占比）-平台未实施",
+      "type": "stat"
+    }
+  ],
+  "preload": false,
+  "refresh": "1h",
+  "schemaVersion": 42,
+  "tags": [
+    "devops",
+    "news",
+    "overview"
+  ],
+  "templating": {
+    "list": [
+      {
+        "current": {
+          "text": "2025",
+          "value": "2025"
+        },
+        "label": "统计年份",
+        "name": "year",
+        "options": [
+          {
+            "selected": true,
+            "text": "2025",
+            "value": "2025"
+          }
+        ],
+        "query": "2025",
+        "type": "textbox"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-1y",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "DevOps 新闻稿数据看板",
+  "uid": "devops-newsboard",
+  "version": 16
+}

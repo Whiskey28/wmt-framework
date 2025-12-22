@@ -1,0 +1,221 @@
+{
+  "main": {
+    "id": "f2d43fe6f61c0c7c",
+    "type": "split",
+    "children": [
+      {
+        "id": "443322f069247990",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "110ad326cde951be",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "简历-多角色视角分析.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "简历-多角色视角分析"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "7fc2158ff2036b00",
+    "type": "split",
+    "children": [
+      {
+        "id": "c336502bded38cf8",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "1ecf5c28b8c92e76",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical",
+                "autoReveal": false
+              },
+              "icon": "lucide-folder-closed",
+              "title": "文件列表"
+            }
+          },
+          {
+            "id": "95f5e68c0e2390b6",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-search",
+              "title": "搜索"
+            }
+          },
+          {
+            "id": "8c8ef2af36bcbee0",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {},
+              "icon": "lucide-bookmark",
+              "title": "书签"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "right": {
+    "id": "62a877cdcdf365fd",
+    "type": "split",
+    "children": [
+      {
+        "id": "d2a03d4489a65b6b",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "d745c88394e65b34",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "论文服务-营销执行计划.md",
+                "collapseAll": true,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-coming-in",
+              "title": "论文服务-营销执行计划 的反向链接列表"
+            }
+          },
+          {
+            "id": "73a14d8be6d28359",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "论文服务-营销执行计划.md",
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-going-out",
+              "title": "论文服务-营销执行计划 的出链列表"
+            }
+          },
+          {
+            "id": "b6693430ddd5b767",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-tags",
+              "title": "标签"
+            }
+          },
+          {
+            "id": "0fda367a9daaed31",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "简历-多角色视角分析.md",
+                "followCursor": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-list",
+              "title": "简历-多角色视角分析 的大纲"
+            }
+          }
+        ],
+        "currentTab": 3
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:打开快速切换": false,
+      "graph:查看关系图谱": false,
+      "canvas:新建白板": false,
+      "daily-notes:打开/创建今天的日记": false,
+      "templates:插入模板": false,
+      "command-palette:打开命令面板": false,
+      "bases:创建新数据库": false
+    }
+  },
+  "active": "1ecf5c28b8c92e76",
+  "lastOpenFiles": [
+    "docs/01-框架公共服务/wmt/maven/VERIFY_OBFUSCATION.md",
+    "docs/01-框架公共服务/wmt/maven/JAVADOC_SOLUTION.md",
+    "docs/01-框架公共服务/wmt/maven/SOURCE_PROTECTION.md",
+    "docs/01-框架公共服务/wmt/maven/Maven-orders.md",
+    "docs/01-框架公共服务/wmt/maven/CODE_OBFUSCATION.md",
+    "docs/01-框架公共服务/wmt/MODULES_GUIDE.md",
+    "docs/01-框架公共服务/wmt/QUICK_START.md",
+    "docs/01-框架公共服务/wmt/maven",
+    "docs/01-框架公共服务/wmt/COMPONENT_DEVELOPMENT.md",
+    "docs/01-框架公共服务/wmt",
+    "docs/wmt/maven/VERIFY_OBFUSCATION.md",
+    "docs/wmt/maven/SOURCE_PROTECTION.md",
+    "docs/wmt/maven/JAVADOC_SOLUTION.md",
+    "docs/wmt/maven/Maven-orders.md",
+    "docs/wmt/maven/CODE_OBFUSCATION.md",
+    "docs/wmt/maven",
+    "docs/Network/网站分析.md",
+    "docs/Network",
+    "docs/DevOps-Platform/Devops/k8s-full-backup-20250924-165602/outsource/services-harmony-workflow-svc.yaml",
+    "docs/DevOps-Platform/Devops/k8s-full-backup-20250924-165602/outsource/services-track-issues-svc-v2.yaml",
+    "docs/DevOps-Platform/Devops/k8s-full-backup-20250924-165602/outsource/services-devops-workflow-web.yaml",
+    "docs/DevOps-Platform/Devops/k8s-full-backup-20250924-165602/outsource/services-app-management-svc.yaml",
+    "docs/DevOps-Platform/Devops/k8s-full-backup-20250924-165602/outsource/services-harmony-gateway-svc.yaml",
+    "docs/DevOps-Platform/Devops/k8s-full-backup-20250924-165602/outsource/secrets-default-token-sslt2.yaml",
+    "docs/DevOps-Platform/pic/组织二方库维护及流水线构建配置 (4).png",
+    "docs/DevOps-Platform/pic/组织二方库维护及流水线构建配置 (2).png",
+    "docs/DevOps-Platform/pic/组织二方库维护及流水线构建配置 (3).png",
+    "docs/DevOps-Platform/pic/组织二方库维护及流水线构建配置 (1).png",
+    "docs/DevOps-Platform/pic/前端流水线打包缓存配置 (3).png",
+    "docs/DevOps-Platform/pic/前端流水线打包缓存配置 (2).png",
+    "docs/DevOps-Platform/pic/前端流水线打包缓存配置 (1).png",
+    "docs/DevOps-Platform/pic/image.png",
+    "docs/DevOps-Platform/pic/image-9.png",
+    "docs/DevOps-Platform/pic/image-8.png",
+    "docs/DevOps-Platform/Devops-问题解决.md",
+    "docs/DevOps-Platform/Devops-网络链路.md",
+    "docs/DevOps-Platform/Devops.md",
+    "docs/DevOps-Platform/Devops-组织二方库维护及流水线构建配置.md",
+    "docs/DevOps-Platform/Devops-流水线初始化及相关配置.md",
+    "docs/DevOps-Platform/Devops-新闻稿.md",
+    "docs/DevOps-Platform/Devops-各平台账密.md",
+    "docs/DevOps-Platform/Devops-拉取用户定时任务.md",
+    "docs/DevOps-Platform/Devops-前端流水线打包缓存配置.md",
+    "docs/DevOps-Platform/Devops-主从存储问题.md",
+    "docs/DevOps-Platform/Devops-mysql.md",
+    "docs/DevOps-Platform/Devops-Mysql-Backup.md"
+  ]
+}
