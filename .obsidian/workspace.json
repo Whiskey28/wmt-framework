@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "简历-多角色视角分析.md",
+                "file": "docs/ahc/2025绩效面谈-工作评估与改进措施.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "简历-多角色视角分析"
+              "title": "2025绩效面谈-工作评估与改进措施"
             }
           }
         ]
@@ -142,13 +142,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "简历-多角色视角分析.md",
+                "file": "docs/ahc/2025绩效面谈-工作评估与改进措施.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "简历-多角色视角分析 的大纲"
+              "title": "2025绩效面谈-工作评估与改进措施 的大纲"
             }
           }
         ],
@@ -169,32 +169,44 @@
       "bases:创建新数据库": false
     }
   },
-  "active": "1ecf5c28b8c92e76",
+  "active": "110ad326cde951be",
   "lastOpenFiles": [
+    "wmt-framework/wmt-spring-boot-starter-xxljob/target/classes/application-xxljob-example.yml",
+    "wmt-framework/wmt-spring-boot-starter-xxljob/target/classes/META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports",
+    "wmt-framework/wmt-spring-boot-starter-xxljob/target/classes/META-INF/spring",
+    "wmt-framework/wmt-spring-boot-starter-xxljob/target/classes/META-INF",
+    "wmt-framework/wmt-spring-boot-starter-websocket/target/classes/application-websocket-example.yml",
+    "wmt-framework/wmt-spring-boot-starter-websocket/target/classes/META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports",
+    "wmt-framework/wmt-spring-boot-starter-websocket/target/classes/META-INF/spring",
+    "wmt-framework/wmt-spring-boot-starter-websocket/target/classes/META-INF",
+    "wmt-framework/wmt-spring-boot-starter-websocket/target/classes/com/wmt/framework/websocket/package-info.class",
+    "wmt-framework/wmt-spring-boot-starter-biz-data-permission/target/classes/application-data-permission-example.yml",
+    "wmt-framework/wmt-spring-boot-starter-biz-data-permission/target/classes/META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports",
+    "chuang/AIGC率降重-亲测有效.md",
+    "docs/ahc/2025绩效面谈-工作评估与改进措施.md",
+    "docs/BOM_ISSUE_FIX.md",
+    "n8n-workflows/health/docs/用户体验优化-节点修改清单.md",
+    "docs/人生规划/00-专家评估报告：规划科学性与关键突破点.md",
+    "docs/人生规划/05-创业支持任务清单与优先级.md",
+    "docs/AI提示词库-学习辅助.md",
+    "docs/人生规划/高可用/按照压力，升级应用.md",
+    "docs/人生规划/高可用/03-开发阶段基础设施完善实施方案.md",
+    "docs/人生规划/2025年度情侣复盘与2026规划.md",
+    "docs/人生规划/简历/简历评价与改进建议.md",
+    "docs/人生规划/简历/简历-多角色视角分析.md",
+    "docs/人生规划/简历/简历-初稿.md",
+    "docs/人生规划/前端vue3/前端页面设计与逻辑详解.md",
+    "docs/人生规划/前端vue3/基于本框架的Vue3实战教学.md",
+    "docs/人生规划/04-学习路径与资源清单.md",
+    "docs/人生规划/03-每周计划模板与复盘机制.md",
+    "docs/人生规划/02-每日计划模板与执行指南.md",
+    "学习规划-个人创业与能力提升.md",
+    "学习规划-执行跟踪表.md",
+    "简历-多角色视角分析.md",
     "docs/01-框架公共服务/wmt/maven/VERIFY_OBFUSCATION.md",
     "docs/01-框架公共服务/wmt/maven/JAVADOC_SOLUTION.md",
     "docs/01-框架公共服务/wmt/maven/SOURCE_PROTECTION.md",
     "docs/01-框架公共服务/wmt/maven/Maven-orders.md",
-    "docs/01-框架公共服务/wmt/maven/CODE_OBFUSCATION.md",
-    "docs/01-框架公共服务/wmt/MODULES_GUIDE.md",
-    "docs/01-框架公共服务/wmt/QUICK_START.md",
-    "docs/01-框架公共服务/wmt/maven",
-    "docs/01-框架公共服务/wmt/COMPONENT_DEVELOPMENT.md",
-    "docs/01-框架公共服务/wmt",
-    "docs/wmt/maven/VERIFY_OBFUSCATION.md",
-    "docs/wmt/maven/SOURCE_PROTECTION.md",
-    "docs/wmt/maven/JAVADOC_SOLUTION.md",
-    "docs/wmt/maven/Maven-orders.md",
-    "docs/wmt/maven/CODE_OBFUSCATION.md",
-    "docs/wmt/maven",
-    "docs/Network/网站分析.md",
-    "docs/Network",
-    "docs/DevOps-Platform/Devops/k8s-full-backup-20250924-165602/outsource/services-harmony-workflow-svc.yaml",
-    "docs/DevOps-Platform/Devops/k8s-full-backup-20250924-165602/outsource/services-track-issues-svc-v2.yaml",
-    "docs/DevOps-Platform/Devops/k8s-full-backup-20250924-165602/outsource/services-devops-workflow-web.yaml",
-    "docs/DevOps-Platform/Devops/k8s-full-backup-20250924-165602/outsource/services-app-management-svc.yaml",
-    "docs/DevOps-Platform/Devops/k8s-full-backup-20250924-165602/outsource/services-harmony-gateway-svc.yaml",
-    "docs/DevOps-Platform/Devops/k8s-full-backup-20250924-165602/outsource/secrets-default-token-sslt2.yaml",
     "docs/DevOps-Platform/pic/组织二方库维护及流水线构建配置 (4).png",
     "docs/DevOps-Platform/pic/组织二方库维护及流水线构建配置 (2).png",
     "docs/DevOps-Platform/pic/组织二方库维护及流水线构建配置 (3).png",
@@ -204,18 +216,6 @@
     "docs/DevOps-Platform/pic/前端流水线打包缓存配置 (1).png",
     "docs/DevOps-Platform/pic/image.png",
     "docs/DevOps-Platform/pic/image-9.png",
-    "docs/DevOps-Platform/pic/image-8.png",
-    "docs/DevOps-Platform/Devops-问题解决.md",
-    "docs/DevOps-Platform/Devops-网络链路.md",
-    "docs/DevOps-Platform/Devops.md",
-    "docs/DevOps-Platform/Devops-组织二方库维护及流水线构建配置.md",
-    "docs/DevOps-Platform/Devops-流水线初始化及相关配置.md",
-    "docs/DevOps-Platform/Devops-新闻稿.md",
-    "docs/DevOps-Platform/Devops-各平台账密.md",
-    "docs/DevOps-Platform/Devops-拉取用户定时任务.md",
-    "docs/DevOps-Platform/Devops-前端流水线打包缓存配置.md",
-    "docs/DevOps-Platform/Devops-主从存储问题.md",
-    "docs/DevOps-Platform/Devops-mysql.md",
-    "docs/DevOps-Platform/Devops-Mysql-Backup.md"
+    "docs/DevOps-Platform/pic/image-8.png"
   ]
 }

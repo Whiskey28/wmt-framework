@@ -84,4 +84,14 @@
         </dependency>
     </dependencies>
 
+    <build>
+        <plugins>
+            <!-- ProGuard代码混淆插件，从父pom的pluginManagement继承配置 -->
+            <plugin>
+                <groupId>com.github.wvengen</groupId>
+                <artifactId>proguard-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+
 </project>

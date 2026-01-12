@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>糖尿病饮食分析 - 表单填写</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Microsoft YaHei", sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1em;
+        }
+
+        .form-container {
+            padding: 40px;
+        }
+
+        .form-section {
+            margin-bottom: 40px;
+        }
+
+        .section-title {
+            font-size: 1.5em;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e0e0e0;
+            display: flex;
+            align-items: center;
+        }
+
+        .section-title::before {
+            content: "📋";
+            margin-right: 10px;
+            font-size: 1.2em;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
+        }
+
+        .form-group label .required {
+            color: #f5576c;
+            margin-left: 3px;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #4CAF50;
+        }
+
+        .form-group .help-text {
+            font-size: 0.85em;
+            color: #999;
+            margin-top: 5px;
+        }
+
+        .food-list {
+            margin-top: 15px;
+        }
+
+        .food-item {
+            display: grid;
+            grid-template-columns: 1fr 1fr auto;
+            gap: 10px;
+            margin-bottom: 15px;
+            padding: 15px;
+            background: #f9f9f9;
+            border-radius: 6px;
+            border: 2px solid #e0e0e0;
+        }
+
+        .food-item input {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .btn-remove-food {
+            background: #f5576c;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: background 0.3s;
+        }
+
+        .btn-remove-food:hover {
+            background: #e0455a;
+        }
+
+        .btn-add-food {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 500;
+            transition: background 0.3s;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .btn-add-food:hover {
+            background: #45a049;
+        }
+
+        .btn-submit {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1.2em;
+            font-weight: 600;
+            width: 100%;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-top: 20px;
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-submit:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #4CAF50;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .message {
+            display: none;
+            padding: 15px;
+            border-radius: 6px;
+            margin-top: 20px;
+        }
+
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .message.active {
+            display: block;
+        }
+
+        .two-columns {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        @media (max-width: 768px) {
+            .two-columns {
+                grid-template-columns: 1fr;
+            }
+
+            .food-item {
+                grid-template-columns: 1fr;
+            }
+
+            .form-container {
+                padding: 20px;
+            }
+        }
+
+        .info-box {
+            background: #e8f5e9;
+            border-left: 4px solid #4CAF50;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+
+        .info-box p {
+            color: #2e7d32;
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏥 糖尿病饮食分析</h1>
+            <p>AI智能分析您的饮食对血糖的影响</p>
+        </div>
+
+        <div class="form-container">
+            <div class="info-box">
+                <p><strong>使用说明：</strong></p>
+                <p>• 请填写您的用餐信息和基本健康信息</p>
+                <p>• 系统将分析食物对血糖的影响，并生成详细报告</p>
+                <p>• 如果填写邮箱，报告将自动发送到您的邮箱</p>
+            </div>
+
+            <form id="diabetesForm">
+                <!-- 用餐信息 -->
+                <div class="form-section">
+                    <h2 class="section-title">用餐信息</h2>
+                    
+                    <div class="form-group">
+                        <label for="mealTime">用餐时间 <span class="required">*</span></label>
+                        <input type="datetime-local" id="mealTime" name="mealTime" required>
+                        <div class="help-text">选择您用餐的具体时间</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>食物列表 <span class="required">*</span></label>
+                        <div class="help-text">请添加您这餐吃的所有食物</div>
+                        <div class="food-list" id="foodList">
+                            <!-- 动态添加的食物项 -->
+                        </div>
+                        <button type="button" class="btn-add-food" onclick="addFoodItem()">+ 添加食物</button>
+                    </div>
+                </div>
+
+                <!-- 用户信息 -->
+                <div class="form-section">
+                    <h2 class="section-title">用户信息</h2>
+                    
+                    <div class="form-group">
+                        <label for="email">邮箱（可选）</label>
+                        <input type="email" id="email" name="email" placeholder="user@example.com">
+                        <div class="help-text">填写邮箱后，分析报告将自动发送到您的邮箱</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="isDiabetic">是否糖尿病患者 <span class="required">*</span></label>
+                        <select id="isDiabetic" name="isDiabetic" required onchange="toggleDiabetesFields()">
+                            <option value="">请选择</option>
+                            <option value="false">否</option>
+                            <option value="true">是</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group" id="diabetesTypeGroup" style="display: none;">
+                        <label for="diabetesType">糖尿病类型</label>
+                        <select id="diabetesType" name="diabetesType">
+                            <option value="无">无</option>
+                            <option value="1型">1型糖尿病</option>
+                            <option value="2型">2型糖尿病</option>
+                            <option value="妊娠期">妊娠期糖尿病</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group" id="currentMedicationGroup" style="display: none;">
+                        <label for="currentMedication">当前用药</label>
+                        <select id="currentMedication" name="currentMedication">
+                            <option value="无">无</option>
+                            <option value="胰岛素">胰岛素</option>
+                            <option value="口服药">口服药</option>
+                        </select>
+                    </div>
+
+                    <div class="two-columns">
+                        <div class="form-group">
+                            <label for="age">年龄（可选）</label>
+                            <input type="number" id="age" name="age" min="1" max="120" placeholder="岁">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="gender">性别（可选）</label>
+                            <select id="gender" name="gender">
+                                <option value="">请选择</option>
+                                <option value="男">男</option>
+                                <option value="女">女</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="two-columns">
+                        <div class="form-group">
+                            <label for="height">身高（可选）</label>
+                            <input type="number" id="height" name="height" min="50" max="250" placeholder="cm">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="weight">体重（可选）</label>
+                            <input type="number" id="weight" name="weight" min="20" max="300" step="0.1" placeholder="kg">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 提交按钮 -->
+                <button type="submit" class="btn-submit" id="submitBtn">提交分析</button>
+
+                <!-- 加载状态 -->
+                <div class="loading" id="loading">
+                    <div class="spinner"></div>
+                    <p>正在分析中，请稍候...</p>
+                </div>
+
+                <!-- 消息提示 -->
+                <div class="message" id="message"></div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // 食物计数器
+        let foodCounter = 0;
+
+        // 初始化：添加第一个食物项
+        window.onload = function() {
+            addFoodItem();
+            // 设置默认用餐时间为当前时间
+            const now = new Date();
+            now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+            document.getElementById('mealTime').value = now.toISOString().slice(0, 16);
+        };
+
+        // 添加食物项
+        function addFoodItem() {
+            foodCounter++;
+            const foodList = document.getElementById('foodList');
+            const foodItem = document.createElement('div');
+            foodItem.className = 'food-item';
+            foodItem.id = `food-${foodCounter}`;
+            foodItem.innerHTML = `
+                <input type="text" 
+                       placeholder="食物名称，如：米饭、青菜、鸡蛋" 
+                       class="food-name" 
+                       required>
+                <input type="text" 
+                       placeholder="数量，如：1碗、200g、2个" 
+                       class="food-quantity" 
+                       required>
+                <button type="button" 
+                        class="btn-remove-food" 
+                        onclick="removeFoodItem(${foodCounter})">删除</button>
+            `;
+            foodList.appendChild(foodItem);
+        }
+
+        // 删除食物项
+        function removeFoodItem(id) {
+            const foodItem = document.getElementById(`food-${id}`);
+            if (foodItem) {
+                foodItem.remove();
+            }
+            // 如果删除后没有食物项，至少保留一个
+            const foodList = document.getElementById('foodList');
+            if (foodList.children.length === 0) {
+                addFoodItem();
+            }
+        }
+
+        // 切换糖尿病相关字段显示
+        function toggleDiabetesFields() {
+            const isDiabetic = document.getElementById('isDiabetic').value === 'true';
+            const diabetesTypeGroup = document.getElementById('diabetesTypeGroup');
+            const currentMedicationGroup = document.getElementById('currentMedicationGroup');
+            
+            if (isDiabetic) {
+                diabetesTypeGroup.style.display = 'block';
+                currentMedicationGroup.style.display = 'block';
+            } else {
+                diabetesTypeGroup.style.display = 'none';
+                currentMedicationGroup.style.display = 'none';
+            }
+        }
+
+        // 表单提交
+        document.getElementById('diabetesForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            // 收集食物数据
+            const foodItems = document.querySelectorAll('.food-item');
+            const foods = [];
+            let hasError = false;
+
+            foodItems.forEach((item, index) => {
+                const name = item.querySelector('.food-name').value.trim();
+                const quantity = item.querySelector('.food-quantity').value.trim();
+                
+                if (!name || !quantity) {
+                    hasError = true;
+                    return;
+                }
+                
+                foods.push({ name, quantity });
+            });
+
+            if (hasError || foods.length === 0) {
+                showMessage('请填写完整的食物信息', 'error');
+                return;
+            }
+
+            // 收集表单数据
+            const formData = {
+                mealTime: document.getElementById('mealTime').value,
+                foods: foods,
+                userInfo: {
+                    email: document.getElementById('email').value.trim(),
+                    isDiabetic: document.getElementById('isDiabetic').value === 'true',
+                    diabetesType: document.getElementById('diabetesType').value || '无',
+                    currentMedication: document.getElementById('currentMedication').value || '无',
+                    age: document.getElementById('age').value ? parseInt(document.getElementById('age').value) : null,
+                    gender: document.getElementById('gender').value || '',
+                    height: document.getElementById('height').value ? parseFloat(document.getElementById('height').value) : null,
+                    weight: document.getElementById('weight').value ? parseFloat(document.getElementById('weight').value) : null
+                }
+            };
+
+            // 转换用餐时间为ISO格式
+            if (formData.mealTime) {
+                const date = new Date(formData.mealTime);
+                formData.mealTime = date.toISOString();
+            }
+
+            // 显示加载状态
+            showLoading(true);
+            hideMessage();
+
+            try {
+                // 替换为您的实际webhook URL
+                // 格式：https://your-n8n-instance.com/webhook/diabetes-analysis
+                const webhookUrl = 'http://localhost:5678/webhook-test/diabetes-analysis';
+                
+                const response = await fetch(webhookUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                const result = await response.json();
+
+                if (response.ok && result.success) {
+                    let successMsg = '分析完成！';
+                    if (formData.userInfo.email) {
+                        successMsg += ` 报告已发送到您的邮箱：${formData.userInfo.email}`;
+                    } else {
+                        successMsg += ' 请查看返回的数据获取分析结果。';
+                    }
+                    if (result.submissionId) {
+                        successMsg += `\n报告ID：${result.submissionId}`;
+                    }
+                    showMessage(successMsg, 'success');
+                } else {
+                    const errorMsg = result.errors ? result.errors.join('; ') : (result.message || '提交失败，请重试');
+                    showMessage(errorMsg, 'error');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showMessage('网络错误，请检查您的网络连接或webhook URL配置', 'error');
+            } finally {
+                showLoading(false);
+            }
+        });
+
+        // 显示/隐藏加载状态
+        function showLoading(show) {
+            const loading = document.getElementById('loading');
+            const submitBtn = document.getElementById('submitBtn');
+            
+            if (show) {
+                loading.classList.add('active');
+                submitBtn.disabled = true;
+            } else {
+                loading.classList.remove('active');
+                submitBtn.disabled = false;
+            }
+        }
+
+        // 显示消息
+        function showMessage(message, type) {
+            const messageEl = document.getElementById('message');
+            messageEl.textContent = message;
+            messageEl.className = `message ${type} active`;
+            
+            // 3秒后自动隐藏错误消息，成功消息保持显示
+            if (type === 'error') {
+                setTimeout(() => {
+                    hideMessage();
+                }, 5000);
+            }
+        }
+
+        // 隐藏消息
+        function hideMessage() {
+            const messageEl = document.getElementById('message');
+            messageEl.classList.remove('active');
+        }
+    </script>
+</body>
+</html>

@@ -13,7 +13,7 @@ wmt:
   protection:
     # 是否启用服务保护功能
     enabled: true
-    
+
     # 分布式锁配置
     lock:
       # 是否启用分布式锁
@@ -66,7 +66,7 @@ wmt:
         signature-key: "your-signature-key"
         # 锁签名算法
         signature-algorithm: HMAC-SHA256
-    
+
     # 幂等性配置
     idempotency:
       # 是否启用幂等性
@@ -121,7 +121,7 @@ wmt:
         signature-key: "your-signature-key"
         # 幂等性签名算法
         signature-algorithm: HMAC-SHA256
-    
+
     # 限流配置
     rate-limiting:
       # 是否启用限流
@@ -178,7 +178,7 @@ wmt:
         signature-key: "your-signature-key"
         # 限流签名算法
         signature-algorithm: HMAC-SHA256
-    
+
     # 熔断器配置
     circuit-breaker:
       # 是否启用熔断器
@@ -237,7 +237,7 @@ wmt:
         signature-key: "your-signature-key"
         # 熔断器签名算法
         signature-algorithm: HMAC-SHA256
-    
+
     # 重试配置
     retry:
       # 是否启用重试
@@ -290,7 +290,7 @@ wmt:
         signature-key: "your-signature-key"
         # 重试签名算法
         signature-algorithm: HMAC-SHA256
-    
+
     # 超时配置
     timeout:
       # 是否启用超时
@@ -341,7 +341,7 @@ wmt:
         signature-key: "your-signature-key"
         # 超时签名算法
         signature-algorithm: HMAC-SHA256
-    
+
     # 监控配置
     monitoring:
       # 是否启用服务保护监控
@@ -435,7 +435,7 @@ spring:
   redis:
     host: localhost
     port: 6379
-    password: 
+    password:
     database: 0
     timeout: 5000ms
     lettuce:
