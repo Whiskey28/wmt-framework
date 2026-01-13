@@ -1,0 +1,7 @@
+﻿com.wmt.framework.apilog.config.AhzxApiLogAutoConfiguration
+com.wmt.framework.jackson.config.AhzxJacksonAutoConfiguration
+com.wmt.framework.swagger.config.AhzxSwaggerAutoConfiguration
+com.wmt.framework.web.config.AhzxWebAutoConfiguration
+com.wmt.framework.xss.config.AhzxXssAutoConfiguration
+com.wmt.framework.banner.config.AhzxBannerAutoConfiguration
+com.wmt.framework.encrypt.config.AhzxApiEncryptAutoConfiguration

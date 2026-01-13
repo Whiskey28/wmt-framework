@@ -24,22 +24,45 @@ wmt-common (基础层)
 
 ### 环境要求
 
+**JDK 8 版本：**
 - JDK 1.8+
 - Maven 3.6+
 - Spring Boot 2.7.x
+
+**JDK 17 版本：**
+- JDK 17+
+- Maven 3.6+
+- Spring Boot 3.5.x
 
 ### 方式一：使用依赖管理（推荐）
 
 在你的Spring Boot项目的`pom.xml`中添加依赖管理：
 
+**JDK 8 版本：**
 ```xml
 <dependencyManagement>
     <dependencies>
-        <!-- 引入WMT依赖管理 -->
+        <!-- 引入WMT依赖管理（JDK8版本） -->
         <dependency>
             <groupId>com.wmt</groupId>
             <artifactId>wmt-dependencies</artifactId>
             <version>2025.12-jdk8-SNAPSHOT</version>
+            <type>pom</type>
+            <scope>import</scope>
+        </dependency>
+    </dependencies>
+</dependencyManagement>
+```
+
+**JDK 17 版本：**
+```xml
+<dependencyManagement>
+    <dependencies>
+        <!-- 引入WMT依赖管理（JDK17版本） -->
+        <dependency>
+            <groupId>com.wmt</groupId>
+            <artifactId>wmt-dependencies-jdk17</artifactId>
+            <version>2025.12-jdk17-SNAPSHOT</version>
             <type>pom</type>
             <scope>import</scope>
         </dependency>
@@ -75,6 +98,7 @@ wmt-common (基础层)
 
 如果您不想使用依赖管理，也可以直接依赖具体组件：
 
+**JDK 8 版本：**
 ```xml
 <dependencies>
     <!-- Web组件 -->
@@ -89,6 +113,25 @@ wmt-common (基础层)
         <groupId>com.wmt</groupId>
         <artifactId>wmt-spring-boot-starter-mybatis</artifactId>
         <version>2025.12-jdk8-SNAPSHOT</version>
+    </dependency>
+</dependencies>
+```
+
+**JDK 17 版本：**
+```xml
+<dependencies>
+    <!-- Web组件 -->
+    <dependency>
+        <groupId>com.wmt</groupId>
+        <artifactId>wmt-spring-boot-starter-web</artifactId>
+        <version>2025.12-jdk17-SNAPSHOT</version>
+    </dependency>
+    
+    <!-- MyBatis组件 -->
+    <dependency>
+        <groupId>com.wmt</groupId>
+        <artifactId>wmt-spring-boot-starter-mybatis</artifactId>
+        <version>2025.12-jdk17-SNAPSHOT</version>
     </dependency>
 </dependencies>
 ```
@@ -337,10 +380,19 @@ mvn deploy -Pobfuscate -DskipTests=true
 
 ## 📋 版本规范
 
+**JDK 8 版本：**
 - `x.x-jdk8-SNAPSHOT`：快照版本，用于开发和测试
 - `x.x-jdk8`：正式版本，用于生产环境
+- 当前版本：`2025.12-jdk8-SNAPSHOT`
 
-当前版本：`2025.12-jdk8-SNAPSHOT`
+**JDK 17 版本：**
+- `x.x-jdk17-SNAPSHOT`：快照版本，用于开发和测试
+- `x.x-jdk17`：正式版本，用于生产环境
+- 当前版本：`2025.12-jdk17-SNAPSHOT`
+
+**注意：** JDK 8 和 JDK 17 版本使用不同的根POM文件：
+- JDK 8 版本：使用 `pom.xml`
+- JDK 17 版本：使用 `pom-jdk17.xml`
 
 ## 🔨 组件开发指南
 

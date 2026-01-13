@@ -1,0 +1,3 @@
+﻿com.wmt.framework.datasource.config.AhzxDataSourceAutoConfiguration
+com.wmt.framework.mybatis.config.AhzxMybatisAutoConfiguration
+com.wmt.framework.translate.config.AhzxTranslateAutoConfiguration
