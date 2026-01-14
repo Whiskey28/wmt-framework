@@ -9,31 +9,60 @@ WMT是一个基于Spring Boot的企业级技术组件库，提供了一系列开
 ### 特性
 
 - ✨ **开箱即用**：遵循Spring Boot自动配置规范，零配置或少量配置即可使用
-- 🔒 **源码保护**：支持代码混淆，保护核心技术不被轻易反编译
+- 🔒 **源码保护**：支持代码混淆，保护核心技术不被轻易反编译[4.0.2版本sql](..%2F..%2F..%2F..%2Fdesktop%2FAHC%2F0.%E5%B7%A5%E4%BD%9C%E4%BB%BB%E5%8A%A1%2F0%E8%BF%9B%E8%A1%8C%E6%97%B6%2F202403DevOps%E5%B9%B3%E5%8F%B0%2F2.%E9%A1%B9%E7%9B%AE%E8%BF%90%E7%BB%B4%2F%E6%95%B0%E6%8D%AE%E5%BA%93%E8%A1%A8%2F4.0.2%2F4.0.2%E7%89%88%E6%9C%ACsql)
 - 📦 **模块化设计**：各组件独立打包，按需引入，不引入无关依赖
 - 🎯 **企业级实践**：基于实际项目经验提炼，满足企业级应用需求
 - 📚 **完善文档**：提供详细的使用文档和示例代码
+
+wmt-common (基础层)
+    ↓
+框架技术组件 (中间层)
+    ↓  
+业务组件 (应用层)
 
 ## 🚀 快速开始
 
 ### 环境要求
 
+**JDK 8 版本：**
 - JDK 1.8+
 - Maven 3.6+
 - Spring Boot 2.7.x
+
+**JDK 17 版本：**
+- JDK 17+
+- Maven 3.6+
+- Spring Boot 3.5.x
 
 ### 方式一：使用依赖管理（推荐）
 
 在你的Spring Boot项目的`pom.xml`中添加依赖管理：
 
+**JDK 8 版本：**
 ```xml
 <dependencyManagement>
     <dependencies>
-        <!-- 引入WMT依赖管理 -->
+        <!-- 引入WMT依赖管理（JDK8版本） -->
         <dependency>
             <groupId>com.wmt</groupId>
             <artifactId>wmt-dependencies</artifactId>
-            <version>2025.10-jdk8-SNAPSHOT</version>
+            <version>2025.12-jdk8-SNAPSHOT</version>
+            <type>pom</type>
+            <scope>import</scope>
+        </dependency>
+    </dependencies>
+</dependencyManagement>
+```
+
+**JDK 17 版本：**
+```xml
+<dependencyManagement>
+    <dependencies>
+        <!-- 引入WMT依赖管理（JDK17版本） -->
+        <dependency>
+            <groupId>com.wmt</groupId>
+            <artifactId>wmt-dependencies-jdk17</artifactId>
+            <version>2025.12-jdk17-SNAPSHOT</version>
             <type>pom</type>
             <scope>import</scope>
         </dependency>
@@ -69,20 +98,40 @@ WMT是一个基于Spring Boot的企业级技术组件库，提供了一系列开
 
 如果您不想使用依赖管理，也可以直接依赖具体组件：
 
+**JDK 8 版本：**
 ```xml
 <dependencies>
     <!-- Web组件 -->
     <dependency>
         <groupId>com.wmt</groupId>
         <artifactId>wmt-spring-boot-starter-web</artifactId>
-        <version>2025.10-jdk8-SNAPSHOT</version>
+        <version>2025.12-jdk8-SNAPSHOT</version>
     </dependency>
     
     <!-- MyBatis组件 -->
     <dependency>
         <groupId>com.wmt</groupId>
         <artifactId>wmt-spring-boot-starter-mybatis</artifactId>
-        <version>2025.10-jdk8-SNAPSHOT</version>
+        <version>2025.12-jdk8-SNAPSHOT</version>
+    </dependency>
+</dependencies>
+```
+
+**JDK 17 版本：**
+```xml
+<dependencies>
+    <!-- Web组件 -->
+    <dependency>
+        <groupId>com.wmt</groupId>
+        <artifactId>wmt-spring-boot-starter-web</artifactId>
+        <version>2025.12-jdk17-SNAPSHOT</version>
+    </dependency>
+    
+    <!-- MyBatis组件 -->
+    <dependency>
+        <groupId>com.wmt</groupId>
+        <artifactId>wmt-spring-boot-starter-mybatis</artifactId>
+        <version>2025.12-jdk17-SNAPSHOT</version>
     </dependency>
 </dependencies>
 ```
@@ -106,23 +155,32 @@ spring:
 
 ## 📦 组件清单
 
+### 基础组件
+
+| 组件名称 | 说明 | Maven坐标 |
+|---------|------|----------|
+| wmt-common | 公共工具类和基础组件（POJO、异常、枚举、工具类等） | `com.wmt:wmt-common` |
+
 ### 框架技术组件
 
 | 组件名称 | 说明 | Maven坐标 |
 |---------|------|----------|
-| wmt-common | 公共工具类和基础组件 | `com.wmt:wmt-common` |
 | wmt-spring-boot-starter-web | Web增强组件（统一异常处理、参数校验、API日志等） | `com.wmt:wmt-spring-boot-starter-web` |
 | wmt-spring-boot-starter-mybatis | MyBatis增强组件（分页、数据源等） | `com.wmt:wmt-spring-boot-starter-mybatis` |
 | wmt-spring-boot-starter-cache | Redis组件（缓存、分布式锁等） | `com.wmt:wmt-spring-boot-starter-cache` |
+| wmt-spring-boot-starter-redis | Redis组件（兼容旧版本） | `com.wmt:wmt-spring-boot-starter-redis` |
 | wmt-spring-boot-starter-security | 安全组件（认证、授权等） | `com.wmt:wmt-spring-boot-starter-security` |
 | wmt-spring-boot-starter-websocket | WebSocket组件 | `com.wmt:wmt-spring-boot-starter-websocket` |
 | wmt-spring-boot-starter-monitor | 监控组件（链路追踪等） | `com.wmt:wmt-spring-boot-starter-monitor` |
+| wmt-spring-boot-starter-prometheus-grafana | Prometheus和Grafana监控组件 | `com.wmt:wmt-spring-boot-starter-prometheus-grafana` |
 | wmt-spring-boot-starter-protection | 服务保护组件（限流、熔断、幂等等） | `com.wmt:wmt-spring-boot-starter-protection` |
 | wmt-spring-boot-starter-job | 定时任务组件（基于Quartz） | `com.wmt:wmt-spring-boot-starter-job` |
 | wmt-spring-boot-starter-xxljob | XXL-JOB集成组件 | `com.wmt:wmt-spring-boot-starter-xxljob` |
 | wmt-spring-boot-starter-mq | 消息队列组件 | `com.wmt:wmt-spring-boot-starter-mq` |
 | wmt-spring-boot-starter-excel | Excel导入导出组件 | `com.wmt:wmt-spring-boot-starter-excel` |
 | wmt-spring-boot-starter-test | 测试组件 | `com.wmt:wmt-spring-boot-starter-test` |
+| wmt-spring-boot-starter-elk-logging | ELK日志组件 | `com.wmt:wmt-spring-boot-starter-elk-logging` |
+| wmt-spring-boot-starter-sjb | SJB组件 | `com.wmt:wmt-spring-boot-starter-sjb` |
 
 ### 业务技术组件
 
@@ -304,10 +362,10 @@ deploy.bat
 
 ```bash
 # 使用混淆方式打包
-mvn clean package -P obfuscate
+mvn clean package -Pobfuscate -DskipTests=true
 
 # 使用混淆方式部署
-mvn deploy -P obfuscate
+mvn deploy -Pobfuscate -DskipTests=true
 ```
 
 ### 混淆配置
@@ -322,14 +380,23 @@ mvn deploy -P obfuscate
 
 ## 📋 版本规范
 
+**JDK 8 版本：**
 - `x.x-jdk8-SNAPSHOT`：快照版本，用于开发和测试
 - `x.x-jdk8`：正式版本，用于生产环境
+- 当前版本：`2025.12-jdk8-SNAPSHOT`
 
-当前版本：`2025.10-jdk8-SNAPSHOT`
+**JDK 17 版本：**
+- `x.x-jdk17-SNAPSHOT`：快照版本，用于开发和测试
+- `x.x-jdk17`：正式版本，用于生产环境
+- 当前版本：`2025.12-jdk17-SNAPSHOT`
+
+**注意：** JDK 8 和 JDK 17 版本使用不同的根POM文件：
+- JDK 8 版本：使用 `pom.xml`
+- JDK 17 版本：使用 `pom-jdk17.xml`
 
 ## 🔨 组件开发指南
 
-如果您需要为WMT框架开发新组件，请参阅 [组件开发指南](docs/COMPONENT_DEVELOPMENT.md)
+如果您需要为WMT框架开发新组件，请参阅 [组件开发指南](docs/wmt/COMPONENT_DEVELOPMENT.md)
 
 ## 🤝 贡献指南
 
@@ -344,7 +411,7 @@ mvn deploy -P obfuscate
 如有问题或建议，请通过以下方式联系：
 
 - 提交Issue：https://github.com/Wmt/wmt-framework/issues
-- 邮箱：support@wmt.com
+- 邮箱：wangmingteng@mail.ustc.edu.cn
 
 ## 🙏 致谢
 

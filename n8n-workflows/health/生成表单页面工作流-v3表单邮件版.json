@@ -1,0 +1,104 @@
+{
+  "name": "生成表单页面工作流",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "health-form",
+        "responseMode": "responseNode",
+        "options": {
+          "ignoreBots": true
+        }
+      },
+      "id": "ca8eb2c3-6051-4ca8-addd-485f18aef6a4",
+      "name": "返回表单页面Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        0
+      ],
+      "webhookId": "health-form-get-webhook"
+    },
+    {
+      "parameters": {
+        "jsCode": "// 生成表单HTML节点 - 完整代码（包含邮箱字段）\n// 返回HTML表单页面（修改了提交URL）\nconst htmlForm = `<!DOCTYPE html>\n<html lang=\"zh-CN\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>个性化健康管理方案 - 信息采集</title>\n    <style>\n        * {\n            margin: 0;\n            padding: 0;\n            box-sizing: border-box;\n        }\n        \n        body {\n            font-family: -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", Arial, sans-serif;\n            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);\n            min-height: 100vh;\n            padding: 20px;\n            display: flex;\n            justify-content: center;\n            align-items: center;\n        }\n        \n        .container {\n            background: white;\n            border-radius: 16px;\n            box-shadow: 0 10px 40px rgba(0,0,0,0.2);\n            max-width: 800px;\n            width: 100%;\n            padding: 40px;\n            margin: 20px;\n        }\n        \n        .header {\n            text-align: center;\n            margin-bottom: 40px;\n            padding-bottom: 20px;\n            border-bottom: 3px solid #4CAF50;\n        }\n        \n        .header h1 {\n            color: #4CAF50;\n            font-size: 2.5em;\n            margin-bottom: 10px;\n            display: flex;\n            align-items: center;\n            justify-content: center;\n            gap: 10px;\n        }\n        \n        .header p {\n            color: #666;\n            font-size: 1.1em;\n        }\n        \n        .form-section {\n            margin-bottom: 30px;\n        }\n        \n        .section-title {\n            font-size: 1.3em;\n            color: #4CAF50;\n            margin-bottom: 20px;\n            padding-bottom: 10px;\n            border-bottom: 2px solid #e0e0e0;\n            display: flex;\n            align-items: center;\n            gap: 8px;\n        }\n        \n        .form-group {\n            margin-bottom: 20px;\n        }\n        \n        .form-group label {\n            display: block;\n            margin-bottom: 8px;\n            color: #333;\n            font-weight: 500;\n            font-size: 0.95em;\n        }\n        \n        .form-group input,\n        .form-group select {\n            width: 100%;\n            padding: 12px 16px;\n            border: 2px solid #e0e0e0;\n            border-radius: 8px;\n            font-size: 1em;\n            transition: all 0.3s ease;\n            background: #fafafa;\n        }\n        \n        .form-group input:focus,\n        .form-group select:focus {\n            outline: none;\n            border-color: #4CAF50;\n            background: white;\n            box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);\n        }\n        \n        .form-group .hint {\n            font-size: 0.85em;\n            color: #999;\n            margin-top: 5px;\n        }\n        \n        .form-group .error {\n            color: #f44336;\n            font-size: 0.85em;\n            margin-top: 5px;\n            display: none;\n        }\n        \n        .form-group.error .error {\n            display: block;\n        }\n        \n        .form-group.error input,\n        .form-group.error select {\n            border-color: #f44336;\n        }\n        \n        .form-row {\n            display: grid;\n            grid-template-columns: 1fr 1fr;\n            gap: 20px;\n        }\n        \n        @media (max-width: 600px) {\n            .form-row {\n                grid-template-columns: 1fr;\n            }\n        }\n        \n        .submit-btn {\n            width: 100%;\n            padding: 16px;\n            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);\n            color: white;\n            border: none;\n            border-radius: 8px;\n            font-size: 1.1em;\n            font-weight: bold;\n            cursor: pointer;\n            transition: all 0.3s ease;\n            margin-top: 20px;\n            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);\n        }\n        \n        .submit-btn:hover {\n            transform: translateY(-2px);\n            box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);\n        }\n        \n        .submit-btn:active {\n            transform: translateY(0);\n        }\n        \n        .submit-btn:disabled {\n            background: #ccc;\n            cursor: not-allowed;\n            transform: none;\n        }\n        \n        .loading {\n            display: none;\n            text-align: center;\n            margin-top: 20px;\n        }\n        \n        .loading.show {\n            display: block;\n        }\n        \n        .spinner {\n            border: 3px solid #f3f3f3;\n            border-top: 3px solid #4CAF50;\n            border-radius: 50%;\n            width: 40px;\n            height: 40px;\n            animation: spin 1s linear infinite;\n            margin: 0 auto 10px;\n        }\n        \n        @keyframes spin {\n            0% { transform: rotate(0deg); }\n            100% { transform: rotate(360deg); }\n        }\n    </style>\n</head>\n<body>\n    <div class=\"container\">\n        <div class=\"header\">\n            <h1>🏥 个性化健康管理方案</h1>\n            <p>请填写以下信息，我们将为您生成专属的健康管理方案</p>\n        </div>\n        \n        <form id=\"healthForm\">\n            <div class=\"form-section\">\n                <h2 class=\"section-title\">📋 基础信息</h2>\n                \n                <div class=\"form-row\">\n                    <div class=\"form-group\">\n                        <label for=\"age\">年龄 <span style=\"color: red;\">*</span></label>\n                        <input type=\"number\" id=\"age\" name=\"age\" min=\"10\" max=\"100\" required placeholder=\"请输入您的年龄\">\n                        <div class=\"hint\">范围：10-100岁</div>\n                        <div class=\"error\">年龄必须在10-100之间</div>\n                    </div>\n                    \n                    <div class=\"form-group\">\n                        <label for=\"gender\">性别 <span style=\"color: red;\">*</span></label>\n                        <select id=\"gender\" name=\"gender\" required>\n                            <option value=\"\">请选择</option>\n                            <option value=\"男\">男</option>\n                            <option value=\"女\">女</option>\n                        </select>\n                        <div class=\"error\">请选择您的性别</div>\n                    </div>\n                </div>\n                \n                <div class=\"form-row\">\n                    <div class=\"form-group\">\n                        <label for=\"height\">身高 (cm) <span style=\"color: red;\">*</span></label>\n                        <input type=\"number\" id=\"height\" name=\"height\" min=\"100\" max=\"250\" required placeholder=\"请输入身高\">\n                        <div class=\"hint\">范围：100-250cm</div>\n                        <div class=\"error\">身高必须在100-250cm之间</div>\n                    </div>\n                    \n                    <div class=\"form-group\">\n                        <label for=\"weight\">体重 (kg) <span style=\"color: red;\">*</span></label>\n                        <input type=\"number\" id=\"weight\" name=\"weight\" min=\"30\" max=\"300\" step=\"0.1\" required placeholder=\"请输入当前体重\">\n                        <div class=\"hint\">范围：30-300kg</div>\n                        <div class=\"error\">体重必须在30-300kg之间</div>\n                    </div>\n                </div>\n                \n                <div class=\"form-group\">\n                    <label for=\"email\">邮箱地址 <span style=\"color: red;\">*</span></label>\n                    <input type=\"email\" id=\"email\" name=\"email\" required placeholder=\"请输入您的邮箱地址\">\n                    <div class=\"hint\">我们将通过此邮箱发送您的健康管理方案</div>\n                    <div class=\"error\">请输入有效的邮箱地址</div>\n                </div>\n            </div>\n            \n            <div class=\"form-section\">\n                <h2 class=\"section-title\">🎯 目标设置</h2>\n                \n                <div class=\"form-group\">\n                    <label for=\"goalType\">目标类型 <span style=\"color: red;\">*</span></label>\n                    <select id=\"goalType\" name=\"goalType\" required>\n                        <option value=\"\">请选择</option>\n                        <option value=\"减肥\">减肥</option>\n                        <option value=\"增肌\">增肌</option>\n                        <option value=\"维持\">维持</option>\n                    </select>\n                    <div class=\"error\">请选择您的目标</div>\n                </div>\n                \n                <div class=\"form-row\">\n                    <div class=\"form-group\">\n                        <label for=\"goalValue\">目标体重 (kg) <span style=\"color: red;\">*</span></label>\n                        <input type=\"number\" id=\"goalValue\" name=\"goalValue\" min=\"30\" max=\"300\" step=\"0.1\" required placeholder=\"请输入目标体重\">\n                        <div class=\"error\">请输入有效的目标体重</div>\n                    </div>\n                    \n                    <div class=\"form-group\">\n                        <label for=\"goalTime\">完成时间 (周) <span style=\"color: red;\">*</span></label>\n                        <input type=\"number\" id=\"goalTime\" name=\"goalTime\" min=\"1\" max=\"52\" required placeholder=\"希望在多少周内达成\">\n                        <div class=\"hint\">范围：1-52周</div>\n                        <div class=\"error\">完成时间必须在1-52周之间</div>\n                    </div>\n                </div>\n                \n                <div class=\"form-group\">\n                    <label for=\"dailyTime\">每日可用时间 (分钟) <span style=\"color: red;\">*</span></label>\n                    <input type=\"number\" id=\"dailyTime\" name=\"dailyTime\" min=\"1\" max=\"300\" required placeholder=\"每天可用于运动的时间\">\n                    <div class=\"hint\">范围：1-300分钟</div>\n                    <div class=\"error\">请输入有效的每日可用时间</div>\n                </div>\n            </div>\n            \n            <div class=\"form-section\">\n                <h2 class=\"section-title\">🏠 生活条件</h2>\n                \n                <div class=\"form-group\">\n                    <label for=\"kitchenCondition\">厨房条件 <span style=\"color: red;\">*</span></label>\n                    <select id=\"kitchenCondition\" name=\"kitchenCondition\" required>\n                        <option value=\"\">请选择</option>\n                        <option value=\"自己做饭\">自己做饭</option>\n                        <option value=\"外卖为主\">外卖为主</option>\n                        <option value=\"综合\">综合</option>\n                    </select>\n                    <div class=\"error\">请选择您的饮食方式</div>\n                </div>\n                \n                <div class=\"form-group\">\n                    <label for=\"facility\">运动设施 <span style=\"color: red;\">*</span></label>\n                    <select id=\"facility\" name=\"facility\" required>\n                        <option value=\"\">请选择</option>\n                        <option value=\"居家\">居家</option>\n                        <option value=\"健身房\">健身房</option>\n                        <option value=\"户外\">户外</option>\n                        <option value=\"综合\">综合</option>\n                    </select>\n                    <div class=\"error\">请选择您的运动环境</div>\n                </div>\n                \n                <div class=\"form-group\">\n                    <label for=\"experience\">运动经验 <span style=\"color: red;\">*</span></label>\n                    <select id=\"experience\" name=\"experience\" required>\n                        <option value=\"\">请选择</option>\n                        <option value=\"没经验\">没经验</option>\n                        <option value=\"有经验\">有经验</option>\n                        <option value=\"经验丰富\">经验丰富</option>\n                    </select>\n                    <div class=\"error\">请选择您的运动经验</div>\n                </div>\n            </div>\n            \n            <button type=\"submit\" class=\"submit-btn\" id=\"submitBtn\">\n                提交信息，生成健康方案\n            </button>\n            \n            <div class=\"loading\" id=\"loading\">\n                <div class=\"spinner\"></div>\n                <p>正在提交，请稍候...</p>\n            </div>\n        </form>\n    </div>\n    \n    <script>\n        const form = document.getElementById(\"healthForm\");\n        const submitBtn = document.getElementById(\"submitBtn\");\n        const loading = document.getElementById(\"loading\");\n        \n        // 修改：使用固定的提交URL\n        const submitUrl = window.location.origin + '/webhook-test/health-form-submit';\n        \n        // 邮箱格式验证函数\n        function validateEmail(email) {\n            const emailRegex = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/;\n            return emailRegex.test(email);\n        }\n        \n        function validateForm() {\n            let isValid = true;\n            const formGroups = form.querySelectorAll(\".form-group\");\n            \n            formGroups.forEach(group => {\n                group.classList.remove(\"error\");\n                const input = group.querySelector(\"input, select\");\n                if (input && input.hasAttribute(\"required\")) {\n                    if (!input.value.trim()) {\n                        group.classList.add(\"error\");\n                        isValid = false;\n                    } else {\n                        // 邮箱格式验证\n                        if (input.type === \"email\") {\n                            if (!validateEmail(input.value.trim())) {\n                                group.classList.add(\"error\");\n                                group.querySelector(\".error\").textContent = \"请输入有效的邮箱地址格式\";\n                                isValid = false;\n                            }\n                        }\n                        // 数字类型验证\n                        if (input.type === \"number\") {\n                            const value = parseFloat(input.value);\n                            const min = parseFloat(input.getAttribute(\"min\"));\n                            const max = parseFloat(input.getAttribute(\"max\"));\n                            if (value < min || value > max) {\n                                group.classList.add(\"error\");\n                                isValid = false;\n                            }\n                        }\n                    }\n                }\n            });\n            \n            const goalType = document.getElementById(\"goalType\").value;\n            const weight = parseFloat(document.getElementById(\"weight\").value);\n            const goalValue = parseFloat(document.getElementById(\"goalValue\").value);\n            \n            if (goalType && weight && goalValue) {\n                const goalGroup = document.getElementById(\"goalValue\").closest(\".form-group\");\n                if (goalType === \"减肥\" && goalValue >= weight) {\n                    goalGroup.classList.add(\"error\");\n                    goalGroup.querySelector(\".error\").textContent = \"目标体重必须小于当前体重\";\n                    isValid = false;\n                } else if (goalType === \"增肌\" && goalValue <= weight) {\n                    goalGroup.classList.add(\"error\");\n                    goalGroup.querySelector(\".error\").textContent = \"目标体重必须大于当前体重\";\n                    isValid = false;\n                }\n            }\n            \n            return isValid;\n        }\n        \n        form.addEventListener(\"submit\", async (e) => {\n            e.preventDefault();\n            \n            if (!validateForm()) {\n                return;\n            }\n            \n            submitBtn.disabled = true;\n            loading.classList.add(\"show\");\n            \n            const formData = new FormData(form);\n            const data = {};\n            for (const [key, value] of formData.entries()) {\n                if (key === \"age\" || key === \"height\" || key === \"weight\" || \n                    key === \"goalValue\" || key === \"goalTime\" || key === \"dailyTime\") {\n                    data[key] = parseFloat(value);\n                } else {\n                    data[key] = value.trim();\n                }\n            }\n            \n            try {\n                // 修改：使用固定的提交URL\n                const response = await fetch(submitUrl, {\n                    method: \"POST\",\n                    headers: {\n                        \"Content-Type\": \"application/json\",\n                    },\n                    body: JSON.stringify(data)\n                });\n                \n                const result = await response.json();\n                \n                if (result.success) {\n                    document.body.innerHTML = result.html || \"<h1>提交成功！正在处理中...</h1>\";\n                } else {\n                    alert(\"提交成功！正在处理中.：\" + (result.errors ? result.errors.join(\", \") : result.message));\n                    submitBtn.disabled = false;\n                    loading.classList.remove(\"show\");\n                }\n            } catch (error) {\n                console.error(\"Error:\", error);\n                alert(\"提交成功！正在处理中.\");\n                submitBtn.disabled = false;\n                loading.classList.remove(\"show\");\n            }\n        });\n        \n        form.addEventListener(\"input\", (e) => {\n            const group = e.target.closest(\".form-group\");\n            if (group) {\n                group.classList.remove(\"error\");\n            }\n        });\n    </script>\n</body>\n</html>`;\n\nreturn {\n  json: {\n    html: htmlForm\n  }\n};\n\n"
+      },
+      "id": "809dc472-fdf9-4772-802e-a5a49a1bd3ae",
+      "name": "生成表单HTML",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        224,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "={{ $json.html }}",
+        "options": {
+          "responseCode": 200,
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Content-Type",
+                "value": "text/html; charset=utf-8"
+              },
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              }
+            ]
+          }
+        }
+      },
+      "id": "5cb104da-9cef-4ae7-87f4-6a76423ff43a",
+      "name": "返回表单页面",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        448,
+        0
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "返回表单页面Webhook": {
+      "main": [
+        [
+          {
+            "node": "生成表单HTML",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "生成表单HTML": {
+      "main": [
+        [
+          {
+            "node": "返回表单页面",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "saveExecutionProgress": true,
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "versionId": "6b4fa4c4-db23-4050-b694-78fec614c01d",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "d3a129b57836a923df617b291f6dc4e215f7ce8ec15c520d1aef17ee296a9dba"
+  },
+  "id": "AKUWNX0cQerzhRIK",
+  "tags": []
+}

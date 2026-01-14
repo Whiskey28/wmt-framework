@@ -1,0 +1,444 @@
+# WMT Tenant Starter 配置示例
+# 基于 wmt-spring-boot-starter-biz-tenant 的完整配置示例
+
+# ==================== 基础配置 ====================
+spring:
+  application:
+    name: wmt-tenant-demo
+  profiles:
+    active: dev
+
+# ==================== WMT Tenant 配置 ====================
+wmt:
+  tenant:
+    # 是否启用多租户功能
+    enabled: true
+    
+    # 租户模式配置
+    mode:
+      # 租户模式：database, schema, table, field
+      type: database
+      # 是否启用租户隔离
+      isolation-enabled: true
+      # 是否启用租户验证
+      validation-enabled: true
+      # 验证超时时间（秒）
+      validation-timeout: 30
+      # 是否启用租户监控
+      monitoring-enabled: true
+      # 监控间隔（秒）
+      monitoring-interval: 30
+      # 是否启用租户统计
+      statistics-enabled: true
+      # 统计保留天数
+      statistics-retention: 30
+      # 是否启用租户告警
+      alerting-enabled: true
+      # 告警阈值（租户数量）
+      alerting-threshold: 1000
+      # 告警重试次数
+      alerting-retry-count: 3
+      # 告警重试间隔（秒）
+      alerting-retry-interval: 60
+    
+    # 租户识别配置
+    identification:
+      # 租户识别方式：header, parameter, cookie, session, subdomain
+      type: header
+      # 租户标识字段名
+      field-name: X-Tenant-Id
+      # 租户标识参数名
+      parameter-name: tenantId
+      # 租户标识Cookie名
+      cookie-name: tenantId
+      # 租户标识Session名
+      session-name: tenantId
+      # 子域名分隔符
+      subdomain-separator: "."
+      # 是否启用租户验证
+      validation-enabled: true
+      # 验证超时时间（秒）
+      validation-timeout: 30
+      # 是否启用租户缓存
+      cache-enabled: true
+      # 缓存过期时间（秒）
+      cache-expire-time: 3600
+      # 是否启用租户监控
+      monitoring-enabled: true
+      # 监控间隔（秒）
+      monitoring-interval: 30
+      # 是否启用租户统计
+      statistics-enabled: true
+      # 统计保留天数
+      statistics-retention: 30
+    
+    # 租户数据源配置
+    datasource:
+      # 是否启用租户数据源
+      enabled: true
+      # 数据源类型：dynamic, static
+      type: dynamic
+      # 数据源配置
+      config:
+        # 是否启用数据源缓存
+        cache-enabled: true
+        # 缓存过期时间（秒）
+        cache-expire-time: 3600
+        # 是否启用数据源监控
+        monitoring-enabled: true
+        # 监控间隔（秒）
+        monitoring-interval: 30
+        # 是否启用数据源统计
+        statistics-enabled: true
+        # 统计保留天数
+        statistics-retention: 30
+        # 是否启用数据源告警
+        alerting-enabled: true
+        # 告警阈值（连接数）
+        alerting-threshold: 100
+        # 告警重试次数
+        alerting-retry-count: 3
+        # 告警重试间隔（秒）
+        alerting-retry-interval: 60
+        # 是否启用数据源健康检查
+        health-check-enabled: true
+        # 健康检查间隔（秒）
+        health-check-interval: 30
+        # 健康检查超时时间（秒）
+        health-check-timeout: 10
+        # 是否启用数据源重试
+        retry-enabled: true
+        # 重试次数
+        retry-count: 3
+        # 重试间隔（秒）
+        retry-interval: 5
+        # 是否启用数据源负载均衡
+        load-balancing-enabled: true
+        # 负载均衡策略：round-robin, random, weighted
+        load-balancing-strategy: round-robin
+        # 是否启用数据源故障转移
+        failover-enabled: true
+        # 故障转移超时时间（秒）
+        failover-timeout: 30
+        # 是否启用数据源备份
+        backup-enabled: true
+        # 备份间隔（秒）
+        backup-interval: 3600
+        # 备份保留天数
+        backup-retention: 30
+    
+    # 租户缓存配置
+    cache:
+      # 是否启用租户缓存
+      enabled: true
+      # 缓存类型：redis, memory
+      type: redis
+      # 缓存配置
+      config:
+        # 默认过期时间（秒）
+        default-expire-time: 3600
+        # 是否启用空值缓存
+        null-value-enabled: true
+        # 空值过期时间（秒）
+        null-value-expire-time: 300
+        # 是否启用缓存预热
+        warm-up-enabled: true
+        # 预热间隔（秒）
+        warm-up-interval: 300
+        # 是否启用缓存监控
+        monitoring-enabled: true
+        # 监控间隔（秒）
+        monitoring-interval: 30
+        # 是否启用缓存统计
+        statistics-enabled: true
+        # 统计保留天数
+        statistics-retention: 30
+        # 是否启用缓存告警
+        alerting-enabled: true
+        # 告警阈值（缓存命中率百分比）
+        alerting-threshold: 80
+        # 告警重试次数
+        alerting-retry-count: 3
+        # 告警重试间隔（秒）
+        alerting-retry-interval: 60
+        # 是否启用缓存压缩
+        compression-enabled: true
+        # 压缩阈值（字节）
+        compression-threshold: 1024
+        # 压缩算法
+        compression-algorithm: gzip
+        # 是否启用缓存加密
+        encryption-enabled: false
+        # 加密密钥
+        encryption-key: "your-encryption-key"
+        # 加密算法
+        encryption-algorithm: AES
+        # 是否启用缓存签名
+        signature-enabled: false
+        # 签名密钥
+        signature-key: "your-signature-key"
+        # 签名算法
+        signature-algorithm: HMAC-SHA256
+    
+    # 租户安全配置
+    security:
+      # 是否启用租户安全
+      enabled: true
+      # 安全类型：isolation, encryption, authentication
+      type: isolation
+      # 安全配置
+      config:
+        # 是否启用租户隔离
+        isolation-enabled: true
+        # 隔离模式：strict, permissive
+        isolation-mode: strict
+        # 是否启用租户加密
+        encryption-enabled: false
+        # 加密密钥
+        encryption-key: "your-encryption-key"
+        # 加密算法
+        encryption-algorithm: AES
+        # 是否启用租户认证
+        authentication-enabled: true
+        # 认证超时时间（秒）
+        authentication-timeout: 30
+        # 是否启用租户授权
+        authorization-enabled: true
+        # 授权超时时间（秒）
+        authorization-timeout: 30
+        # 是否启用租户审计
+        audit-enabled: true
+        # 审计日志保留天数
+        audit-log-retention: 30
+        # 是否启用租户监控
+        monitoring-enabled: true
+        # 监控间隔（秒）
+        monitoring-interval: 30
+        # 是否启用租户统计
+        statistics-enabled: true
+        # 统计保留天数
+        statistics-retention: 30
+        # 是否启用租户告警
+        alerting-enabled: true
+        # 告警阈值（安全事件数量）
+        alerting-threshold: 100
+        # 告警重试次数
+        alerting-retry-count: 3
+        # 告警重试间隔（秒）
+        alerting-retry-interval: 60
+    
+    # 租户消息队列配置
+    message-queue:
+      # 是否启用租户消息队列
+      enabled: true
+      # 消息队列类型：redis, rocketmq, kafka, rabbitmq
+      type: redis
+      # 消息队列配置
+      config:
+        # 是否启用消息持久化
+        persistence-enabled: true
+        # 消息过期时间（秒）
+        expire-time: 3600
+        # 是否启用消息压缩
+        compression-enabled: true
+        # 压缩阈值（字节）
+        compression-threshold: 1024
+        # 压缩算法
+        compression-algorithm: gzip
+        # 是否启用消息加密
+        encryption-enabled: false
+        # 加密密钥
+        encryption-key: "your-encryption-key"
+        # 加密算法
+        encryption-algorithm: AES
+        # 是否启用消息签名
+        signature-enabled: false
+        # 签名密钥
+        signature-key: "your-signature-key"
+        # 签名算法
+        signature-algorithm: HMAC-SHA256
+        # 是否启用消息监控
+        monitoring-enabled: true
+        # 监控间隔（秒）
+        monitoring-interval: 30
+        # 是否启用消息统计
+        statistics-enabled: true
+        # 统计保留天数
+        statistics-retention: 30
+        # 是否启用消息告警
+        alerting-enabled: true
+        # 告警阈值（消息积压数量）
+        alerting-threshold: 1000
+        # 告警重试次数
+        alerting-retry-count: 3
+        # 告警重试间隔（秒）
+        alerting-retry-interval: 60
+    
+    # 租户任务调度配置
+    job:
+      # 是否启用租户任务调度
+      enabled: true
+      # 任务调度类型：quartz, xxl-job
+      type: quartz
+      # 任务调度配置
+      config:
+        # 是否启用任务持久化
+        persistence-enabled: true
+        # 任务过期时间（秒）
+        expire-time: 3600
+        # 是否启用任务压缩
+        compression-enabled: true
+        # 压缩阈值（字节）
+        compression-threshold: 1024
+        # 压缩算法
+        compression-algorithm: gzip
+        # 是否启用任务加密
+        encryption-enabled: false
+        # 加密密钥
+        encryption-key: "your-encryption-key"
+        # 加密算法
+        encryption-algorithm: AES
+        # 是否启用任务签名
+        signature-enabled: false
+        # 签名密钥
+        signature-key: "your-signature-key"
+        # 签名算法
+        signature-algorithm: HMAC-SHA256
+        # 是否启用任务监控
+        monitoring-enabled: true
+        # 监控间隔（秒）
+        monitoring-interval: 30
+        # 是否启用任务统计
+        statistics-enabled: true
+        # 统计保留天数
+        statistics-retention: 30
+        # 是否启用任务告警
+        alerting-enabled: true
+        # 告警阈值（任务执行时间秒）
+        alerting-threshold: 300
+        # 告警重试次数
+        alerting-retry-count: 3
+        # 告警重试间隔（秒）
+        alerting-retry-interval: 60
+    
+    # 租户监控配置
+    monitoring:
+      # 是否启用租户监控
+      enabled: true
+      # 监控间隔（秒）
+      interval: 30
+      # 是否启用租户统计
+      statistics-enabled: true
+      # 租户统计保留天数
+      statistics-retention: 30
+      # 是否启用租户告警
+      alerting-enabled: true
+      # 租户告警阈值配置
+      alerting-thresholds:
+        # 租户数量阈值
+        tenant-count: 1000
+        # 租户活跃度阈值（百分比）
+        tenant-activity: 80
+        # 租户资源使用率阈值（百分比）
+        resource-usage: 80
+        # 租户响应时间阈值（毫秒）
+        response-time: 1000
+        # 租户错误率阈值（百分比）
+        error-rate: 5
+      # 告警重试次数
+      alerting-retry-count: 3
+      # 告警重试间隔（秒）
+      alerting-retry-interval: 60
+      # 告警通知方式：email, sms, webhook
+      alert-notification-types:
+        - email
+        - webhook
+      # 告警通知配置
+      alert-notification:
+        # 邮件配置
+        email:
+          enabled: true
+          smtp-host: smtp.gmail.com
+          smtp-port: 587
+          username: your-email@gmail.com
+          password: your-password
+          from: alerts@your-domain.com
+          to:
+            - admin@your-domain.com
+            - devops@your-domain.com
+          subject: "[WMT Tenant] 租户监控告警"
+        # Webhook配置
+        webhook:
+          enabled: true
+          url: https://your-webhook-url.com/alerts
+          method: POST
+          headers:
+            Content-Type: application/json
+            Authorization: Bearer your-token
+          timeout: 10
+          retry-count: 3
+
+# ==================== 数据源配置 ====================
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/wmt_tenant?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&useSSL=false
+    username: root
+    password: 123456
+    druid:
+      initial-size: 5
+      min-idle: 5
+      max-active: 20
+      max-wait: 60000
+      time-between-eviction-runs-millis: 60000
+      min-evictable-idle-time-millis: 300000
+      validation-query: SELECT 1
+      test-while-idle: true
+      test-on-borrow: false
+      test-on-return: false
+      pool-prepared-statements: true
+      max-pool-prepared-statement-per-connection-size: 20
+
+# ==================== Redis配置 ====================
+spring:
+  redis:
+    host: localhost
+    port: 6379
+    password: 
+    database: 0
+    timeout: 5000ms
+    lettuce:
+      pool:
+        max-active: 8
+        max-wait: -1ms
+        max-idle: 8
+        min-idle: 0
+
+# ==================== 日志配置 ====================
+logging:
+  level:
+    root: INFO
+    com.wmt: DEBUG
+    org.springframework.tenant: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n"
+  file:
+    name: ./logs/wmt-tenant-demo.log
+    max-size: 100MB
+    max-history: 30
+
+# ==================== 监控配置 ====================
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus,tenant
+  endpoint:
+    health:
+      show-details: when-authorized
+    tenant:
+      enabled: true
+  info:
+    env:
+      enabled: true

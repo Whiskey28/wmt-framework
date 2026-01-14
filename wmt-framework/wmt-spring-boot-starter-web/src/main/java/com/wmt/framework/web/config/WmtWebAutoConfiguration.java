@@ -6,7 +6,6 @@ import com.wmt.framework.common.enums.WebFilterOrderEnum;
 import com.wmt.framework.web.core.aspect.RequestLogAspect;
 import com.wmt.framework.web.core.filter.CacheRequestBodyFilter;
 import com.wmt.framework.web.core.filter.DemoFilter;
-import com.wmt.framework.web.core.filter.LogMdcFilter;
 import com.wmt.framework.web.core.handler.GlobalExceptionHandler;
 import com.wmt.framework.web.core.handler.GlobalResponseBodyHandler;
 import com.wmt.framework.web.core.util.WebFrameworkUtils;
@@ -126,14 +125,6 @@ public class WmtWebAutoConfiguration {
         return createFilterBean(new CacheRequestBodyFilter(), WebFilterOrderEnum.REQUEST_BODY_CACHE_FILTER);
     }
 
-    /**
-     * 创建 LogMdcFilter Bean，用于在日志中添加链路追踪、用户信息等字段
-     */
-    @Bean
-    @ConditionalOnProperty(prefix = "wmt.log.mdc", value = "enable", matchIfMissing = true)
-    public FilterRegistrationBean<LogMdcFilter> logMdcFilter(WebProperties webProperties) {
-        return createFilterBean(new LogMdcFilter(webProperties), WebFilterOrderEnum.TRACE_FILTER);
-    }
 
     /**
      * 创建 RequestLogAspect Bean，用于记录详细的请求响应信息

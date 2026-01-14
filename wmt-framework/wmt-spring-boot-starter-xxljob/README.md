@@ -12,6 +12,10 @@ WMT XXL-Job 组件提供了基于 XXL-Job 的分布式任务调度能力，支�
 - ✅ **日志记录**：集成 XXL-Job 日志系统
 - ✅ **异常处理**：完善的异常处理机制
 - ✅ **监控支持**：支持任务执行监控和告警
+- ✅ **配置验证**：启动时自动验证必填配置项，缺失时记录警告日志
+- ✅ **执行器工厂**：抽象执行器创建逻辑，支持执行器生命周期管理
+- ✅ **健康检查**：集成 Spring Boot Actuator，提供执行器健康状态检查
+- ✅ **扩展能力**：预留多执行器支持，便于后续扩展
 
 ## 快速开始
 
@@ -86,15 +90,28 @@ public class UserSyncJob {
 
 ### 基础配置
 
-| 配置项 | 说明 | 默认值 |
-|--------|------|--------|
-| `xxl.job.enabled` | 是否启用 XXL-Job | `false` |
-| `xxl.job.access-token` | 访问令牌 | 无 |
-| `xxl.job.admin.addresses` | 调度中心地址 | 无 |
-| `xxl.job.executor.appname` | 执行器应用名 | 无 |
-| `xxl.job.executor.port` | 执行器端口 | `9999` |
-| `xxl.job.executor.logpath` | 日志路径 | `./logs/xxl-job` |
-| `xxl.job.executor.logretentiondays` | 日志保留天数 | `30` |
+| 配置项 | 说明 | 默认值 | 必填 |
+|--------|------|--------|------|
+| `xxl.job.enabled` | 是否启用 XXL-Job | `false` | 是 |
+| `xxl.job.access-token` | 访问令牌 | 无 | 否 |
+| `xxl.job.admin.addresses` | 调度中心地址 | 无 | 是 |
+| `xxl.job.executor.appname` | 执行器应用名 | 无 | 是 |
+| `xxl.job.executor.port` | 执行器端口 | `9999` | 是 |
+| `xxl.job.executor.logpath` | 日志路径 | `./logs/xxl-job` | 是 |
+| `xxl.job.executor.logretentiondays` | 日志保留天数 | `30` | 否 |
+| `xxl.job.executor.address` | 执行器注册地址（为空则自动获取） | 无 | 否 |
+| `xxl.job.executor.ip` | 执行器IP（为空则自动获取） | 无 | 否 |
+
+### 配置验证
+
+组件在启动时会自动验证必填配置项。如果必填项未配置，会记录警告日志，但不会阻止应用启动。建议在生产环境中确保所有必填项都已正确配置。
+
+**必填配置项**：
+- `xxl.job.enabled`：必须为 `true` 才能启用组件
+- `xxl.job.admin.addresses`：调度中心地址，未配置会导致执行器无法连接
+- `xxl.job.executor.appname`：执行器应用名，未配置会导致执行器注册失败
+- `xxl.job.executor.port`：执行器端口，未配置或无效会使用默认值 9999
+- `xxl.job.executor.logpath`：日志路径，未配置会使用默认值 `./logs/xxl-job`
 
 ### 完整配置示例
 
@@ -205,6 +222,69 @@ try {
 4. **日志记录**：从框架自动记录改为 `XxlJobHelper.log()`
 5. **任务注册**：从代码注册改为管理台配置
 
+## 健康检查
+
+组件集成了 Spring Boot Actuator 的健康检查功能，可以通过 `/actuator/health` 端点查看执行器的健康状态。
+
+### 启用健康检查
+
+1. 添加 Spring Boot Actuator 依赖（如果项目中还没有）：
+
+```xml
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-actuator</artifactId>
+</dependency>
+```
+
+2. 配置 Actuator 端点：
+
+```yaml
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: when-authorized
+```
+
+### 健康检查信息
+
+访问 `/actuator/health` 端点，可以看到以下信息：
+
+```json
+{
+  "status": "UP",
+  "components": {
+    "xxlJobHealthIndicator": {
+      "status": "UP",
+      "details": {
+        "initialized": true,
+        "appname": "wmt-demo-executor",
+        "port": 9999,
+        "adminAddresses": "http://127.0.0.1:8088/xxl-job-admin",
+        "logPath": "./logs/xxl-job",
+        "connected": true
+      }
+    }
+  }
+}
+```
+
+**健康状态说明**：
+- `UP`：执行器已初始化且连接正常
+- `DOWN`：执行器未初始化或连接异常
+
+**检查项**：
+- `initialized`：执行器是否已初始化
+- `appname`：执行器应用名
+- `port`：执行器端口
+- `adminAddresses`：调度中心地址
+- `logPath`：日志路径
+- `connected`：是否连接到调度中心
+
 ## 最佳实践
 
 1. **任务命名**：使用驼峰命名法，如 `userSyncJob`
@@ -213,6 +293,8 @@ try {
 4. **日志记录**：记录关键信息，便于问题排查
 5. **性能监控**：监控执行时间和资源使用
 6. **测试覆盖**：编写充分的单元测试
+7. **配置验证**：确保所有必填配置项都已正确配置
+8. **健康检查**：定期检查执行器健康状态，及时发现问题
 
 ## 示例项目
 
@@ -226,11 +308,14 @@ try {
 
 ## 注意事项
 
-1. 确保 XXL-Job 管理台正常运行
-2. 配置正确的访问令牌
-3. 执行器应用名与管理台注册的名称一致
-4. 任务方法必须是 `public` 且无参数
-5. 使用 `@XxlJob` 注解指定 JobHandler 名称
+1. **调度中心**：确保 XXL-Job 管理台正常运行
+2. **访问令牌**：如果调度中心启用了令牌验证，需要配置正确的访问令牌
+3. **应用名一致性**：执行器应用名必须与管理台注册的名称一致
+4. **任务方法**：任务方法必须是 `public` 且无参数
+5. **JobHandler 名称**：使用 `@XxlJob` 注解指定 JobHandler 名称，需与管理台配置一致
+6. **配置验证**：启动时会自动验证必填配置项，缺失时会记录警告日志
+7. **健康检查**：建议启用 Spring Boot Actuator 的健康检查功能，便于监控执行器状态
+8. **日志路径**：确保日志路径有写入权限，否则可能导致任务执行失败
 
 ## 技术支持
 

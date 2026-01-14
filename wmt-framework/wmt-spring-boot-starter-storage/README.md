@@ -28,7 +28,7 @@ WMT存储组件提供统一的文件存储管理功能，支持多种存储方�
 <dependency>
     <groupId>com.wmt</groupId>
     <artifactId>wmt-spring-boot-starter-storage</artifactId>
-    <version>2025.10-jdk8-SNAPSHOT</version>
+    <version>2025.12-jdk8-SNAPSHOT</version>
 </dependency>
 ```
 

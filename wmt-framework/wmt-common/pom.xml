@@ -15,6 +15,16 @@
     <description>定义基础 pojo 类、枚举、工具类等等</description>
 
 
+    <build>
+        <plugins>
+            <!-- ProGuard代码混淆插件，从父pom的pluginManagement继承配置 -->
+            <plugin>
+                <groupId>com.github.wvengen</groupId>
+                <artifactId>proguard-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+
     <dependencies>
         <!-- Spring 核心 -->
         <dependency>

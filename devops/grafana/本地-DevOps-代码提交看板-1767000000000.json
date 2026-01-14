@@ -1,0 +1,1040 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": 0,
+  "links": [],
+  "panels": [
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 10,
+      "panels": [],
+      "title": "代码提交总体概览（按年度）",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "mysql",
+        "uid": "af7fx0o982qrkf"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 0,
+        "y": 1
+      },
+      "id": 11,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "12.3.0",
+      "targets": [
+        {
+          "dataset": "yanlian_devops_scm",
+          "datasource": {
+            "type": "mysql",
+            "uid": "af7fx0o982qrkf"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT COUNT(*) AS commit_cnt\nFROM yanlian_devops_scm.commit_info c\nWHERE c.create_time IS NOT NULL\n  AND YEAR(c.create_time) IN (${year:csv})\n  AND DATE_FORMAT(c.create_time, '%m') IN (${months:csv});",
+          "refId": "A",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [],
+            "limit": 50
+          }
+        }
+      ],
+      "title": "本年代码提交总次数",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "mysql",
+        "uid": "af7fx0o982qrkf"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 6,
+        "y": 1
+      },
+      "id": 12,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "12.3.0",
+      "targets": [
+        {
+          "dataset": "yanlian_devops_scm",
+          "datasource": {
+            "type": "mysql",
+            "uid": "af7fx0o982qrkf"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT \n  IFNULL(SUM(c.total), 0)/10000 AS total_changes\nFROM yanlian_devops_scm.commit_info c\nWHERE c.create_time IS NOT NULL\n  AND YEAR(c.create_time) IN (${year:csv})\n  AND DATE_FORMAT(c.create_time, '%m') IN (${months:csv});",
+          "refId": "A",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [],
+            "limit": 50
+          }
+        }
+      ],
+      "title": "本年代码变更总行数（万行）",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "mysql",
+        "uid": "af7fx0o982qrkf"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 12,
+        "y": 1
+      },
+      "id": 13,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "12.3.0",
+      "targets": [
+        {
+          "dataset": "yanlian_devops_scm",
+          "datasource": {
+            "type": "mysql",
+            "uid": "af7fx0o982qrkf"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT \n  COUNT(DISTINCT CONCAT(IFNULL(c.server_id, 0), '-', c.gitlab_id)) AS active_repo_cnt\nFROM yanlian_devops_scm.commit_info c\nWHERE c.create_time IS NOT NULL\n  AND YEAR(c.create_time) IN (${year:csv})\n  AND DATE_FORMAT(c.create_time, '%m') IN (${months:csv});",
+          "refId": "A",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [],
+            "limit": 50
+          }
+        }
+      ],
+      "title": "活跃代码仓库数",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "mysql",
+        "uid": "af7fx0o982qrkf"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 18,
+        "y": 1
+      },
+      "id": 14,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "12.3.0",
+      "targets": [
+        {
+          "dataset": "yanlian_devops_scm",
+          "datasource": {
+            "type": "mysql",
+            "uid": "af7fx0o982qrkf"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT \n  COUNT(DISTINCT c.gitlab_user_id) AS active_developer_cnt\nFROM yanlian_devops_scm.commit_info c\nWHERE c.create_time IS NOT NULL\n  AND YEAR(c.create_time) IN (${year:csv})\n  AND DATE_FORMAT(c.create_time, '%m') IN (${months:csv})\n  AND c.gitlab_user_id IS NOT NULL;",
+          "refId": "A",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [],
+            "limit": 50
+          }
+        }
+      ],
+      "title": "活跃开发者数",
+      "type": "stat"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 6
+      },
+      "id": 20,
+      "panels": [],
+      "title": "租户维度代码提交情况",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "mysql",
+        "uid": "af7fx0o982qrkf"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "fillOpacity": 80,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineWidth": 1,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "decimals": 0,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 7
+      },
+      "id": 21,
+      "options": {
+        "barRadius": 0,
+        "barWidth": 0.7,
+        "fullHighlight": false,
+        "groupWidth": 0.7,
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "orientation": "auto",
+        "showValue": "auto",
+        "stacking": "none",
+        "tooltip": {
+          "hideZeros": false,
+          "maxHeight": 600,
+          "mode": "single",
+          "sort": "none"
+        },
+        "xTickLabelRotation": 0,
+        "xTickLabelSpacing": 0
+      },
+      "pluginVersion": "12.3.0",
+      "targets": [
+        {
+          "dataset": "yanlian_devops_scm",
+          "datasource": {
+            "type": "mysql",
+            "uid": "af7fx0o982qrkf"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT \n  COALESCE(o.name, '未分配租户') AS org_name,\n  COUNT(*) AS commit_count\nFROM yanlian_devops_scm.commit_info c\nLEFT JOIN yanlian_devops_development.sub_system_component ssc\n  ON ssc.component_key = c.gitlab_id\n AND ssc.component = 'GITLAB'\n AND ssc.del_flag = 0\nLEFT JOIN yanlian_devops_development.devops_system ds\n  ON ssc.system_id = ds.id\nLEFT JOIN yanlian_app_management.sys_organization o\n  ON ds.tenant_id = o.id\n AND o.is_deleted = 0\nWHERE c.create_time IS NOT NULL\n  AND YEAR(c.create_time) IN (${year:csv})\n  AND DATE_FORMAT(c.create_time, '%m') IN (${months:csv})\n  AND (${tenantId:csv} = '0' OR FIND_IN_SET(ds.tenant_id, '${tenantId:csv}') > 0)\nGROUP BY ds.tenant_id, o.name\nORDER BY commit_count DESC\nLIMIT 10;",
+          "refId": "A",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [],
+            "limit": 50
+          }
+        }
+      ],
+      "title": "各租户代码提交次数 Top10",
+      "type": "barchart"
+    },
+    {
+      "datasource": {
+        "type": "mysql",
+        "uid": "af7fx0o982qrkf"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "fillOpacity": 80,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineWidth": 1,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "decimals": 0,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 7
+      },
+      "id": 22,
+      "options": {
+        "barRadius": 0,
+        "barWidth": 0.7,
+        "fullHighlight": false,
+        "groupWidth": 0.7,
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "orientation": "auto",
+        "showValue": "auto",
+        "stacking": "none",
+        "tooltip": {
+          "hideZeros": false,
+          "maxHeight": 600,
+          "mode": "single",
+          "sort": "none"
+        },
+        "xTickLabelRotation": 0,
+        "xTickLabelSpacing": 0
+      },
+      "pluginVersion": "12.3.0",
+      "targets": [
+        {
+          "dataset": "yanlian_devops_scm",
+          "datasource": {
+            "type": "mysql",
+            "uid": "af7fx0o982qrkf"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT \n  COALESCE(o.name, '未分配租户') AS org_name,\n  IFNULL(SUM(c.total), 0) AS total_changes\nFROM yanlian_devops_scm.commit_info c\nLEFT JOIN yanlian_devops_development.sub_system_component ssc\n  ON ssc.component_key = c.gitlab_id\n AND ssc.component = 'GITLAB'\n AND ssc.del_flag = 0\nLEFT JOIN yanlian_devops_development.devops_system ds\n  ON ssc.system_id = ds.id\nLEFT JOIN yanlian_app_management.sys_organization o\n  ON ds.tenant_id = o.id\n AND o.is_deleted = 0\nWHERE c.create_time IS NOT NULL\n  AND YEAR(c.create_time) IN (${year:csv})\n  AND DATE_FORMAT(c.create_time, '%m') IN (${months:csv})\n  AND (${tenantId:csv} = '0' OR FIND_IN_SET(ds.tenant_id, '${tenantId:csv}') > 0)\nGROUP BY ds.tenant_id, o.name\nORDER BY total_changes DESC\nLIMIT 10;",
+          "refId": "A",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [],
+            "limit": 50
+          }
+        }
+      ],
+      "title": "各租户代码变更行数 Top10",
+      "type": "barchart"
+    },
+    {
+      "datasource": {
+        "type": "mysql",
+        "uid": "af7fx0o982qrkf"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "footer": {
+              "reducers": []
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 15
+      },
+      "id": 23,
+      "options": {
+        "cellHeight": "sm",
+        "showHeader": true,
+        "sortBy": [
+          {
+            "desc": true,
+            "displayName": "commit_count"
+          }
+        ]
+      },
+      "pluginVersion": "12.3.0",
+      "targets": [
+        {
+          "dataset": "yanlian_devops_scm",
+          "datasource": {
+            "type": "mysql",
+            "uid": "af7fx0o982qrkf"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT \n  COALESCE(o.name, '未分配租户') AS org_name,\n  COUNT(*) AS commit_count,\n  COUNT(DISTINCT c.gitlab_user_id) AS committer_count,\n  IFNULL(SUM(c.additions), 0) AS total_additions,\n  IFNULL(SUM(c.deletions), 0) AS total_deletions,\n  IFNULL(SUM(c.total), 0) AS total_changes,\n  ROUND(IFNULL(SUM(c.total), 0) / NULLIF(COUNT(*), 0), 2) AS avg_changes_per_commit\nFROM yanlian_devops_scm.commit_info c\nLEFT JOIN yanlian_devops_development.sub_system_component ssc\n  ON ssc.component_key = c.gitlab_id\n AND ssc.component = 'GITLAB'\n AND ssc.del_flag = 0\nLEFT JOIN yanlian_devops_development.devops_system ds\n  ON ssc.system_id = ds.id\nLEFT JOIN yanlian_app_management.sys_organization o\n  ON ds.tenant_id = o.id\n AND o.is_deleted = 0\nWHERE c.create_time IS NOT NULL\n  AND YEAR(c.create_time) IN (${year:csv})\n  AND DATE_FORMAT(c.create_time, '%m') IN (${months:csv})\n  AND (${tenantId:csv} = '0' OR FIND_IN_SET(ds.tenant_id, '${tenantId:csv}') > 0)\nGROUP BY ds.tenant_id, o.name\nORDER BY commit_count DESC;",
+          "refId": "A",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [],
+            "limit": 500
+          }
+        }
+      ],
+      "title": "租户代码提交明细（年度汇总）",
+      "type": "table"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 23
+      },
+      "id": 30,
+      "panels": [],
+      "title": "用户代码贡献排行",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "mysql",
+        "uid": "af7fx0o982qrkf"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "footer": {
+              "reducers": []
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 12,
+        "w": 24,
+        "x": 0,
+        "y": 24
+      },
+      "id": 31,
+      "options": {
+        "cellHeight": "sm",
+        "showHeader": true,
+        "sortBy": [
+          {
+            "desc": true,
+            "displayName": "total_changes"
+          }
+        ]
+      },
+      "pluginVersion": "12.3.0",
+      "targets": [
+        {
+          "dataset": "yanlian_devops_scm",
+          "datasource": {
+            "type": "mysql",
+            "uid": "af7fx0o982qrkf"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT \n  COALESCE(o.name, '未分配租户') AS org_name,\n  COALESCE(u.name, c.committer_name) AS user_name,\n  COALESCE(u.username, c.committer_name) AS username,\n  COUNT(*) AS commit_count,\n  IFNULL(SUM(c.additions), 0) AS total_additions,\n  IFNULL(SUM(c.deletions), 0) AS total_deletions,\n  IFNULL(SUM(c.total), 0) AS total_changes,\n  ROUND(IFNULL(SUM(c.total), 0) / NULLIF(COUNT(*), 0), 2) AS avg_changes_per_commit,\n  MIN(c.create_time) AS first_commit_time,\n  MAX(c.create_time) AS last_commit_time\nFROM yanlian_devops_scm.commit_info c\nLEFT JOIN yanlian_devops_development.sub_system_component ssc\n  ON ssc.component_key = c.gitlab_id\n AND ssc.component = 'GITLAB'\n AND ssc.del_flag = 0\nLEFT JOIN yanlian_devops_development.devops_system ds\n  ON ssc.system_id = ds.id\nLEFT JOIN yanlian_app_management.sys_organization o\n  ON ds.tenant_id = o.id\n AND o.is_deleted = 0\nLEFT JOIN yanlian_devops_scm.amp_gitlab_user_relation agur\n  ON agur.gitlab_user_id = c.gitlab_user_id\n AND (agur.server_id IS NULL OR agur.server_id = c.server_id)\nLEFT JOIN yanlian_app_management.sys_user u\n  ON agur.amp_user_id = u.id\n AND u.is_deleted = 0\nWHERE c.create_time IS NOT NULL\n  AND c.gitlab_user_id IS NOT NULL\n  AND YEAR(c.create_time) IN (${year:csv})\n  AND DATE_FORMAT(c.create_time, '%m') IN (${months:csv})\n  AND (${tenantId:csv} = '0' OR FIND_IN_SET(ds.tenant_id, '${tenantId:csv}') > 0)\n  AND (${tenantId:csv} = '0' OR agur.amp_user_id IN (\n    SELECT suo.user_id \n    FROM yanlian_app_management.sys_user_organization suo \n    WHERE FIND_IN_SET(suo.organ_id, '${tenantId:csv}') > 0\n  ))\nGROUP BY ds.tenant_id, o.name, COALESCE(agur.amp_user_id, 0), COALESCE(u.id, 0), COALESCE(u.name, c.committer_name), COALESCE(u.username, c.committer_name)\nORDER BY total_changes DESC;",
+          "refId": "A",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [],
+            "limit": 5000
+          }
+        }
+      ],
+      "title": "用户代码贡献排行（按总变更行数倒序）",
+      "type": "table"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 36
+      },
+      "id": 40,
+      "panels": [],
+      "title": "时间趋势（全平台）",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "mysql",
+        "uid": "af7fx0o982qrkf"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 20,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "pointSize": 4,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "showValues": false,
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "decimals": 0,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 37
+      },
+      "id": 41,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "maxHeight": 600,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.3.0",
+      "targets": [
+        {
+          "dataset": "yanlian_devops_scm",
+          "datasource": {
+            "type": "mysql",
+            "uid": "af7fx0o982qrkf"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT \n  DATE_SUB(DATE(c.create_time), INTERVAL WEEKDAY(c.create_time) DAY) AS time,\n  COUNT(*) AS commit_cnt\nFROM yanlian_devops_scm.commit_info c\nWHERE c.create_time IS NOT NULL\n  AND YEAR(c.create_time) IN (${year:csv})\n  AND DATE_FORMAT(c.create_time, '%m') IN (${months:csv})\nGROUP BY time\nORDER BY time;",
+          "refId": "A",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [],
+            "limit": 1000
+          }
+        }
+      ],
+      "title": "每周代码提交次数趋势（全平台）",
+      "type": "timeseries"
+    }
+  ],
+  "preload": false,
+  "refresh": "1h",
+  "schemaVersion": 42,
+  "tags": [
+    "devops",
+    "code",
+    "commit"
+  ],
+  "templating": {
+    "list": [
+      {
+        "allValue": "2020,2021,2022,2023,2024,2025,2026,2027,2028,2029",
+        "current": {
+          "text": [
+            "$__all"
+          ],
+          "value": [
+            "$__all"
+          ]
+        },
+        "includeAll": true,
+        "label": "统计年份",
+        "multi": true,
+        "name": "year",
+        "options": [
+          {
+            "selected": false,
+            "text": "2020",
+            "value": "2020"
+          },
+          {
+            "selected": false,
+            "text": "2021",
+            "value": "2021"
+          },
+          {
+            "selected": false,
+            "text": "2022",
+            "value": "2022"
+          },
+          {
+            "selected": false,
+            "text": "2023",
+            "value": "2023"
+          },
+          {
+            "selected": false,
+            "text": "2024",
+            "value": "2024"
+          },
+          {
+            "selected": false,
+            "text": "2025",
+            "value": "2025"
+          },
+          {
+            "selected": false,
+            "text": "2026",
+            "value": "2026"
+          },
+          {
+            "selected": false,
+            "text": "2027",
+            "value": "2027"
+          },
+          {
+            "selected": false,
+            "text": "2028",
+            "value": "2028"
+          },
+          {
+            "selected": false,
+            "text": "2029",
+            "value": "2029"
+          }
+        ],
+        "query": "2020,2021,2022,2023,2024,2025,2026,2027,2028,2029",
+        "type": "custom"
+      },
+      {
+        "allValue": "0",
+        "current": {
+          "text": "All",
+          "value": "$__all"
+        },
+        "datasource": {
+          "type": "mysql",
+          "uid": "af7fx0o982qrkf"
+        },
+        "definition": "SELECT id AS __value, name AS __text\nFROM yanlian_app_management.sys_organization\nWHERE is_deleted = 0\nORDER BY id;",
+        "includeAll": true,
+        "label": "租户",
+        "multi": true,
+        "name": "tenantId",
+        "options": [],
+        "query": "SELECT id AS __value, name AS __text\nFROM yanlian_app_management.sys_organization\nWHERE is_deleted = 0\nORDER BY id;",
+        "refresh": 1,
+        "regex": "",
+        "type": "query"
+      },
+      {
+        "allValue": "'01','02','03','04','05','06','07','08','09','10','11','12'",
+        "current": {
+          "text": [
+            "$__all"
+          ],
+          "value": [
+            "$__all"
+          ]
+        },
+        "includeAll": true,
+        "label": "月份",
+        "multi": true,
+        "name": "months",
+        "options": [
+          {
+            "selected": false,
+            "text": "'01'",
+            "value": "'01'"
+          },
+          {
+            "selected": false,
+            "text": "'02'",
+            "value": "'02'"
+          },
+          {
+            "selected": false,
+            "text": "'03'",
+            "value": "'03'"
+          },
+          {
+            "selected": false,
+            "text": "'04'",
+            "value": "'04'"
+          },
+          {
+            "selected": false,
+            "text": "'05'",
+            "value": "'05'"
+          },
+          {
+            "selected": false,
+            "text": "'06'",
+            "value": "'06'"
+          },
+          {
+            "selected": false,
+            "text": "'07'",
+            "value": "'07'"
+          },
+          {
+            "selected": false,
+            "text": "'08'",
+            "value": "'08'"
+          },
+          {
+            "selected": false,
+            "text": "'09'",
+            "value": "'09'"
+          },
+          {
+            "selected": false,
+            "text": "'10'",
+            "value": "'10'"
+          },
+          {
+            "selected": false,
+            "text": "'11'",
+            "value": "'11'"
+          },
+          {
+            "selected": false,
+            "text": "'12'",
+            "value": "'12'"
+          }
+        ],
+        "query": "'01','02','03','04','05','06','07','08','09','10','11','12'",
+        "type": "custom"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-2y",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "DevOps 代码提交运营看板（租户视角）",
+  "uid": "devops-code-commit-board",
+  "version": 9
+}

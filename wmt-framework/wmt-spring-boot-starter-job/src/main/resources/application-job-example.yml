@@ -1,0 +1,401 @@
+# WMT Job Starter 配置示例
+# 基于 wmt-spring-boot-starter-job 的完整配置示例
+
+# ==================== 基础配置 ====================
+spring:
+  application:
+    name: wmt-job-demo
+  profiles:
+    active: dev
+
+# ==================== WMT Job 配置 ====================
+wmt:
+  job:
+    # 是否启用任务功能
+    enabled: true
+    
+    # Quartz配置
+    quartz:
+      # 是否启用Quartz
+      enabled: true
+      # 任务存储类型：memory, jdbc
+      store-type: jdbc
+      # 是否启用集群模式
+      cluster-enabled: true
+      # 集群检查间隔（秒）
+      cluster-check-interval: 20
+      # 任务执行超时时间（秒）
+      job-timeout: 300
+      # 任务重试次数
+      job-retry-count: 3
+      # 任务重试间隔（秒）
+      job-retry-interval: 60
+      # 是否启用任务持久化
+      job-persistence: true
+      # 是否启用任务恢复
+      job-recovery: true
+      # 任务恢复延迟（秒）
+      job-recovery-delay: 30
+      # 是否启用任务监控
+      job-monitoring: true
+      # 任务监控间隔（秒）
+      job-monitoring-interval: 30
+      # 是否启用任务统计
+      job-statistics: true
+      # 任务统计保留天数
+      job-statistics-retention: 30
+      
+      # 线程池配置
+      thread-pool:
+        # 核心线程数
+        core-size: 10
+        # 最大线程数
+        max-size: 50
+        # 队列容量
+        queue-capacity: 100
+        # 线程空闲时间（秒）
+        keep-alive-time: 60
+        # 线程名称前缀
+        thread-name-prefix: "wmt-job-"
+        # 是否等待任务完成后关闭
+        wait-for-tasks-to-complete: true
+        # 等待任务完成超时时间（秒）
+        await-termination-timeout: 30
+        # 是否允许核心线程超时
+        allow-core-thread-timeout: true
+        # 拒绝策略：abort, discard, discard-oldest, caller-runs
+        rejection-policy: caller-runs
+      
+      # 调度器配置
+      scheduler:
+        # 调度器名称
+        name: WmtJobScheduler
+        # 调度器实例ID
+        instance-id: ${spring.application.name}-${random.uuid}
+        # 是否启用自动启动
+        auto-startup: true
+        # 启动延迟（秒）
+        startup-delay: 10
+        # 是否等待任务完成后关闭
+        wait-for-jobs-to-complete: true
+        # 等待任务完成超时时间（秒）
+        await-termination-timeout: 30
+        # 是否覆盖已存在的任务
+        overwrite-existing-jobs: true
+        # 是否启用任务恢复
+        recovery-enabled: true
+        # 任务恢复延迟（秒）
+        recovery-delay: 30
+        # 是否启用任务监控
+        monitoring-enabled: true
+        # 任务监控间隔（秒）
+        monitoring-interval: 30
+        # 是否启用任务统计
+        statistics-enabled: true
+        # 任务统计保留天数
+        statistics-retention: 30
+      
+      # 任务配置
+      job:
+        # 默认任务组
+        default-group: DEFAULT
+        # 默认触发器组
+        default-trigger-group: DEFAULT
+        # 任务执行超时时间（秒）
+        execution-timeout: 300
+        # 任务重试次数
+        retry-count: 3
+        # 任务重试间隔（秒）
+        retry-interval: 60
+        # 是否启用任务日志
+        logging-enabled: true
+        # 任务日志级别
+        logging-level: INFO
+        # 是否启用任务指标
+        metrics-enabled: true
+        # 任务指标保留天数
+        metrics-retention: 30
+        # 是否启用任务告警
+        alerting-enabled: true
+        # 任务告警阈值（秒）
+        alerting-threshold: 600
+        # 任务告警重试次数
+        alerting-retry-count: 3
+        # 任务告警重试间隔（秒）
+        alerting-retry-interval: 60
+    
+    # 异步任务配置
+    async:
+      # 是否启用异步任务
+      enabled: true
+      # 核心线程数
+      core-pool-size: 10
+      # 最大线程数
+      max-pool-size: 50
+      # 队列容量
+      queue-capacity: 100
+      # 线程空闲时间（秒）
+      keep-alive-time: 60
+      # 线程名称前缀
+      thread-name-prefix: "wmt-async-"
+      # 是否等待任务完成后关闭
+      wait-for-tasks-to-complete: true
+      # 等待任务完成超时时间（秒）
+      await-termination-timeout: 30
+      # 是否允许核心线程超时
+      allow-core-thread-timeout: true
+      # 拒绝策略：abort, discard, discard-oldest, caller-runs
+      rejection-policy: caller-runs
+      # 是否启用任务监控
+      monitoring-enabled: true
+      # 任务监控间隔（秒）
+      monitoring-interval: 30
+      # 是否启用任务统计
+      statistics-enabled: true
+      # 任务统计保留天数
+      statistics-retention: 30
+      # 是否启用任务告警
+      alerting-enabled: true
+      # 任务告警阈值（秒）
+      alerting-threshold: 300
+      # 任务告警重试次数
+      alerting-retry-count: 3
+      # 任务告警重试间隔（秒）
+      alerting-retry-interval: 60
+    
+    # 任务监控配置
+    monitoring:
+      # 是否启用任务监控
+      enabled: true
+      # 监控间隔（秒）
+      interval: 30
+      # 是否启用任务统计
+      statistics-enabled: true
+      # 任务统计保留天数
+      statistics-retention: 30
+      # 是否启用任务告警
+      alerting-enabled: true
+      # 任务告警阈值（秒）
+      alerting-threshold: 600
+      # 任务告警重试次数
+      alerting-retry-count: 3
+      # 任务告警重试间隔（秒）
+      alerting-retry-interval: 60
+      # 告警通知方式：email, sms, webhook
+      alert-notification-types:
+        - email
+        - webhook
+      # 告警通知配置
+      alert-notification:
+        # 邮件配置
+        email:
+          enabled: true
+          smtp-host: smtp.gmail.com
+          smtp-port: 587
+          username: your-email@gmail.com
+          password: your-password
+          from: alerts@your-domain.com
+          to:
+            - admin@your-domain.com
+            - devops@your-domain.com
+          subject: "[WMT Job] 任务告警"
+        # Webhook配置
+        webhook:
+          enabled: true
+          url: https://your-webhook-url.com/alerts
+          method: POST
+          headers:
+            Content-Type: application/json
+            Authorization: Bearer your-token
+          timeout: 10
+          retry-count: 3
+
+# ==================== Quartz 配置 ====================
+spring:
+  quartz:
+    # 是否启用Quartz
+    enabled: true
+    # 任务存储类型
+    job-store-type: jdbc
+    # 是否启用集群模式
+    cluster-enabled: true
+    # 集群检查间隔（秒）
+    cluster-check-interval: 20
+    # 任务执行超时时间（秒）
+    job-timeout: 300
+    # 任务重试次数
+    job-retry-count: 3
+    # 任务重试间隔（秒）
+    job-retry-interval: 60
+    # 是否启用任务持久化
+    job-persistence: true
+    # 是否启用任务恢复
+    job-recovery: true
+    # 任务恢复延迟（秒）
+    job-recovery-delay: 30
+    # 是否启用任务监控
+    job-monitoring: true
+    # 任务监控间隔（秒）
+    job-monitoring-interval: 30
+    # 是否启用任务统计
+    job-statistics: true
+    # 任务统计保留天数
+    job-statistics-retention: 30
+    
+    # 线程池配置
+    thread-pool:
+      # 核心线程数
+      core-size: 10
+      # 最大线程数
+      max-size: 50
+      # 队列容量
+      queue-capacity: 100
+      # 线程空闲时间（秒）
+      keep-alive-time: 60
+      # 线程名称前缀
+      thread-name-prefix: "quartz-"
+      # 是否等待任务完成后关闭
+      wait-for-tasks-to-complete: true
+      # 等待任务完成超时时间（秒）
+      await-termination-timeout: 30
+      # 是否允许核心线程超时
+      allow-core-thread-timeout: true
+      # 拒绝策略
+      rejection-policy: caller-runs
+    
+    # 调度器配置
+    scheduler:
+      # 调度器名称
+      name: QuartzScheduler
+      # 调度器实例ID
+      instance-id: ${spring.application.name}-${random.uuid}
+      # 是否启用自动启动
+      auto-startup: true
+      # 启动延迟（秒）
+      startup-delay: 10
+      # 是否等待任务完成后关闭
+      wait-for-jobs-to-complete: true
+      # 等待任务完成超时时间（秒）
+      await-termination-timeout: 30
+      # 是否覆盖已存在的任务
+      overwrite-existing-jobs: true
+      # 是否启用任务恢复
+      recovery-enabled: true
+      # 任务恢复延迟（秒）
+      recovery-delay: 30
+      # 是否启用任务监控
+      monitoring-enabled: true
+      # 任务监控间隔（秒）
+      monitoring-interval: 30
+      # 是否启用任务统计
+      statistics-enabled: true
+      # 任务统计保留天数
+      statistics-retention: 30
+    
+    # 任务配置
+    job:
+      # 默认任务组
+      default-group: DEFAULT
+      # 默认触发器组
+      default-trigger-group: DEFAULT
+      # 任务执行超时时间（秒）
+      execution-timeout: 300
+      # 任务重试次数
+      retry-count: 3
+      # 任务重试间隔（秒）
+      retry-interval: 60
+      # 是否启用任务日志
+      logging-enabled: true
+      # 任务日志级别
+      logging-level: INFO
+      # 是否启用任务指标
+      metrics-enabled: true
+      # 任务指标保留天数
+      metrics-retention: 30
+      # 是否启用任务告警
+      alerting-enabled: true
+      # 任务告警阈值（秒）
+      alerting-threshold: 600
+      # 任务告警重试次数
+      alerting-retry-count: 3
+      # 任务告警重试间隔（秒）
+      alerting-retry-interval: 60
+
+# ==================== 异步任务配置 ====================
+spring:
+  task:
+    execution:
+      # 核心线程数
+      pool:
+        core-size: 10
+        max-size: 50
+        queue-capacity: 100
+        keep-alive: 60s
+      # 线程名称前缀
+      thread-name-prefix: "async-"
+      # 是否等待任务完成后关闭
+      shutdown:
+        await-termination: true
+        await-termination-period: 30s
+    scheduling:
+      # 线程池大小
+      pool:
+        size: 10
+      # 线程名称前缀
+      thread-name-prefix: "scheduling-"
+      # 是否等待任务完成后关闭
+      shutdown:
+        await-termination: true
+        await-termination-period: 30s
+
+# ==================== 数据源配置（用于Quartz存储） ====================
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/wmt_job?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&useSSL=false
+    username: root
+    password: 123456
+    druid:
+      initial-size: 5
+      min-idle: 5
+      max-active: 20
+      max-wait: 60000
+      time-between-eviction-runs-millis: 60000
+      min-evictable-idle-time-millis: 300000
+      validation-query: SELECT 1
+      test-while-idle: true
+      test-on-borrow: false
+      test-on-return: false
+      pool-prepared-statements: true
+      max-pool-prepared-statement-per-connection-size: 20
+
+# ==================== 日志配置 ====================
+logging:
+  level:
+    root: INFO
+    com.wmt: DEBUG
+    org.quartz: DEBUG
+    org.springframework.scheduling: DEBUG
+    org.springframework.task: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n"
+  file:
+    name: ./logs/wmt-job-demo.log
+    max-size: 100MB
+    max-history: 30
+
+# ==================== 监控配置 ====================
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus,quartz
+  endpoint:
+    health:
+      show-details: when-authorized
+    quartz:
+      enabled: true
+  info:
+    env:
+      enabled: true

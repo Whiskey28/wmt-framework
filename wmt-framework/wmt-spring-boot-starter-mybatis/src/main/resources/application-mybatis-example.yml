@@ -1,0 +1,252 @@
+# WMT MyBatis Starter 配置示例
+# 基于 wmt-spring-boot-starter-mybatis 的完整配置示例
+
+# ==================== 基础配置 ====================
+spring:
+  application:
+    name: wmt-mybatis-demo
+  profiles:
+    active: dev
+
+# ==================== 数据源配置 ====================
+spring:
+  # 主数据源配置
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/wmt_demo?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&useSSL=false
+    username: root
+    password: 123456
+    
+    # Druid连接池配置
+    druid:
+      initial-size: 5
+      min-idle: 5
+      max-active: 20
+      max-wait: 60000
+      time-between-eviction-runs-millis: 60000
+      min-evictable-idle-time-millis: 300000
+      validation-query: SELECT 1
+      test-while-idle: true
+      test-on-borrow: false
+      test-on-return: false
+      pool-prepared-statements: true
+      max-pool-prepared-statement-per-connection-size: 20
+      
+      # 监控配置
+      stat-view-servlet:
+        enabled: true
+        url-pattern: /druid/*
+        login-username: admin
+        login-password: admin
+        reset-enable: false
+        allow: 127.0.0.1
+        deny: 
+      filter:
+        stat:
+          enabled: true
+          log-slow-sql: true
+          slow-sql-millis: 1000
+        wall:
+          enabled: true
+          config:
+            multi-statement-allow: true
+
+# ==================== 动态数据源配置 ====================
+spring:
+  datasource:
+    dynamic:
+      # 是否启用动态数据源
+      enabled: true
+      # 是否使用p6spy输出，默认不输出
+      p6spy: false
+      # 是否使用seata代理数据源
+      seata: false
+      # 严格模式，匹配不到数据源时抛异常
+      strict: false
+      
+      # 主数据源
+      primary: master
+      
+      # 数据源配置
+      datasource:
+        # 主数据源
+        master:
+          driver-class-name: com.mysql.cj.jdbc.Driver
+          url: jdbc:mysql://localhost:3306/wmt_demo?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&useSSL=false
+          username: root
+          password: 123456
+          druid:
+            initial-size: 5
+            min-idle: 5
+            max-active: 20
+            max-wait: 60000
+            time-between-eviction-runs-millis: 60000
+            min-evictable-idle-time-millis: 300000
+            validation-query: SELECT 1
+            test-while-idle: true
+            test-on-borrow: false
+            test-on-return: false
+            pool-prepared-statements: true
+            max-pool-prepared-statement-per-connection-size: 20
+        
+        # 从数据源
+        slave:
+          driver-class-name: com.mysql.cj.jdbc.Driver
+          url: jdbc:mysql://localhost:3306/wmt_demo_slave?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&useSSL=false
+          username: root
+          password: 123456
+          druid:
+            initial-size: 3
+            min-idle: 3
+            max-active: 10
+            max-wait: 60000
+            time-between-eviction-runs-millis: 60000
+            min-evictable-idle-time-millis: 300000
+            validation-query: SELECT 1
+            test-while-idle: true
+            test-on-borrow: false
+            test-on-return: false
+            pool-prepared-statements: true
+            max-pool-prepared-statement-per-connection-size: 20
+
+# ==================== MyBatis Plus 配置 ====================
+mybatis-plus:
+  # 配置扫描通用枚举
+  type-enums-package: com.wmt.demo.enums
+  # 配置mapper xml文件的路径
+  mapper-locations: classpath*:mapper/*.xml
+  # 配置MyBatis数据返回类型别名（默认别名是类名）
+  type-aliases-package: com.wmt.demo.entity
+  
+  configuration:
+    # 是否开启自动驼峰命名规则映射:从数据库列名到Java属性名
+    map-underscore-to-camel-case: true
+    # 如果查询结果中包含空值的列，则 MyBatis 在映射的时候，不会映射这个字段
+    call-setters-on-nulls: true
+    # 这个配置会将执行的sql打印出来，在开发或测试的时候可以用
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    # 这个配置会将执行的sql打印出来，在开发或测试的时候可以用
+    # log-impl: org.apache.ibatis.logging.slf4j.Slf4jImpl
+  
+  global-config:
+    # 数据库相关配置
+    db-config:
+      # 主键类型
+      id-type: NONE # "智能"模式，基于数据源类型自动适配
+      # 逻辑删除的全局字段名
+      logic-delete-field: deleted
+      # 逻辑已删除值(默认为 1)
+      logic-delete-value: 1
+      # 逻辑未删除值(默认为 0)
+      logic-not-delete-value: 0
+      # 字段验证策略
+      insert-strategy: NOT_NULL
+      update-strategy: NOT_NULL
+      select-strategy: NOT_EMPTY
+      # 表名前缀
+      table-prefix: t_
+      # 表名是否使用下划线命名
+      table-underline: true
+      # 大写命名
+      capital-mode: false
+      # 逻辑删除的全局字段名
+      logic-delete-field: deleted
+      # 逻辑已删除值(默认为 1)
+      logic-delete-value: 1
+      # 逻辑未删除值(默认为 0)
+      logic-not-delete-value: 0
+    
+    # 是否控制台 print mybatis-plus 的 LOGO
+    banner: false
+
+# ==================== WMT MyBatis 配置 ====================
+wmt:
+  mybatis:
+    # 是否启用
+    enabled: true
+    
+    # 分页配置
+    page:
+      # 是否启用分页插件
+      enabled: true
+      # 分页合理化参数，默认false禁用
+      reasonable: true
+      # 是否支持方法参数进行分页，默认false
+      support-methods-arguments: true
+      # 是否支持通过 Mapper 接口参数来传递分页参数，默认false
+      support-mapper-arguments: true
+      # 分页参数合理化，默认false禁用
+      reasonable: true
+      # 是否开启 countSql 优化，默认false
+      optimize-count-sql: true
+      # 是否开启 countSql 优化，默认false
+      optimize-count-sql: true
+    
+    # 自动填充配置
+    auto-fill:
+      # 是否启用自动填充
+      enabled: true
+      # 创建时间字段名
+      create-time-field: createTime
+      # 更新时间字段名
+      update-time-field: updateTime
+      # 创建人字段名
+      create-user-field: createBy
+      # 更新人字段名
+      update-user-field: updateBy
+    
+    # 乐观锁配置
+    optimistic-locker:
+      # 是否启用乐观锁
+      enabled: true
+      # 乐观锁字段名
+      version-field: version
+    
+    # 逻辑删除配置
+    logic-delete:
+      # 是否启用逻辑删除
+      enabled: true
+      # 逻辑删除字段名
+      field: deleted
+      # 逻辑删除值
+      value: 1
+      # 逻辑未删除值
+      not-value: 0
+
+# ==================== 多数据源事务配置 ====================
+spring:
+  transaction:
+    # 是否启用事务
+    enabled: true
+    # 默认超时时间（秒）
+    default-timeout: 30
+    # 是否回滚到保存点
+    rollback-on-commit-failure: true
+
+# ==================== 日志配置 ====================
+logging:
+  level:
+    root: INFO
+    com.wmt: DEBUG
+    com.baomidou.mybatisplus: DEBUG
+    org.springframework.jdbc: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n"
+  file:
+    name: ./logs/wmt-mybatis-demo.log
+    max-size: 100MB
+    max-history: 30
+
+# ==================== 监控配置 ====================
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus,druid
+  endpoint:
+    health:
+      show-details: when-authorized
+  info:
+    env:
+      enabled: true

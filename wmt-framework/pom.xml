@@ -20,6 +20,7 @@
         <module>wmt-spring-boot-starter-websocket</module>
 
         <module>wmt-spring-boot-starter-monitor</module>
+        <module>wmt-spring-boot-starter-prometheus-grafana</module>
         <module>wmt-spring-boot-starter-protection</module>
         <module>wmt-spring-boot-starter-job</module>
         <module>wmt-spring-boot-starter-xxljob</module>
@@ -32,9 +33,13 @@
         <module>wmt-spring-boot-starter-biz-data-permission</module>
         <module>wmt-spring-boot-starter-biz-ip</module>
 
-        <module>wmt-spring-boot-starter-file</module>
-        <module>wmt-spring-boot-starter-storage</module>
-        <module>wmt-spring-boot-starter-search</module>
+        <module>wmt-spring-boot-starter-elk-logging</module>
+        <module>wmt-spring-boot-starter-sjb</module>
+
+<!--        <module>wmt-spring-boot-starter-file</module>-->
+<!--        <module>wmt-spring-boot-starter-storage</module>-->
+<!--        <module>wmt-spring-boot-starter-search</module>-->
+<!--        <module>wmt-spring-boot-starter-log</module>-->
     </modules>
 
     <artifactId>wmt-framework</artifactId>
@@ -51,6 +56,54 @@
     <url>https://github.com/Wmt/wmt-framework</url>
 
     <build>
+        <pluginManagement>
+            <plugins>
+                <!-- ProGuard代码混淆插件配置，供所有jar类型的子模块继承 -->
+                <plugin>
+                    <groupId>com.github.wvengen</groupId>
+                    <artifactId>proguard-maven-plugin</artifactId>
+                    <dependencies>
+                        <!-- 添加ProGuard依赖，解决 "ProGuard not found in classpath" 错误 -->
+                        <!-- 注意：proguard-maven-plugin 2.6.0 与 ProGuard 7.x 不兼容，使用 6.2.2 -->
+                        <!-- ProGuard 6.2.2 使用 net.sf.proguard groupId -->
+                        <dependency>
+                            <groupId>net.sf.proguard</groupId>
+                            <artifactId>proguard-base</artifactId>
+                            <version>6.2.2</version>
+                        </dependency>
+                    </dependencies>
+                    <configuration>
+                        <!-- 使用父pom中定义的skip.proguard属性，支持通过profile控制 -->
+                        <skip>${skip.proguard}</skip>
+                        <proguardVersion>6.2.2</proguardVersion>
+                        <!-- injar 和 outjar 使用相对于 outputDirectory 的路径（文件名即可） -->
+                        <injar>${project.build.finalName}.jar</injar>
+                        <outjar>${project.build.finalName}.jar</outjar>
+                        <outputDirectory>${project.build.directory}</outputDirectory>
+                        <libs>
+                            <lib>${java.home}/lib/rt.jar</lib>
+                            <lib>${java.home}/lib/jce.jar</lib>
+                        </libs>
+                        <includeDependency>false</includeDependency>
+                        <options>
+                            <!-- 使用根项目的proguard.conf配置文件，@前缀表示这是配置文件路径 -->
+                            <!-- project.parent.parent.basedir 指向根 pom 目录 -->
+                            <option>@${project.parent.parent.basedir}/proguard.conf</option>
+                        </options>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <id>proguard</id>
+                            <phase>package</phase>
+                            <goals>
+                                <goal>proguard</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+        
         <plugins>
             <!-- 禁用源码jar生成，保护源代码 -->
             <plugin>
@@ -77,6 +130,7 @@
                     </execution>
                 </executions>
             </plugin>
+
         </plugins>
     </build>
 

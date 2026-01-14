@@ -1,0 +1,656 @@
+{
+  "name": "糖尿病饮食分析AI Agent",
+  "nodes": [
+    {
+      "parameters": {
+        "multipleMethods": true,
+        "httpMethod": [
+          "POST"
+        ],
+        "path": "diabetes-analysis",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "5b7fbe8b-d8d5-4665-ac8b-4c1ca1938e0f",
+      "name": "处理糖尿病分析请求",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1.1,
+      "position": [
+        -6320,
+        640
+      ],
+      "webhookId": "diabetes-analysis-webhook",
+      "executeOnce": false,
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "jsCode": "// 转换和验证输入数据节点\n// 输入格式示例：\n// {\n//   \"mealTime\": \"2024-01-15T08:00:00\",\n//   \"foods\": [\n//     {\"name\": \"米饭\", \"quantity\": \"1碗\"},\n//     {\"name\": \"青菜\", \"quantity\": \"200g\"},\n//     {\"name\": \"鸡蛋\", \"quantity\": \"1个\"}\n//   ],\n//   \"userInfo\": {\n//     \"email\": \"user@example.com\",  // 可选\n//     \"isDiabetic\": true,  // 是否糖尿病患者\n//     \"diabetesType\": \"2型\",  // 1型/2型/妊娠期/无\n//     \"currentMedication\": \"口服药\",  // 胰岛素/口服药/无\n//     \"age\": 45,\n//     \"gender\": \"男\",\n//     \"height\": 170,\n//     \"weight\": 70\n//   }\n// }\n\nconst input = $input.item.json;\n\n// 解析请求体\nlet requestData = input.body;\nif (typeof requestData === 'string') {\n  try {\n    requestData = JSON.parse(requestData);\n  } catch (e) {\n    requestData = input.body || input;\n  }\n}\n\nif (!requestData || typeof requestData !== 'object') {\n  requestData = input;\n}\n\n// 生成唯一的提交ID\nconst submissionId = 'diabetes_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);\n\n// 验证必填字段\nconst errors = [];\n\nif (!requestData.mealTime) {\n  errors.push('用餐时间(mealTime)是必填项');\n}\n\nif (!requestData.foods || !Array.isArray(requestData.foods) || requestData.foods.length === 0) {\n  errors.push('食物列表(foods)是必填项，且不能为空');\n}\n\n// 验证食物数据格式\nif (requestData.foods) {\n  requestData.foods.forEach((food, index) => {\n    if (!food.name) {\n      errors.push(`食物列表第${index + 1}项缺少名称(name)`);\n    }\n    if (!food.quantity) {\n      errors.push(`食物列表第${index + 1}项缺少数量(quantity)`);\n    }\n  });\n}\n\n// 如果有错误，返回错误信息\nif (errors.length > 0) {\n  return {\n    json: {\n      valid: false,\n      errors: errors,\n      submissionId: submissionId\n    }\n  };\n}\n\n// 转换数据格式\nconst convertedData = {\n  submissionId: submissionId,\n  mealTime: requestData.mealTime,\n  foods: requestData.foods,\n  userInfo: {\n    email: (requestData.userInfo?.email || '').trim(),\n    isDiabetic: requestData.userInfo?.isDiabetic || false,\n    diabetesType: requestData.userInfo?.diabetesType || '无',\n    currentMedication: requestData.userInfo?.currentMedication || '无',\n    age: parseInt(requestData.userInfo?.age) || null,\n    gender: requestData.userInfo?.gender || '',\n    height: parseFloat(requestData.userInfo?.height) || null,\n    weight: parseFloat(requestData.userInfo?.weight) || null,\n    createdAt: new Date().toISOString()\n  }\n};\n\n// 计算BMI（如果有身高体重）\nif (convertedData.userInfo.height && convertedData.userInfo.weight) {\n  const heightInMeters = convertedData.userInfo.height / 100;\n  convertedData.userInfo.bmi = parseFloat((convertedData.userInfo.weight / (heightInMeters * heightInMeters)).toFixed(1));\n}\n\nreturn {\n  json: {\n    valid: true,\n    data: convertedData\n  }\n};\n\n"
+      },
+      "id": "e143d75c-deb4-49ec-a927-946548b6bcd1",
+      "name": "转换和验证输入数据",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -6112,
+        640
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "validation-check",
+              "leftValue": "={{ $json.valid }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "289b3d5b-6dad-45ed-9935-775732fea848",
+      "name": "验证是否通过",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        -5920,
+        640
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { success: false, errors: $json.errors, message: '数据验证失败' } }}",
+        "options": {
+          "responseCode": 400,
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              }
+            ]
+          }
+        }
+      },
+      "id": "adf11314-34ef-4919-987a-fd3d6d266a3d",
+      "name": "返回错误响应",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        -5712,
+        816
+      ]
+    },
+    {
+      "parameters": {
+        "table": {
+          "__rl": true,
+          "value": "diabetes_food_analysis",
+          "mode": "list",
+          "cachedResultName": "diabetes_food_analysis"
+        },
+        "dataMode": "defineBelow",
+        "valuesToSend": {
+          "values": [
+            {
+              "column": "submission_id",
+              "value": "={{ $('转换和验证输入数据').item.json.data.submissionId }}"
+            },
+            {
+              "column": "user_email",
+              "value": "={{ $('转换和验证输入数据').item.json.data.userInfo.email }}"
+            },
+            {
+              "column": "meal_time",
+              "value": "={{ $('转换和验证输入数据').item.json.data.mealTime }}"
+            },
+            {
+              "column": "food_data",
+              "value": "={{ JSON.stringify($('转换和验证输入数据').item.json.data) }}"
+            },
+            {
+              "column": "status",
+              "value": "pending"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.5,
+      "position": [
+        -5712,
+        640
+      ],
+      "id": "c4496159-b82e-4b30-bd2c-c385a7b3dca6",
+      "name": "保存分析记录",
+      "credentials": {
+        "mySql": {
+          "id": "Bo7ZmDWsF0ElfN14",
+          "name": "MySQL account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// 解析食物重量节点（简化版）\n// 只负责解析重量，不进行营养成分计算\n// 营养成分分析交给DeepSeek AI处理\n\nconst data = $('转换和验证输入数据').first().json.data;\n\n// 简单的数量单位估算（用于解析\"1碗\"、\"2个\"等）\nconst UNIT_WEIGHT_ESTIMATES = {\n  \"碗\": 150,    // 默认1碗=150g（米饭、面条等）\n  \"个\": 100,    // 默认1个=100g（馒头、包子、苹果等）\n  \"根\": 200,    // 默认1根=200g（香蕉、玉米等）\n  \"片\": 50,     // 默认1片=50g（面包等）\n  \"颗\": 10,     // 默认1颗=10g（葡萄、草莓等）\n  \"块\": 100,    // 默认1块=100g\n  \"把\": 200,    // 默认1把=200g（青菜等）\n  \"只\": 50,     // 默认1只=50g（鸡蛋、虾等）\n  \"杯\": 250     // 默认1杯=250g（牛奶、豆浆等）\n};\n\nfunction parseWeight(quantity) {\n  // 尝试解析为克数（如\"200g\"、\"150克\"）\n  const gMatch = quantity.match(/(\\d+(?:\\.\\d+)?)\\s*(?:g|克|gram)/i);\n  if (gMatch) {\n    return parseFloat(gMatch[1]);\n  }\n  \n  // 尝试解析为数量单位（如\"1碗\"、\"2个\"）\n  const unitMatch = quantity.match(/(\\d+(?:\\.\\d+)?)([个碗根片颗块把只杯])/);\n  if (unitMatch) {\n    const count = parseFloat(unitMatch[1]);\n    const unit = unitMatch[2];\n    if (UNIT_WEIGHT_ESTIMATES[unit]) {\n      return UNIT_WEIGHT_ESTIMATES[unit] * count;\n    }\n  }\n  \n  // 如果都解析不了，返回null，让AI来处理\n  return null;\n}\n\n// 解析所有食物的重量\nconst parsedFoods = data.foods.map((food) => {\n  let weight = parseWeight(food.quantity);\n  \n  // 如果无法解析重量，使用默认值100g，让AI来估算\n  if (!weight) {\n    weight = 100; // 默认100g\n  }\n  \n  return {\n    name: food.name,\n    quantity: food.quantity,\n    weight: weight,\n    weightEstimated: !parseWeight(food.quantity) // 标记重量是否为估算值\n  };\n});\n\nreturn {\n  json: {\n    submissionId: data.submissionId,\n    mealTime: data.mealTime,\n    userInfo: data.userInfo,\n    foods: parsedFoods\n  }\n};\n\n"
+      },
+      "id": "ef2870c0-fe7c-416d-8fe0-646ebfbc9995",
+      "name": "解析食物重量",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -5520,
+        640
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// AI分析食物营养成分节点\n// 调用DeepSeek AI来分析食物的营养成分（碳水、GI、GL值）\n\nconst data = $('解析食物重量').first().json;\n\n// 构建食物列表字符串\nconst foodsList = data.foods.map((food, index) => {\n  return `${index + 1}. ${food.name} - ${food.quantity}（约${food.weight}g${food.weightEstimated ? '，重量为估算值' : ''}）`;\n}).join('\\n');\n\n// 构建AI提示词\nconst nutritionPrompt = `你是一位专业的营养师，擅长分析食物的营养成分，特别是对血糖有影响的指标。\n\n请分析以下食物的营养成分，重点关注：\n1. **碳水化合物含量**（g/100g，然后根据实际重量计算总碳水）\n2. **GI值**（血糖指数，0-100）\n3. **GL值**（血糖负荷，= 碳水 × GI / 100）\n\n## 食物列表\n${foodsList}\n\n## 要求\n1. 对于每个食物，根据其名称和重量，分析其营养成分\n2. 如果食物名称是复合菜名（如\"宫保鸡丁\"），请分析其主要成分和整体营养成分\n3. 如果重量是估算值，请基于常见分量进行合理估算\n4. 使用中国食物成分表的标准数据\n5. 对于不确定的食物，请基于食物类别进行合理估算\n\n## 输出格式（必须严格遵循JSON格式）\n请以JSON格式输出，格式如下：\n\\`\\`\\`json\n{\n  \"foods\": [\n    {\n      \"name\": \"食物名称\",\n      \"weight\": 重量（克）,\n      \"carbs\": 碳水化合物（克）,\n      \"gi\": GI值（0-100）,\n      \"gl\": GL值,\n      \"category\": \"食物类别（主食/蔬菜/水果/肉类/豆制品/奶制品/坚果/其他）\",\n      \"note\": \"备注（如有估算值或特殊说明）\"\n    }\n  ],\n  \"summary\": {\n    \"totalCarbs\": 总碳水化合物（克）,\n    \"totalGL\": 总血糖负荷,\n    \"averageGI\": 平均GI值（加权平均）,\n    \"estimatedFoods\": [\"使用了估算值的食物名称列表\"]\n  }\n}\n\\`\\`\\`\n\n## 重要提示\n- 必须输出有效的JSON格式\n- 所有数值必须是数字类型\n- 如果某个食物不确定，请在note中说明\n- 确保计算准确，特别是GL值（GL = 碳水 × GI / 100）\n\n请开始分析：`;\n\nreturn {\n  json: {\n    ...data,\n    nutritionPrompt: nutritionPrompt\n  }\n};\n\n"
+      },
+      "id": "79c859b0-5f15-4cfe-a40d-c6e6fbefda11",
+      "name": "AI分析食物营养成分",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -5312,
+        640
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.deepseek.com/v1/chat/completions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({\n  model: 'deepseek-chat',\n  messages: [\n    {\n      role: 'system',\n      content: '你是一位专业的营养师，擅长分析食物的营养成分，特别是对血糖有影响的指标。'\n    },\n    {\n      role: 'user',\n      content: $json.nutritionPrompt\n    }\n  ],\n  temperature: 0.3,\n  max_tokens: 2000\n}) }}",
+        "options": {}
+      },
+      "id": "6f04e014-1d1f-48ca-b77d-0853ac5f5d68",
+      "name": "DeepSeek分析营养成分",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -5120,
+        640
+      ],
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "AZ1aklY1RZIpED5g",
+          "name": "Deepseek"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// 解析AI营养成分分析结果节点\n// 从DeepSeek的响应中提取营养成分数据\n\nconst aiResponse = $input.item.json;\nconst originalData = $('解析食物重量').first().json;\n\n// 提取AI生成的文本\nlet responseText = '';\nif (aiResponse.choices && aiResponse.choices[0] && aiResponse.choices[0].message) {\n  responseText = aiResponse.choices[0].message.content;\n} else if (aiResponse.content) {\n  responseText = aiResponse.content;\n} else if (typeof aiResponse === 'string') {\n  responseText = aiResponse;\n}\n\n// 尝试从响应中提取JSON\nlet nutritionData = null;\n\n// 方法1：尝试直接解析JSON（如果响应就是JSON）\ntry {\n  nutritionData = JSON.parse(responseText);\n} catch (e) {\n  // 方法2：尝试从代码块中提取JSON\n  const jsonMatch = responseText.match(/```json\\s*([\\s\\S]*?)\\s*```/);\n  if (jsonMatch) {\n    try {\n      nutritionData = JSON.parse(jsonMatch[1]);\n    } catch (e2) {\n      // 方法3：尝试提取JSON对象（不使用代码块标记）\n      const jsonObjectMatch = responseText.match(/\\{[\\s\\S]*\"foods\"[\\s\\S]*\\}/);\n      if (jsonObjectMatch) {\n        try {\n          nutritionData = JSON.parse(jsonObjectMatch[0]);\n        } catch (e3) {\n          console.error('无法解析JSON:', e3);\n        }\n      }\n    }\n  }\n}\n\n// 如果无法解析，使用默认值并标记错误\nif (!nutritionData || !nutritionData.foods) {\n  console.warn('AI响应无法解析，使用默认值');\n  \n  // 使用默认值：假设所有食物都是中等碳水\n  nutritionData = {\n    foods: originalData.foods.map(food => ({\n      name: food.name,\n      weight: food.weight,\n      carbs: (food.weight / 100) * 15, // 默认15g碳水/100g\n      gi: 55, // 默认中等GI\n      gl: (food.weight / 100) * 15 * 0.55,\n      category: \"其他\",\n      note: \"AI分析失败，使用默认估算值\"\n    })),\n    summary: {\n      totalCarbs: originalData.foods.reduce((sum, food) => sum + (food.weight / 100) * 15, 0),\n      totalGL: originalData.foods.reduce((sum, food) => sum + (food.weight / 100) * 15 * 0.55, 0),\n      averageGI: 55,\n      estimatedFoods: originalData.foods.map(f => f.name)\n    }\n  };\n}\n\n// 合并原始数据和AI分析结果\nconst foodsWithNutrition = originalData.foods.map((originalFood, index) => {\n  const aiFood = nutritionData.foods[index] || nutritionData.foods.find(f => f.name === originalFood.name);\n  \n  if (aiFood) {\n    return {\n      name: originalFood.name,\n      quantity: originalFood.quantity,\n      weight: aiFood.weight || originalFood.weight,\n      carbs: parseFloat((aiFood.carbs || 0).toFixed(2)),\n      gi: parseInt(aiFood.gi || 55),\n      gl: parseFloat((aiFood.gl || 0).toFixed(2)),\n      category: aiFood.category || \"其他\",\n      note: aiFood.note || \"\",\n      aiAnalyzed: true\n    };\n  } else {\n    // 如果AI没有分析这个食物，使用默认值\n    return {\n      name: originalFood.name,\n      quantity: originalFood.quantity,\n      weight: originalFood.weight,\n      carbs: parseFloat(((originalFood.weight / 100) * 15).toFixed(2)),\n      gi: 55,\n      gl: parseFloat(((originalFood.weight / 100) * 15 * 0.55).toFixed(2)),\n      category: \"其他\",\n      note: \"AI未分析此食物，使用默认估算值\",\n      aiAnalyzed: false\n    };\n  }\n});\n\n// 计算汇总数据（使用AI提供的数据，如果没有则重新计算）\nconst summary = nutritionData.summary || {\n  totalCarbs: parseFloat(foodsWithNutrition.reduce((sum, f) => sum + f.carbs, 0).toFixed(2)),\n  totalGL: parseFloat(foodsWithNutrition.reduce((sum, f) => sum + f.gl, 0).toFixed(2)),\n  averageGI: (() => {\n    let weightedGI = 0;\n    let totalCarbs = 0;\n    foodsWithNutrition.forEach(f => {\n      if (f.carbs > 0) {\n        weightedGI += f.gi * f.carbs;\n        totalCarbs += f.carbs;\n      }\n    });\n    return totalCarbs > 0 ? Math.round(weightedGI / totalCarbs) : 0;\n  })(),\n  estimatedFoods: nutritionData.summary?.estimatedFoods || foodsWithNutrition.filter(f => f.note || !f.aiAnalyzed).map(f => f.name)\n};\n\nreturn {\n  json: {\n    submissionId: originalData.submissionId,\n    mealTime: originalData.mealTime,\n    userInfo: originalData.userInfo,\n    foods: foodsWithNutrition,\n    summary: summary,\n    aiResponseRaw: responseText // 保留原始响应用于调试\n  }\n};\n\n"
+      },
+      "id": "adc2e404-5a91-455f-a6c5-a24e612dcdce",
+      "name": "解析AI营养成分结果",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -4912,
+        640
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// 血糖预测节点\n// 基于碳水化合物计数法和GI值进行血糖预测\n\nconst data = $('解析AI营养成分结果').first().json;\nconst { summary, userInfo } = data;\n\n// 血糖预测算法\n// 1. 空腹血糖预测（基于基础代谢和当前状态）\n// 2. 餐后2小时血糖预测（基于碳水化合物和GI值）\n\nfunction predictBloodGlucose(totalCarbs, averageGI, userInfo) {\n  const results = {\n    fastingGlucose: null,\n    postprandial2hGlucose: null,\n    predictions: {}\n  };\n  \n  // 基础血糖水平（假设正常范围）\n  let baseFastingGlucose = 5.5; // mmol/L（正常空腹血糖）\n  let basePostprandialGlucose = 7.0; // mmol/L（正常餐后2小时）\n  \n  // 根据用户信息调整基础值\n  if (userInfo.isDiabetic) {\n    if (userInfo.diabetesType === '1型') {\n      baseFastingGlucose = 7.0; // 1型糖尿病患者通常需要胰岛素\n      basePostprandialGlucose = 9.0;\n    } else if (userInfo.diabetesType === '2型') {\n      baseFastingGlucose = 6.5;\n      basePostprandialGlucose = 8.5;\n    } else if (userInfo.diabetesType === '妊娠期') {\n      baseFastingGlucose = 5.3;\n      basePostprandialGlucose = 6.7;\n    }\n  }\n  \n  // 空腹血糖预测（相对稳定，主要受基础代谢影响）\n  // 如果有BMI信息，可以稍微调整\n  if (userInfo.bmi) {\n    if (userInfo.bmi > 28) {\n      baseFastingGlucose += 0.5; // 肥胖可能增加空腹血糖\n    } else if (userInfo.bmi < 18.5) {\n      baseFastingGlucose -= 0.3;\n    }\n  }\n  \n  results.fastingGlucose = parseFloat(baseFastingGlucose.toFixed(1));\n  \n  // 餐后2小时血糖预测\n  // 基于碳水化合物计数法：每10g碳水化合物约升高血糖1-2mmol/L\n  // GI值影响血糖上升速度和峰值\n  const carbsImpact = (totalCarbs / 10) * 1.5; // 基础影响\n  \n  // GI值调整系数（高GI食物血糖上升更快更高）\n  let giMultiplier = 1.0;\n  if (averageGI >= 70) {\n    giMultiplier = 1.3; // 高GI食物\n  } else if (averageGI >= 55) {\n    giMultiplier = 1.1; // 中GI食物\n  } else {\n    giMultiplier = 0.9; // 低GI食物\n  }\n  \n  // 计算餐后血糖上升\n  const glucoseRise = carbsImpact * giMultiplier;\n  \n  // 考虑药物影响\n  let medicationAdjustment = 0;\n  if (userInfo.currentMedication === '胰岛素') {\n    medicationAdjustment = -2.0; // 胰岛素会降低血糖\n  } else if (userInfo.currentMedication === '口服药') {\n    medicationAdjustment = -1.5; // 口服药也会降低血糖\n  }\n  \n  // 最终餐后2小时血糖\n  const predictedPostprandial = basePostprandialGlucose + glucoseRise + medicationAdjustment;\n  \n  // 确保预测值在合理范围内（2-20 mmol/L）\n  results.postprandial2hGlucose = Math.max(2.0, Math.min(20.0, parseFloat(predictedPostprandial.toFixed(1))));\n  \n  // 血糖评估\n  let fastingStatus = '正常';\n  if (results.fastingGlucose < 3.9) {\n    fastingStatus = '偏低（可能低血糖）';\n  } else if (results.fastingGlucose >= 7.0) {\n    fastingStatus = '偏高（可能糖尿病）';\n  } else if (results.fastingGlucose >= 6.1) {\n    fastingStatus = '偏高（空腹血糖受损）';\n  }\n  \n  let postprandialStatus = '正常';\n  if (userInfo.isDiabetic) {\n    if (results.postprandial2hGlucose < 4.0) {\n      postprandialStatus = '偏低（可能低血糖）';\n    } else if (results.postprandial2hGlucose > 10.0) {\n      postprandialStatus = '偏高（需要关注）';\n    } else if (results.postprandial2hGlucose > 7.8) {\n      postprandialStatus = '偏高（餐后血糖受损）';\n    }\n  } else {\n    if (results.postprandial2hGlucose < 4.0) {\n      postprandialStatus = '偏低（可能低血糖）';\n    } else if (results.postprandial2hGlucose > 7.8) {\n      postprandialStatus = '偏高（需要关注）';\n    }\n  }\n  \n  results.predictions = {\n    fastingStatus: fastingStatus,\n    postprandialStatus: postprandialStatus,\n    riskLevel: '低',\n    recommendations: []\n  };\n  \n  // 风险评估\n  if (results.postprandial2hGlucose > 10.0 || results.fastingGlucose > 7.0) {\n    results.predictions.riskLevel = '高';\n    results.predictions.recommendations.push('建议立即监测血糖，必要时咨询医生');\n  } else if (results.postprandial2hGlucose > 7.8 || results.fastingGlucose > 6.1) {\n    results.predictions.riskLevel = '中';\n    results.predictions.recommendations.push('建议调整饮食，选择低GI食物');\n  }\n  \n  // 添加运动建议\n  if (results.postprandial2hGlucose > 7.8) {\n    results.predictions.recommendations.push('建议餐后30-60分钟进行轻度运动（如散步）');\n  }\n  \n  return results;\n}\n\n// 执行预测\nconst glucosePrediction = predictBloodGlucose(\n  summary.totalCarbs,\n  summary.averageGI,\n  userInfo\n);\n\nreturn {\n  json: {\n    ...data,\n    glucosePrediction: glucosePrediction\n  }\n};\n\n"
+      },
+      "id": "35a7b907-0c86-4d57-818f-3001436e5816",
+      "name": "血糖预测",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -4720,
+        640
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// AI分析提示词格式化节点\n// 为DeepSeek生成完整的分析提示词\n\nconst data = $('血糖预测').first().json;\n\nconst userPrompt = `作为专业的糖尿病专家医生，请为患者进行详细的饮食分析。以下是患者的信息和食物数据：\n\n## 用户信息\n- **是否糖尿病患者**：${data.userInfo.isDiabetic ? '是' : '否'}\n- **糖尿病类型**：${data.userInfo.diabetesType}\n- **当前用药**：${data.userInfo.currentMedication}\n- **年龄**：${data.userInfo.age || '未提供'}岁\n- **性别**：${data.userInfo.gender || '未提供'}\n- **身高**：${data.userInfo.height || '未提供'}cm\n- **体重**：${data.userInfo.weight || '未提供'}kg\n- **BMI**：${data.userInfo.bmi || '未计算'}\n\n## 用餐信息\n- **用餐时间**：${new Date(data.mealTime).toLocaleString('zh-CN')}\n- **食物组合**：\n${data.foods.map((food, index) => {\n  return `${index + 1}. ${food.name} - ${food.quantity}（约${food.weight}g）\n     - 碳水化合物：${food.carbs}g\n     - GI值：${food.gi}\n     - GL值：${food.gl}\n     - 类别：${food.category || '未分类'}\n     ${food.note ? `⚠️ ${food.note}` : ''}`;\n}).join('\\n')}\n\n## 营养分析\n- **总碳水化合物**：${data.summary.totalCarbs}g\n- **总血糖负荷(GL)**：${data.summary.totalGL}\n- **平均GI值**：${data.summary.averageGI}\n${data.summary.estimatedFoods && data.summary.estimatedFoods.length > 0 ? `- **使用估算值的食物**：${data.summary.estimatedFoods.join('、')}（AI分析时使用了估算值）` : ''}\n\n## 血糖预测\n- **预测空腹血糖**：${data.glucosePrediction.fastingGlucose} mmol/L（${data.glucosePrediction.predictions.fastingStatus}）\n- **预测餐后2小时血糖**：${data.glucosePrediction.postprandial2hGlucose} mmol/L（${data.glucosePrediction.predictions.postprandialStatus}）\n- **风险等级**：${data.glucosePrediction.predictions.riskLevel}\n\n## 报告要求\n\n请生成一份详细的健康分析报告，包含以下4个核心部分：\n\n### 1. 糖尿病的含义（基础科普）\n- 什么是糖尿病（简单易懂的解释）\n- 糖尿病的类型（1型、2型、妊娠期）\n- 血糖的正常范围\n- 糖尿病的主要症状和危害\n- 预防糖尿病的重要性（针对非糖尿病患者）\n\n### 2. 食物组合的详细分析\n- **总体评价**：这餐食物的血糖影响评估\n- **每样食物分析**：\n  ${data.foods.map(food => {\n    const note = food.note ? `（${food.note}）` : '';\n    return `- **${food.name}**${note}：碳水化合物含量(${food.carbs}g)、GI值(${food.gi})、GL值(${food.gl})、类别(${food.category || '未分类'})、对血糖的影响`;\n  }).join('\\n  ')}\n- **GI/GL值解读**：\n  - 什么是GI值（血糖指数）和GL值（血糖负荷）\n  - 这餐食物的GI/GL值意味着什么\n  - 哪些食物是\"血糖友好\"的，哪些需要谨慎\n- **营养均衡性**：这餐是否营养均衡，缺少什么营养素\n- **改进建议**：如果这餐血糖影响较大，如何调整\n${data.summary.estimatedFoods && data.summary.estimatedFoods.length > 0 ? `\\n- **特别说明**：部分食物（${data.summary.estimatedFoods.join('、')}）使用了AI估算值。建议用户提供更具体的食物名称或实际测量血糖来验证预测结果。` : ''}\n\n### 3. 血糖预测分析\n- **预测结果解读**：\n  - 空腹血糖预测：${data.glucosePrediction.fastingGlucose} mmol/L 的含义\n  - 餐后2小时血糖预测：${data.glucosePrediction.postprandial2hGlucose} mmol/L 的含义\n- **风险评估**：\n  - 当前风险等级：${data.glucosePrediction.predictions.riskLevel}\n  - 需要关注的问题\n  - 什么情况下需要立即就医\n- **预测准确性说明**：\n  - 说明这是基于算法的估算，实际血糖可能因个体差异而不同\n  - 建议实际测量血糖来验证\n\n### 4. 运动和饮食建议（吃了这餐后要做什么）\n- **餐后运动建议**：\n  - 是否需要运动（基于血糖预测）\n  - 建议的运动类型（如：散步、慢跑、瑜伽等）\n  - 运动时机（餐后多久开始）\n  - 运动时长和强度\n  - 注意事项（特别是糖尿病患者）\n- **饮食调整建议**：\n  - 如果血糖预测偏高，如何调整下一餐\n  - 建议的食物替换方案\n  - 建议的进食顺序（先吃蔬菜、再吃蛋白质、最后吃主食）\n  - 建议的进食速度\n- **血糖监测建议**：\n  - 建议何时测量血糖\n  - 建议的监测频率\n  - 如何记录和分析血糖数据\n- **应急处理**：\n  - 如果出现低血糖症状怎么办\n  - 如果血糖过高怎么办\n  - 何时需要咨询医生\n\n## 输出格式要求\n- 使用Markdown格式，结构清晰\n- 使用标题、列表、表格等格式增强可读性\n- 语言通俗易懂，避免过于专业的术语\n- 使用友好的语气，给予鼓励和支持\n- 针对${data.userInfo.isDiabetic ? '糖尿病患者' : '预防人群'}提供相应的建议\n\n## 特别要求\n- 根据用户的糖尿病类型和用药情况提供个性化建议\n- 如果是非糖尿病患者，重点强调预防的重要性\n- 提供实用的、可执行的建议\n- 强调医疗免责：本分析仅供参考，不能替代专业医疗建议\n\n请开始生成报告：`;\n\nreturn {\n  json: {\n    ...data,\n    aiPrompt: userPrompt\n  }\n};\n\n"
+      },
+      "id": "faf1ecbb-df7a-48e4-a4fb-84822d134e90",
+      "name": "格式化AI分析提示词",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -4512,
+        640
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.deepseek.com/v1/chat/completions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({\n  model: 'deepseek-chat',\n  messages: [\n    {\n      role: 'system',\n      content: '你是一位专业的糖尿病专家医生，拥有丰富的临床经验。你擅长分析食物对血糖的影响，能够为患者提供科学、实用、易懂的健康建议。'\n    },\n    {\n      role: 'user',\n      content: $json.aiPrompt\n    }\n  ],\n  temperature: 0.7,\n  max_tokens: 4000\n}) }}",
+        "options": {}
+      },
+      "id": "e84ef8eb-d559-4b69-a9af-c05bd9780389",
+      "name": "DeepSeek生成分析报告",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -4320,
+        640
+      ],
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "AZ1aklY1RZIpED5g",
+          "name": "Deepseek"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// 解析AI分析结果\nconst aiResponse = $input.item.json;\nlet analysisText = '';\nif (aiResponse.choices && aiResponse.choices[0] && aiResponse.choices[0].message) {\n  analysisText = aiResponse.choices[0].message.content;\n} else if (aiResponse.content) {\n  analysisText = aiResponse.content;\n} else if (typeof aiResponse === 'string') {\n  analysisText = aiResponse;\n}\n\nconst data = $('血糖预测').first().json;\nreturn {\n  json: {\n    ...data,\n    aiAnalysis: analysisText\n  }\n};"
+      },
+      "id": "e9123c51-df23-4c43-adc4-2b9f6dc6ebda",
+      "name": "解析AI分析结果",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -4112,
+        640
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// 生成HTML报告节点\n// 将AI分析结果和预测数据转换为美观的HTML报告\n\nconst data = $('解析AI分析结果').first().json;\nconst analysis = data.aiAnalysis;\nconst glucosePrediction = data.glucosePrediction;\nconst summary = data.summary;\nconst userInfo = data.userInfo;\n\n// 将 pipe 风格 Markdown 表格转换为 HTML 表格\nfunction convertTables(md) {\n  const lines = md.split('\\n');\n  const out = [];\n  let i = 0;\n\n  // 判断是否是表格行，如: | 列1 | 列2 |\n  const isTableRow = (l) => /^\\s*\\|.*\\|\\s*$/.test(l);\n  // 表头和分隔行之间的分隔线，如: | --- | --- |\n  const isDividerRow = (l) =>\n    /^\\s*\\|?\\s*:?-+:?\\s*(\\|\\s*:?-+:?\\s*)+\\|?\\s*$/.test(l);\n\n  while (i < lines.length) {\n    const line = lines[i];\n    if (isTableRow(line) && i + 1 < lines.length && isDividerRow(lines[i + 1])) {\n      const tableLines = [];\n      tableLines.push(line);       // header\n      tableLines.push(lines[i+1]); // divider\n      i += 2;\n\n      // collect body rows\n      while (i < lines.length && isTableRow(lines[i])) {\n        tableLines.push(lines[i]);\n        i++;\n      }\n\n      // 解析表格\n      const rows = tableLines.map((l) =>\n        l.trim().replace(/^\\||\\|$/g, '').split('|').map((c) => c.trim())\n      );\n      const header = rows[0];\n      const body = rows.slice(2); // 第2行是分隔行\n\n      const thead =\n        '<thead><tr>' + header.map((h) => `<th>${h}</th>`).join('') + '</tr></thead>';\n      const tbody =\n        '<tbody>' +\n        body\n          .map(\n            (r) =>\n              '<tr>' + r.map((c) => `<td>${c}</td>`).join('') + '</tr>'\n          )\n          .join('') +\n        '</tbody>';\n\n      out.push('<table>' + thead + tbody + '</table>');\n      continue;\n    }\n\n    out.push(line);\n    i++;\n  }\n\n  return out.join('\\n');\n}\n\n// 清理和转换Markdown为HTML（包含表格处理）\nfunction markdownToHtml(md) {\n  if (!md) return '';\n  \n  // 先将 pipe 风格表格转换为 HTML\n  let html = convertTables(md);\n  \n  // 标题\n  html = html.replace(/^###### (.*$)/gim, '<h6>$1</h6>');\n  html = html.replace(/^##### (.*$)/gim, '<h5>$1</h5>');\n  html = html.replace(/^#### (.*$)/gim, '<h4>$1</h4>');\n  html = html.replace(/^### (.*$)/gim, '<h3>$1</h3>');\n  html = html.replace(/^## (.*$)/gim, '<h2>$1</h2>');\n  html = html.replace(/^# (.*$)/gim, '<h1>$1</h1>');\n  \n  // 粗体和斜体\n  html = html.replace(/\\*\\*(.*?)\\*\\*/g, '<strong>$1</strong>');\n  html = html.replace(/\\*(.*?)\\*/g, '<em>$1</em>');\n  \n  // 代码\n  html = html.replace(/`([^`]+)`/g, '<code>$1</code>');\n  \n  // 链接\n  html = html.replace(/\\[([^\\]]+)\\]\\(([^)]+)\\)/g, '<a href=\"$2\">$1</a>');\n  \n  // 水平线\n  html = html.replace(/^---$/gim, '<hr/>');\n  \n  // 列表\n  html = html.replace(/^[\\*\\-] (.+)$/gim, '<li>$1</li>');\n  html = html.replace(/^(\\d+)\\. (.+)$/gim, '<li>$2</li>');\n  html = html.replace(/(<li>.*<\\/li>\\n?)+/g, m => '<ul>' + m + '</ul>');\n  \n  // 段落\n  const lines = html.split('\\n');\n  const result = [];\n  let currentParagraph = [];\n  \n  for (const rawLine of lines) {\n    const line = rawLine.trim();\n    const isBlock = /^<[hul]|^<\\/[hul]|^<hr|^<strong|^<em|^<code|^<a/.test(line);\n    if (isBlock) {\n      if (currentParagraph.length) {\n        result.push('<p>' + currentParagraph.join(' ') + '</p>');\n        currentParagraph = [];\n      }\n      result.push(line);\n      continue;\n    }\n    if (line === '') {\n      if (currentParagraph.length) {\n        result.push('<p>' + currentParagraph.join(' ') + '</p>');\n        currentParagraph = [];\n      }\n      continue;\n    }\n    currentParagraph.push(line);\n  }\n  if (currentParagraph.length) {\n    result.push('<p>' + currentParagraph.join(' ') + '</p>');\n  }\n  \n  html = result.join('\\n');\n  html = html.replace(/<p>(<h[1-6]|<ul|<hr)/g, '$1');\n  html = html.replace(/(<\\/h[1-6]>|<\\/ul>|<hr\\/>)<\\/p>/g, '$1');\n  \n  return html;\n}\n\nconst analysisHtml = markdownToHtml(analysis);\n\n// 生成完整的HTML报告\nconst htmlReport = `<!DOCTYPE html>\n<html lang=\"zh-CN\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>糖尿病饮食分析报告 - ${data.submissionId}</title>\n    <style>\n        * {\n            margin: 0;\n            padding: 0;\n            box-sizing: border-box;\n        }\n        body {\n            font-family: -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", Arial, \"Microsoft YaHei\", sans-serif;\n            line-height: 1.6;\n            color: #333;\n            background: #f5f5f5;\n            padding: 20px;\n        }\n        .container {\n            max-width: 1200px;\n            margin: 0 auto;\n            background: white;\n            padding: 40px;\n            border-radius: 8px;\n            box-shadow: 0 2px 10px rgba(0,0,0,0.1);\n        }\n        .header {\n            border-bottom: 3px solid #4CAF50;\n            padding-bottom: 20px;\n            margin-bottom: 30px;\n        }\n        .header h1 {\n            color: #4CAF50;\n            font-size: 2.5em;\n            margin-bottom: 10px;\n        }\n        .header .meta {\n            color: #666;\n            font-size: 0.9em;\n        }\n        .section {\n            margin-bottom: 40px;\n        }\n        .section-title {\n            font-size: 1.8em;\n            color: #2c3e50;\n            margin-bottom: 20px;\n            padding-bottom: 10px;\n            border-bottom: 2px solid #e0e0e0;\n        }\n        .info-grid {\n            display: grid;\n            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));\n            gap: 15px;\n            margin-bottom: 20px;\n        }\n        .info-card {\n            background: #f9f9f9;\n            padding: 15px;\n            border-radius: 5px;\n            border-left: 4px solid #4CAF50;\n        }\n        .info-label {\n            font-weight: bold;\n            color: #555;\n            margin-bottom: 5px;\n        }\n        .info-value {\n            color: #333;\n            font-size: 1.1em;\n        }\n        .glucose-card {\n            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);\n            color: white;\n            padding: 20px;\n            border-radius: 8px;\n            text-align: center;\n            margin: 15px 0;\n        }\n        .glucose-value {\n            font-size: 2.5em;\n            font-weight: bold;\n            margin: 10px 0;\n        }\n        .glucose-status {\n            font-size: 1.1em;\n            opacity: 0.9;\n        }\n        .risk-high {\n            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);\n        }\n        .risk-medium {\n            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);\n        }\n        .risk-low {\n            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);\n        }\n        .food-table {\n            width: 100%;\n            border-collapse: collapse;\n            margin: 20px 0;\n        }\n        .food-table th,\n        .food-table td {\n            padding: 12px;\n            text-align: left;\n            border-bottom: 1px solid #e0e0e0;\n        }\n        .food-table th {\n            background: #4CAF50;\n            color: white;\n            font-weight: bold;\n        }\n        .food-table tr:hover {\n            background: #f5f5f5;\n        }\n        .content-area {\n            background: #fafafa;\n            padding: 25px;\n            border-radius: 5px;\n            margin-top: 15px;\n        }\n        .content-area h1, .content-area h2, .content-area h3 {\n            color: #2c3e50;\n            margin-top: 20px;\n            margin-bottom: 15px;\n        }\n        .content-area h1 {\n            font-size: 2em;\n            border-bottom: 3px solid #4CAF50;\n            padding-bottom: 10px;\n        }\n        .content-area h2 {\n            font-size: 1.5em;\n            border-bottom: 2px solid #e0e0e0;\n            padding-bottom: 8px;\n        }\n        .content-area h3 {\n            font-size: 1.2em;\n        }\n        .content-area p {\n            margin-bottom: 15px;\n            text-align: justify;\n        }\n        .content-area ul, .content-area ol {\n            margin-left: 30px;\n            margin-bottom: 15px;\n        }\n        .content-area li {\n            margin-bottom: 8px;\n        }\n        .content-area strong {\n            color: #4CAF50;\n        }\n        .content-area code {\n            background: #f4f4f4;\n            padding: 2px 6px;\n            border-radius: 3px;\n            font-family: 'Courier New', monospace;\n        }\n        .disclaimer {\n            background: #fff3cd;\n            border-left: 4px solid #ffc107;\n            padding: 20px;\n            margin: 30px 0;\n            border-radius: 4px;\n        }\n        .disclaimer h3 {\n            color: #856404;\n            margin-bottom: 10px;\n        }\n        .disclaimer p {\n            color: #856404;\n            margin-bottom: 8px;\n        }\n        .footer {\n            margin-top: 40px;\n            padding-top: 20px;\n            border-top: 2px solid #e0e0e0;\n            text-align: center;\n            color: #666;\n            font-size: 0.9em;\n        }\n    </style>\n</head>\n<body>\n    <div class=\"container\">\n        <div class=\"header\">\n            <h1>🏥 糖尿病饮食分析报告</h1>\n            <div class=\"meta\">\n                <p>生成时间：${new Date().toLocaleString('zh-CN')}</p>\n                <p>报告ID：${data.submissionId}</p>\n            </div>\n        </div>\n\n        <div class=\"section\">\n            <h2 class=\"section-title\">👤 用户信息</h2>\n            <div class=\"info-grid\">\n                <div class=\"info-card\">\n                    <div class=\"info-label\">是否糖尿病患者</div>\n                    <div class=\"info-value\">${userInfo.isDiabetic ? '是' : '否'}</div>\n                </div>\n                <div class=\"info-card\">\n                    <div class=\"info-label\">糖尿病类型</div>\n                    <div class=\"info-value\">${userInfo.diabetesType}</div>\n                </div>\n                <div class=\"info-card\">\n                    <div class=\"info-label\">当前用药</div>\n                    <div class=\"info-value\">${userInfo.currentMedication}</div>\n                </div>\n                ${userInfo.age ? `\n                <div class=\"info-card\">\n                    <div class=\"info-label\">年龄</div>\n                    <div class=\"info-value\">${userInfo.age}岁</div>\n                </div>\n                ` : ''}\n                ${userInfo.gender ? `\n                <div class=\"info-card\">\n                    <div class=\"info-label\">性别</div>\n                    <div class=\"info-value\">${userInfo.gender}</div>\n                </div>\n                ` : ''}\n                ${userInfo.bmi ? `\n                <div class=\"info-card\">\n                    <div class=\"info-label\">BMI</div>\n                    <div class=\"info-value\">${userInfo.bmi}</div>\n                </div>\n                ` : ''}\n            </div>\n        </div>\n\n        <div class=\"section\">\n            <h2 class=\"section-title\">🍽️ 食物组合分析</h2>\n            ${summary.estimatedFoods && summary.estimatedFoods.length > 0 ? `\n            <div class=\"info-card\" style=\"background: #fff3cd; border-left-color: #ffc107; margin-bottom: 20px;\">\n                <div class=\"info-label\" style=\"color: #856404;\">⚠️ 提示</div>\n                <div class=\"info-value\" style=\"color: #856404;\">\n                    以下食物使用了AI估算值：${summary.estimatedFoods.join('、')}。\n                    估算值由AI基于食物类别和名称分析得出，仅供参考，建议实际测量血糖验证。\n                </div>\n            </div>\n            ` : ''}\n            <table class=\"food-table\">\n                <thead>\n                    <tr>\n                        <th>食物名称</th>\n                        <th>数量</th>\n                        <th>重量(g)</th>\n                        <th>碳水化合物(g)</th>\n                        <th>GI值</th>\n                        <th>GL值</th>\n                    </tr>\n                </thead>\n                <tbody>\n                    ${data.foods.map(food => `\n                    <tr>\n                        <td>${food.name}${food.note ? ' ⚠️<span style=\"font-size: 0.8em; color: #ff9800;\" title=\"' + food.note + '\">(AI分析)</span>' : ''}</td>\n                        <td>${food.quantity}</td>\n                        <td>${food.weight}</td>\n                        <td>${food.carbs}</td>\n                        <td>${food.gi}</td>\n                        <td>${food.gl}</td>\n                    </tr>\n                    `).join('')}\n                </tbody>\n            </table>\n            <div class=\"info-grid\" style=\"margin-top: 20px;\">\n                <div class=\"info-card\">\n                    <div class=\"info-label\">总碳水化合物</div>\n                    <div class=\"info-value\">${summary.totalCarbs}g</div>\n                </div>\n                <div class=\"info-card\">\n                    <div class=\"info-label\">总血糖负荷(GL)</div>\n                    <div class=\"info-value\">${summary.totalGL}</div>\n                </div>\n                <div class=\"info-card\">\n                    <div class=\"info-label\">平均GI值</div>\n                    <div class=\"info-value\">${summary.averageGI}</div>\n                </div>\n            </div>\n        </div>\n\n        <div class=\"section\">\n            <h2 class=\"section-title\">📊 血糖预测</h2>\n            <div class=\"glucose-card risk-${glucosePrediction.predictions.riskLevel === '高' ? 'high' : glucosePrediction.predictions.riskLevel === '中' ? 'medium' : 'low'}\">\n                <div style=\"font-size: 1.2em; margin-bottom: 10px;\">预测空腹血糖</div>\n                <div class=\"glucose-value\">${glucosePrediction.fastingGlucose} mmol/L</div>\n                <div class=\"glucose-status\">${glucosePrediction.predictions.fastingStatus}</div>\n            </div>\n            <div class=\"glucose-card risk-${glucosePrediction.predictions.riskLevel === '高' ? 'high' : glucosePrediction.predictions.riskLevel === '中' ? 'medium' : 'low'}\">\n                <div style=\"font-size: 1.2em; margin-bottom: 10px;\">预测餐后2小时血糖</div>\n                <div class=\"glucose-value\">${glucosePrediction.postprandial2hGlucose} mmol/L</div>\n                <div class=\"glucose-status\">${glucosePrediction.predictions.postprandialStatus}</div>\n            </div>\n            <div class=\"info-card\" style=\"margin-top: 20px;\">\n                <div class=\"info-label\">风险等级</div>\n                <div class=\"info-value\" style=\"font-size: 1.3em; color: ${glucosePrediction.predictions.riskLevel === '高' ? '#f5576c' : glucosePrediction.predictions.riskLevel === '中' ? '#fee140' : '#4CAF50'};\">${glucosePrediction.predictions.riskLevel}</div>\n            </div>\n            ${glucosePrediction.predictions.recommendations.length > 0 ? `\n            <div class=\"info-card\" style=\"margin-top: 15px;\">\n                <div class=\"info-label\">建议</div>\n                <ul style=\"margin-top: 10px; padding-left: 20px;\">\n                    ${glucosePrediction.predictions.recommendations.map(rec => `<li>${rec}</li>`).join('')}\n                </ul>\n            </div>\n            ` : ''}\n        </div>\n\n        <div class=\"section\">\n            <h2 class=\"section-title\">📋 详细分析报告</h2>\n            <div class=\"content-area\">\n                ${analysisHtml}\n            </div>\n        </div>\n\n        <div class=\"disclaimer\">\n            <h3>⚠️ 医疗免责声明</h3>\n            <p><strong>重要提示：</strong>本报告仅供参考，不能替代专业医疗建议。</p>\n            <p>• 血糖预测基于算法估算，实际血糖可能因个体差异、药物、运动、情绪等多种因素而不同</p>\n            <p>• 本报告不构成医疗诊断，不能替代医生的专业判断</p>\n            <p>• 如有健康问题或血糖异常，请及时咨询专业医生</p>\n            <p>• 糖尿病患者应定期监测血糖，并遵循医生的治疗方案</p>\n            <p>• 本系统不对任何医疗决策或后果承担责任</p>\n        </div>\n\n        <div class=\"footer\">\n            <p>本报告由AI糖尿病分析系统自动生成 | ${new Date().toLocaleDateString('zh-CN')}</p>\n            <p style=\"margin-top: 10px; font-size: 0.9em;\">请妥善保管本报告，建议定期复查血糖</p>\n        </div>\n    </div>\n</body>\n</html>`;\n\nreturn {\n  json: {\n    ...data,\n    htmlReport: htmlReport\n  }\n};\n\n"
+      },
+      "id": "f6a401bd-cdd2-40a0-b8b9-38661feefde6",
+      "name": "生成HTML报告",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -3920,
+        640
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "table": {
+          "__rl": true,
+          "value": "diabetes_food_analysis",
+          "mode": "list",
+          "cachedResultName": "diabetes_food_analysis"
+        },
+        "dataMode": "defineBelow",
+        "columnToMatchOn": "submission_id",
+        "valueToMatchOn": "={{ $('转换和验证输入数据').item.json.data.submissionId }}",
+        "valuesToSend": {
+          "values": [
+            {
+              "column": "analysis_result",
+              "value": "={{ JSON.stringify($json) }}"
+            },
+            {
+              "column": "html_report",
+              "value": "={{ $json.htmlReport }}"
+            },
+            {
+              "column": "status",
+              "value": "completed"
+            },
+            {
+              "column": "processed_at",
+              "value": "={{ $now }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.5,
+      "position": [
+        -3712,
+        640
+      ],
+      "id": "3196fddc-2018-4661-80d9-568e694c148d",
+      "name": "更新分析结果",
+      "credentials": {
+        "mySql": {
+          "id": "Bo7ZmDWsF0ElfN14",
+          "name": "MySQL account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "has-email",
+              "leftValue": "={{ $('转换和验证输入数据').item.json.data.userInfo.email }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "dfc80455-fcc7-4679-800b-3fd65bd10f5f",
+      "name": "判断是否有邮箱",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        -3520,
+        640
+      ]
+    },
+    {
+      "parameters": {
+        "fromEmail": "W1041859017@163.com",
+        "toEmail": "={{ $('转换和验证输入数据').item.json.data.userInfo.email }}",
+        "subject": "您的糖尿病饮食分析报告",
+        "html": "={{ $('生成HTML报告').item.json.htmlReport }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        -3312,
+        528
+      ],
+      "id": "2152c70a-d082-49bb-85c6-df038b0a60ed",
+      "name": "发送邮件",
+      "webhookId": "35e56f81-cf6a-4c42-b888-378fde989f34",
+      "credentials": {
+        "smtp": {
+          "id": "1SfxpBYrbGKQUVst",
+          "name": "SMTP account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ {\n  success: true,\n  submissionId: $('转换和验证输入数据').item.json.data.submissionId,\n  message: '分析完成',\n  data: $json\n} }}",
+        "options": {
+          "responseCode": 200,
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              }
+            ]
+          }
+        }
+      },
+      "id": "87ccc3b2-b2b5-4adc-957b-74fc192aded7",
+      "name": "返回成功响应",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        -3312,
+        736
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "处理糖尿病分析请求": {
+      "main": [
+        [
+          {
+            "node": "转换和验证输入数据",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "转换和验证输入数据": {
+      "main": [
+        [
+          {
+            "node": "验证是否通过",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "验证是否通过": {
+      "main": [
+        [
+          {
+            "node": "保存分析记录",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "返回错误响应",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "保存分析记录": {
+      "main": [
+        [
+          {
+            "node": "解析食物重量",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "解析食物重量": {
+      "main": [
+        [
+          {
+            "node": "AI分析食物营养成分",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI分析食物营养成分": {
+      "main": [
+        [
+          {
+            "node": "DeepSeek分析营养成分",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "DeepSeek分析营养成分": {
+      "main": [
+        [
+          {
+            "node": "解析AI营养成分结果",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "解析AI营养成分结果": {
+      "main": [
+        [
+          {
+            "node": "血糖预测",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "血糖预测": {
+      "main": [
+        [
+          {
+            "node": "格式化AI分析提示词",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "格式化AI分析提示词": {
+      "main": [
+        [
+          {
+            "node": "DeepSeek生成分析报告",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "DeepSeek生成分析报告": {
+      "main": [
+        [
+          {
+            "node": "解析AI分析结果",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "解析AI分析结果": {
+      "main": [
+        [
+          {
+            "node": "生成HTML报告",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "生成HTML报告": {
+      "main": [
+        [
+          {
+            "node": "更新分析结果",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "更新分析结果": {
+      "main": [
+        [
+          {
+            "node": "判断是否有邮箱",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "判断是否有邮箱": {
+      "main": [
+        [
+          {
+            "node": "发送邮件",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "返回成功响应",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "发送邮件": {
+      "main": [
+        [
+          {
+            "node": "返回成功响应",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "924c74fa-0439-4c65-89ae-1655d2ea1b97",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "d3a129b57836a923df617b291f6dc4e215f7ce8ec15c520d1aef17ee296a9dba"
+  },
+  "id": "Xp2rXRVy7BLb9j2B94zTS",
+  "tags": []
+}

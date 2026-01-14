@@ -1,25 +1,24 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.wmt</groupId>
-    <artifactId>wmt</artifactId>
+    <artifactId>wmt-jdk17</artifactId>
     <version>${revision}</version>
     <packaging>pom</packaging>
     <modules>
-        <module>wmt-dependencies</module>
-        <module>wmt-framework</module>
-<!--        <module>wmt-demo</module>-->
+        <module>wmt-dependencies-jdk17</module>
+        <module>wmt-framework-jdk17</module>
     </modules>
 
     <name>${project.artifactId}</name>
-    <description>WMT技术组件库 - 提供企业级Spring Boot技术组件封装</description>
+    <description>WMT技术组件库 - 提供企业级Spring Boot技术组件封装（JDK17版本）</description>
 
     <properties>
-        <revision>2025.10-jdk8-SNAPSHOT</revision>
+        <revision>2025.12-jdk17-SNAPSHOT</revision>
         <!-- Maven 相关 -->
-        <java.version>1.8</java.version>
+        <java.version>17</java.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <maven-surefire-plugin.version>3.5.3</maven-surefire-plugin.version>
@@ -30,19 +29,23 @@
         <flatten-maven-plugin.version>1.7.2</flatten-maven-plugin.version>
         <proguard-maven-plugin.version>2.6.0</proguard-maven-plugin.version>
         <!-- maven-surefire-plugin 暂时无法通过 bom 的依赖读取（兼容老版本 IDEA 2024 及以前版本） -->
-        <lombok.version>1.18.38</lombok.version>
-        <spring.boot.version>2.7.18</spring.boot.version>
+        <lombok.version>1.18.42</lombok.version>
+        <spring.boot.version>3.5.9</spring.boot.version>
         <mapstruct.version>1.6.3</mapstruct.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <!-- 是否启用代码混淆，默认false，发布时设置为true -->
-        <enable.proguard>false</enable.proguard>
+        <!-- 是否启用代码混淆，默认true（暂时禁用），发布时通过 -Pobfuscate profile 启用 -->
+        <!-- 注意：proguard-maven-plugin的skip参数：true=跳过混淆，false=执行混淆 -->
+        <!-- 所以skip.proguard=true表示跳过混淆，skip.proguard=false表示执行混淆 -->
+        <skip.proguard>true</skip.proguard>
+        <!-- proguard-maven-plugin 会检查 proguard.skip 系统属性，需要与 skip.proguard 保持一致 -->
+        <proguard.skip>${skip.proguard}</proguard.skip>
     </properties>
 
     <dependencyManagement>
         <dependencies>
             <dependency>
                 <groupId>com.wmt</groupId>
-                <artifactId>wmt-dependencies</artifactId>
+                <artifactId>wmt-dependencies-jdk17</artifactId>
                 <version>${revision}</version>
                 <type>pom</type>
                 <scope>import</scope>
@@ -91,6 +94,11 @@
                                 <version>${mapstruct.version}</version>
                             </path>
                         </annotationProcessorPaths>
+                        <!-- 编译参数写在 arg 内，解决 Spring Boot 3.2 的 Parameter Name Discovery 问题 -->
+                        <debug>false</debug>
+                        <compilerArgs>
+                            <arg>-parameters</arg>
+                        </compilerArgs>
                     </configuration>
                 </plugin>
                 <plugin>
@@ -114,6 +122,43 @@
                     <groupId>com.github.wvengen</groupId>
                     <artifactId>proguard-maven-plugin</artifactId>
                     <version>${proguard-maven-plugin.version}</version>
+                    <dependencies>
+                        <!-- 添加ProGuard依赖，解决 "ProGuard not found in classpath" 错误 -->
+                        <!-- 注意：proguard-maven-plugin 2.6.0 与 ProGuard 7.x 不兼容，使用 6.2.2 -->
+                        <!-- ProGuard 6.2.2 使用 net.sf.proguard groupId -->
+                        <dependency>
+                            <groupId>net.sf.proguard</groupId>
+                            <artifactId>proguard-base</artifactId>
+                            <version>6.2.2</version>
+                        </dependency>
+                    </dependencies>
+                    <configuration>
+                        <!-- skip=true表示跳过混淆，skip=false表示执行混淆 -->
+                        <!-- 对于pom类型的模块，自动跳过混淆 -->
+                        <skip>${skip.proguard}</skip>
+                        <proguardVersion>6.2.2</proguardVersion>
+                        <!-- injar 和 outjar 使用相对于 outputDirectory 的路径（文件名即可） -->
+                        <injar>${project.build.finalName}.jar</injar>
+                        <outjar>${project.build.finalName}.jar</outjar>
+                        <outputDirectory>${project.build.directory}</outputDirectory>
+                        <libs>
+                            <lib>${java.home}/lib/rt.jar</lib>
+                            <lib>${java.home}/lib/jce.jar</lib>
+                        </libs>
+                        <includeDependency>false</includeDependency>
+                        <options>
+                            <!-- 使用父项目的proguard.conf配置文件，@前缀表示这是配置文件路径 -->
+                            <option>@${project.parent.basedir}/proguard.conf</option>
+                        </options>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <phase>package</phase>
+                            <goals>
+                                <goal>proguard</goal>
+                            </goals>
+                        </execution>
+                    </executions>
                 </plugin>
             </plugins>
         </pluginManagement>
@@ -216,7 +261,9 @@
         <profile>
             <id>obfuscate</id>
             <properties>
-                <enable.proguard>true</enable.proguard>
+                <!-- 启用混淆：skip.proguard=false表示执行混淆 -->
+                <skip.proguard>false</skip.proguard>
+                <!-- proguard.skip 会自动继承 skip.proguard 的值 -->
             </properties>
         </profile>
     </profiles>

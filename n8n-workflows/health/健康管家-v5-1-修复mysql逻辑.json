@@ -1,0 +1,1197 @@
+{
+  "name": "健康管家-v5-1",
+  "nodes": [
+    {
+      "parameters": {
+        "jsCode": "// 返回成功响应\nconst input = $input.item.json;\nconst submissionId = $('转换表单数据').first().json.submissionId;\n\nreturn {\n  json: {\n    success: true,\n    submissionId: submissionId,\n    message: '表单已提交，正在处理中...'\n  }\n};\n\n"
+      },
+      "id": "eaaacbd0-f627-4bb5-b8d9-cec41aaabc35",
+      "name": "返回成功响应",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -176,
+        192
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {
+          "responseCode": 200,
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              }
+            ]
+          }
+        }
+      },
+      "id": "ef6091a5-a5a2-4409-8317-ecf9f563028d",
+      "name": "返回提交成功",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        48,
+        192
+      ]
+    },
+    {
+      "parameters": {
+        "multipleMethods": true,
+        "httpMethod": [
+          "POST"
+        ],
+        "path": "health-form-submit",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "7fc08975-5933-417f-8bd1-0accaa30e4a3",
+      "name": "处理表单提交Webhook1",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1.1,
+      "position": [
+        -1584,
+        176
+      ],
+      "webhookId": "health-form-submit-webhook",
+      "executeOnce": false,
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "jsCode": "// 提取HTTP方法\nconst input = $input.item.json;\n\nlet method = 'GET';\nif (input.method) {\n  method = input.method.toUpperCase();\n} else if (input.headers && input.headers['x-http-method']) {\n  method = input.headers['x-http-method'].toUpperCase();\n} else if (input.body && Object.keys(input.body).length > 0) {\n  method = 'POST';\n}\n\nreturn {\n  json: {\n    ...input,\n    httpMethod: method\n  }\n};\n\n"
+      },
+      "id": "2d3118f9-81d3-4340-b9f7-b6237b3273a1",
+      "name": "提取HTTP方法2",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1360,
+        176
+      ]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "f8193c61-e2f7-47ff-a65d-febef3e1fe55"
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "6d0bd6e4-b7e9-43b4-a9e5-2c2337359e61",
+      "name": "判断请求类型2",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        -1184,
+        176
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "noData",
+        "options": {
+          "responseCode": 200,
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              },
+              {
+                "name": "Access-Control-Allow-Methods",
+                "value": "GET, POST, OPTIONS"
+              },
+              {
+                "name": "Access-Control-Allow-Headers",
+                "value": "Content-Type, Authorization"
+              }
+            ]
+          }
+        }
+      },
+      "id": "f425f365-4282-4e64-b88a-96e88796d298",
+      "name": "返回OPTIONS响应1",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        -992,
+        176
+      ]
+    },
+    {
+      "parameters": {
+        "table": {
+          "__rl": true,
+          "value": "health_form_submissions",
+          "mode": "list",
+          "cachedResultName": "health_form_submissions"
+        },
+        "dataMode": "defineBelow",
+        "valuesToSend": {
+          "values": [
+            {
+              "column": "submission_id",
+              "value": "={{ $('转换表单数据').item.json.submissionId }}"
+            },
+            {
+              "column": "age",
+              "value": "={{ $json.data.age }}"
+            },
+            {
+              "column": "gender",
+              "value": "={{ $json.data.gender }}"
+            },
+            {
+              "column": "height",
+              "value": "={{ $json.data.height }}"
+            },
+            {
+              "column": "weight",
+              "value": "={{ $json.data.weight }}"
+            },
+            {
+              "column": "goal_type",
+              "value": "={{ $json.data.goalType }}"
+            },
+            {
+              "column": "goal_value",
+              "value": "={{ $json.data.goalValue }}"
+            },
+            {
+              "column": "goal_time",
+              "value": "={{ $json.data.goalTime }}"
+            },
+            {
+              "column": "daily_time",
+              "value": "={{ $json.data.dailyTime }}"
+            },
+            {
+              "column": "kitchen_condition",
+              "value": "={{ $json.data.kitchenCondition }}"
+            },
+            {
+              "column": "facility",
+              "value": "={{ $json.data.facility }}"
+            },
+            {
+              "column": "experience",
+              "value": "={{ $json.data.experience }}"
+            },
+            {
+              "column": "email",
+              "value": "={{ $json.data.email }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.5,
+      "position": [
+        -944,
+        416
+      ],
+      "id": "98b25972-7a92-490b-bf96-657784e6d2d9",
+      "name": "Insert rows in a table",
+      "credentials": {
+        "mySql": {
+          "id": "Bo7ZmDWsF0ElfN14",
+          "name": "MySQL account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "id": "5aff738b-6e24-438b-9a56-7e7d0b755249",
+      "name": "测试手动触发",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -1584,
+        608
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "format-prompt",
+              "name": "userPrompt",
+              "value": "=作为专业健身营养师，请为用户生成一份详细、个性化、实用的健康评估报告。\n\n## 用户信息\n- 年龄：{{ $json.profile.age }}岁\n- 性别：{{ $json.profile.gender }}\n- 身高：{{ $json.profile.height }}cm\n- 当前体重：{{ $json.profile.weight }}kg\n- 目标类型：{{ $json.profile.goalType }}\n- 目标值：{{ $json.profile.goalValue }}kg\n- 完成时间：{{ $json.profile.goalTime }}周\n- 运动经验：{{ $json.profile.experience }}\n- 每日可用时间：{{ $json.profile.dailyTime }}分钟\n- 厨房条件：{{ $json.profile.kitchenCondition }}\n- 运动设施：{{ $json.profile.facility }}\n\n## 已计算数据\n- **BMI指数**：{{ $json.calculations.bmi }}（{{ $json.calculations.bmiStatus }}）\n- **基础代谢率(BMR)**：{{ $json.calculations.bmr }} kcal/天\n- **每日总消耗(TDEE)**：{{ $json.calculations.tdee }} kcal/天（活动系数：{{ $json.calculations.activityFactor }}）\n- **目标热量**：{{ $json.calculations.targetCalories }} kcal/天\n- **热量缺口/盈余**：{{ $json.calculations.calorieDeficitOrSurplus }} kcal/天\n- **营养素目标**：蛋白质{{ $json.calculations.nutrients.protein }}g，碳水{{ $json.calculations.nutrients.carbs }}g，脂肪{{ $json.calculations.nutrients.fat }}g\n- **每周变化目标**：{{ $json.calculations.goalAnalysis.weeklyChange }}kg/周\n\n## 报告要求\n\n### 核心内容（必须包含）\n1. **BMI指数及健康状态评价**\n   - 详细分析当前BMI值及其健康意义\n   - 与标准范围的对比分析\n   - 针对当前BMI状态的具体建议\n\n2. **基础代谢率(BMR)的合理性评估**\n   - 解释BMR的含义和重要性\n   - 评估用户BMR是否在正常范围\n   - 提供提升或维持BMR的建议\n\n3. **每日总能量消耗(TDEE)的评估**\n   - 解释TDEE的计算依据\n   - 评估活动系数的合理性\n   - 提供优化建议\n\n4. **目标设定的合理性分析**\n   - 分析目标是否科学合理\n   - 评估完成时间的可行性\n   - 提供目标调整建议（如需要）\n\n5. **热量缺口/盈余的科学性评估**\n   - 解释热量缺口/盈余的含义\n   - 评估当前设定的科学性\n   - 提供执行建议和注意事项\n\n6. **三大营养素分配的合理性**\n   - 分析蛋白质、碳水、脂肪的分配比例\n   - 解释为什么这样分配\n   - 提供调整建议（如需要）\n\n7. **健康风险评估**\n   - 识别潜在的健康风险\n   - 提供预防建议\n   - 提醒需要咨询医生的情形\n\n8. **执行建议和注意事项**\n   - 提供具体的执行步骤\n   - 列出常见误区和注意事项\n   - 提供进度追踪建议\n\n### 增强内容（提升用户体验）\n9. **常见问题解答**\n   - 如果热量目标难以达到怎么办？\n   - 如果某天热量超标了怎么办？\n   - 如何判断计划是否有效？\n   - 什么时候需要调整计划？\n\n10. **应急调整方案**\n    - 如果某天无法按计划执行，如何调整？\n    - 如果遇到平台期怎么办？\n    - 如果身体出现不适怎么办？\n\n11. **进度追踪建议**\n    - 建议记录哪些数据（体重、体围、照片等）\n    - 建议多久记录一次\n    - 如何判断进度是否正常\n\n12. **营养补充建议（如需要）**\n    - 是否需要补充维生素或矿物质\n    - 是否需要补充蛋白质粉等\n    - 提供具体的补充建议\n\n## 输出格式要求\n- 使用Markdown格式，结构清晰，层次分明\n- 使用标题、列表、表格等格式增强可读性\n- 包含具体的数值和计算依据\n- 语言通俗易懂，避免过于专业的术语\n- 提供实用的、可执行的建议\n- 使用友好的语气，给予鼓励和支持\n\n## 特别要求\n- 根据用户的性别、年龄、目标类型提供个性化建议\n- 考虑用户的生活条件（厨房条件、运动设施）\n- 根据用户的运动经验提供适合的建议\n- 使用积极正面的语言，给予用户信心和动力",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "1bf92583-0e80-4b0f-8ca6-3ee0bc89506e",
+      "name": "格式化评估提示词",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -544,
+        416
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// 清理转义字符并转换为HTML\nconst data = $input.item.json;\nconst rawText = data.dietPlan; // 训练计划节点请改为对应字段\n\n// 清理转义字符\nfunction cleanEscapeChars(text) {\n  if (!text || typeof text !== 'string') return '';\n  return text\n    .replace(/\\\\n/g, '\\n')\n    .replace(/\\\\\"/g, '\"')\n    .replace(/\\\\\\\\/g, '\\\\')\n    .replace(/\\\\t/g, '\\t')\n    .replace(/\\\\r/g, '\\r')\n    .replace(/\\n{3,}/g, '\\n\\n');\n}\n\n// 将 pipe 风格表格转换为 HTML 表格\nfunction convertTables(md) {\n  const lines = md.split('\\n');\n  const out = [];\n  let i = 0;\n\n  while (i < lines.length) {\n    const line = lines[i];\n    // 检测形如 \"| col | col |\" 的行\n    const isTableRow = l => /^\\s*\\|.*\\|\\s*$/.test(l);\n    if (isTableRow(line) && i + 1 < lines.length && /^\\s*\\|?\\s*:?-+:?\\s*(\\|\\s*:?-+:?\\s*)+\\|?\\s*$/.test(lines[i + 1])) {\n      // 收集表格块\n      const tableLines = [];\n      tableLines.push(line);\n      tableLines.push(lines[i + 1]);\n      i += 2;\n      while (i < lines.length && isTableRow(lines[i])) {\n        tableLines.push(lines[i]);\n        i++;\n      }\n\n      // 解析表格\n      const rows = tableLines.map(l =>\n        l.trim().replace(/^\\||\\|$/g, '').split('|').map(c => c.trim())\n      );\n      const header = rows[0];\n      const body = rows.slice(2); // 第2行是分隔行\n\n      const thead = '<thead><tr>' + header.map(h => `<th>${h}</th>`).join('') + '</tr></thead>';\n      const tbody = '<tbody>' + body.map(r => '<tr>' + r.map(c => `<td>${c}</td>`).join('') + '</tr>').join('') + '</tbody>';\n      out.push('<table>' + thead + tbody + '</table>');\n      continue;\n    }\n    out.push(line);\n    i++;\n  }\n\n  return out.join('\\n');\n}\n\n// Markdown转HTML（在转换表格后再走其他规则）\nfunction markdownToHtml(md) {\n  if (!md) return '';\n  let html = convertTables(md);\n\n  html = html.replace(/^###### (.*$)/gim, '<h6>$1</h6>');\n  html = html.replace(/^##### (.*$)/gim, '<h5>$1</h5>');\n  html = html.replace(/^#### (.*$)/gim, '<h4>$1</h4>');\n  html = html.replace(/^### (.*$)/gim, '<h3>$1</h3>');\n  html = html.replace(/^## (.*$)/gim, '<h2>$1</h2>');\n  html = html.replace(/^# (.*$)/gim, '<h1>$1</h1>');\n  html = html.replace(/\\*\\*(.*?)\\*\\*/g, '<strong>$1</strong>');\n  html = html.replace(/\\*(.*?)\\*/g, '<em>$1</em>');\n  html = html.replace(/`([^`]+)`/g, '<code>$1</code>');\n  html = html.replace(/\\[([^\\]]+)\\]\\(([^)]+)\\)/g, '<a href=\"$2\">$1</a>');\n  html = html.replace(/^---$/gim, '<hr/>');\n  html = html.replace(/^[\\*\\-] (.+)$/gim, '<li>$1</li>');\n  html = html.replace(/^(\\d+)\\. (.+)$/gim, '<li>$2</li>');\n  html = html.replace(/(<li>.*<\\/li>\\n?)+/g, m => '<ul>' + m + '</ul>');\n\n  const lines = html.split('\\n');\n  const result = [];\n  let currentParagraph = [];\n\n  for (const rawLine of lines) {\n    const line = rawLine.trim();\n    const isBlock = /^<table|^<\\/table|^<thead|^<tbody|^<tr|^<th|^<td|^<h[1-6]|^<ul|^<\\/ul|^<li|^<\\/li|^<hr|^<strong|^<em|^<code|^<a/.test(line);\n    if (isBlock) {\n      if (currentParagraph.length) {\n        result.push('<p>' + currentParagraph.join(' ') + '</p>');\n        currentParagraph = [];\n      }\n      result.push(line);\n      continue;\n    }\n    if (line === '') {\n      if (currentParagraph.length) {\n        result.push('<p>' + currentParagraph.join(' ') + '</p>');\n        currentParagraph = [];\n      }\n      continue;\n    }\n    currentParagraph.push(line);\n  }\n  if (currentParagraph.length) {\n    result.push('<p>' + currentParagraph.join(' ') + '</p>');\n  }\n\n  html = result.join('\\n');\n  html = html.replace(/<p>(<h[1-6]|<ul|<\\/ul|<table)/g, '$1');\n  html = html.replace(/(<\\/h[1-6]>|<\\/ul>|<\\/table>)<\\/p>/g, '$1');\n  return html;\n}\n\nconst cleaned = cleanEscapeChars(rawText);\nconst html = markdownToHtml(cleaned);\n\nreturn {\n  json: {\n    profile: data.profile,\n    calculations: data.calculations,\n    assessment: {\n      markdown: cleaned,\n      html: html\n    }\n  }\n};"
+      },
+      "id": "91ac5db3-29fe-4a0f-a9ce-34a1f4be7a3a",
+      "name": "清理和转换饮食计划1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        128,
+        624
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// 解析训练计划\nconst aiResponse = $input.item.json;\nconst profile = $('清理和转换饮食计划1').item.json.profile;\nconst calculations = $('清理和转换饮食计划1').item.json.calculations;\nconst assessment = $('清理和转换饮食计划1').item.json.assessment;\nconst dietPlan = $('清理和转换饮食计划1').item.json.dietPlan;\n\nlet trainingPlanText = '';\nif (aiResponse.choices && aiResponse.choices[0] && aiResponse.choices[0].message) {\n  trainingPlanText = aiResponse.choices[0].message.content;\n} else if (aiResponse.content) {\n  trainingPlanText = aiResponse.content;\n} else if (typeof aiResponse === 'string') {\n  trainingPlanText = aiResponse;\n}\n\nreturn {\n  json: {\n    profile: profile,\n    calculations: calculations,\n    assessment: assessment,\n    dietPlan: dietPlan,\n    trainingPlan: trainingPlanText\n  }\n};"
+      },
+      "id": "ddb170e0-b7f9-457f-9a76-9e66c652e26a",
+      "name": "解析训练计划1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -144,
+        832
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// 清理转义字符并转换为HTML\nconst data = $input.item.json;\nconst rawText = data.trainingPlan;\n\n\n// 清理转义字符\nfunction cleanEscapeChars(text) {\n  if (!text || typeof text !== 'string') return '';\n  return text\n    .replace(/\\\\n/g, '\\n')\n    .replace(/\\\\\"/g, '\"')\n    .replace(/\\\\\\\\/g, '\\\\')\n    .replace(/\\\\t/g, '\\t')\n    .replace(/\\\\r/g, '\\r')\n    .replace(/\\n{3,}/g, '\\n\\n');\n}\n\n// 将 pipe 风格表格转换为 HTML 表格\nfunction convertTables(md) {\n  const lines = md.split('\\n');\n  const out = [];\n  let i = 0;\n\n  while (i < lines.length) {\n    const line = lines[i];\n    // 检测形如 \"| col | col |\" 的行\n    const isTableRow = l => /^\\s*\\|.*\\|\\s*$/.test(l);\n    if (isTableRow(line) && i + 1 < lines.length && /^\\s*\\|?\\s*:?-+:?\\s*(\\|\\s*:?-+:?\\s*)+\\|?\\s*$/.test(lines[i + 1])) {\n      // 收集表格块\n      const tableLines = [];\n      tableLines.push(line);\n      tableLines.push(lines[i + 1]);\n      i += 2;\n      while (i < lines.length && isTableRow(lines[i])) {\n        tableLines.push(lines[i]);\n        i++;\n      }\n\n      // 解析表格\n      const rows = tableLines.map(l =>\n        l.trim().replace(/^\\||\\|$/g, '').split('|').map(c => c.trim())\n      );\n      const header = rows[0];\n      const body = rows.slice(2); // 第2行是分隔行\n\n      const thead = '<thead><tr>' + header.map(h => `<th>${h}</th>`).join('') + '</tr></thead>';\n      const tbody = '<tbody>' + body.map(r => '<tr>' + r.map(c => `<td>${c}</td>`).join('') + '</tr>').join('') + '</tbody>';\n      out.push('<table>' + thead + tbody + '</table>');\n      continue;\n    }\n    out.push(line);\n    i++;\n  }\n\n  return out.join('\\n');\n}\n\n// Markdown转HTML（在转换表格后再走其他规则）\nfunction markdownToHtml(md) {\n  if (!md) return '';\n  let html = convertTables(md);\n\n  html = html.replace(/^###### (.*$)/gim, '<h6>$1</h6>');\n  html = html.replace(/^##### (.*$)/gim, '<h5>$1</h5>');\n  html = html.replace(/^#### (.*$)/gim, '<h4>$1</h4>');\n  html = html.replace(/^### (.*$)/gim, '<h3>$1</h3>');\n  html = html.replace(/^## (.*$)/gim, '<h2>$1</h2>');\n  html = html.replace(/^# (.*$)/gim, '<h1>$1</h1>');\n  html = html.replace(/\\*\\*(.*?)\\*\\*/g, '<strong>$1</strong>');\n  html = html.replace(/\\*(.*?)\\*/g, '<em>$1</em>');\n  html = html.replace(/`([^`]+)`/g, '<code>$1</code>');\n  html = html.replace(/\\[([^\\]]+)\\]\\(([^)]+)\\)/g, '<a href=\"$2\">$1</a>');\n  html = html.replace(/^---$/gim, '<hr/>');\n  html = html.replace(/^[\\*\\-] (.+)$/gim, '<li>$1</li>');\n  html = html.replace(/^(\\d+)\\. (.+)$/gim, '<li>$2</li>');\n  html = html.replace(/(<li>.*<\\/li>\\n?)+/g, m => '<ul>' + m + '</ul>');\n\n  const lines = html.split('\\n');\n  const result = [];\n  let currentParagraph = [];\n\n  for (const rawLine of lines) {\n    const line = rawLine.trim();\n    const isBlock = /^<table|^<\\/table|^<thead|^<tbody|^<tr|^<th|^<td|^<h[1-6]|^<ul|^<\\/ul|^<li|^<\\/li|^<hr|^<strong|^<em|^<code|^<a/.test(line);\n    if (isBlock) {\n      if (currentParagraph.length) {\n        result.push('<p>' + currentParagraph.join(' ') + '</p>');\n        currentParagraph = [];\n      }\n      result.push(line);\n      continue;\n    }\n    if (line === '') {\n      if (currentParagraph.length) {\n        result.push('<p>' + currentParagraph.join(' ') + '</p>');\n        currentParagraph = [];\n      }\n      continue;\n    }\n    currentParagraph.push(line);\n  }\n  if (currentParagraph.length) {\n    result.push('<p>' + currentParagraph.join(' ') + '</p>');\n  }\n\n  html = result.join('\\n');\n  html = html.replace(/<p>(<h[1-6]|<ul|<\\/ul|<table)/g, '$1');\n  html = html.replace(/(<\\/h[1-6]>|<\\/ul>|<\\/table>)<\\/p>/g, '$1');\n  return html;\n}\n\nconst cleaned = cleanEscapeChars(rawText);\nconst html = markdownToHtml(cleaned);\n\nreturn {\n  json: {\n    profile: data.profile,\n    calculations: data.calculations,\n    assessment: {\n      markdown: cleaned,\n      html: html\n    }\n  }\n};\n\n"
+      },
+      "id": "786af403-dc36-453b-8e01-f1b26d5f56fb",
+      "name": "清理和转换训练计划1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        80,
+        832
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// 清理转义字符并转换为HTML\nconst data = $input.item.json;\nconst rawText = data.assessment;\n\n\n// 清理转义字符\nfunction cleanEscapeChars(text) {\n  if (!text || typeof text !== 'string') return '';\n  return text\n    .replace(/\\\\n/g, '\\n')\n    .replace(/\\\\\"/g, '\"')\n    .replace(/\\\\\\\\/g, '\\\\')\n    .replace(/\\\\t/g, '\\t')\n    .replace(/\\\\r/g, '\\r')\n    .replace(/\\n{3,}/g, '\\n\\n');\n}\n\n// 将 pipe 风格表格转换为 HTML 表格\nfunction convertTables(md) {\n  const lines = md.split('\\n');\n  const out = [];\n  let i = 0;\n\n  while (i < lines.length) {\n    const line = lines[i];\n    // 检测形如 \"| col | col |\" 的行\n    const isTableRow = l => /^\\s*\\|.*\\|\\s*$/.test(l);\n    if (isTableRow(line) && i + 1 < lines.length && /^\\s*\\|?\\s*:?-+:?\\s*(\\|\\s*:?-+:?\\s*)+\\|?\\s*$/.test(lines[i + 1])) {\n      // 收集表格块\n      const tableLines = [];\n      tableLines.push(line);\n      tableLines.push(lines[i + 1]);\n      i += 2;\n      while (i < lines.length && isTableRow(lines[i])) {\n        tableLines.push(lines[i]);\n        i++;\n      }\n\n      // 解析表格\n      const rows = tableLines.map(l =>\n        l.trim().replace(/^\\||\\|$/g, '').split('|').map(c => c.trim())\n      );\n      const header = rows[0];\n      const body = rows.slice(2); // 第2行是分隔行\n\n      const thead = '<thead><tr>' + header.map(h => `<th>${h}</th>`).join('') + '</tr></thead>';\n      const tbody = '<tbody>' + body.map(r => '<tr>' + r.map(c => `<td>${c}</td>`).join('') + '</tr>').join('') + '</tbody>';\n      out.push('<table>' + thead + tbody + '</table>');\n      continue;\n    }\n    out.push(line);\n    i++;\n  }\n\n  return out.join('\\n');\n}\n\n// Markdown转HTML（在转换表格后再走其他规则）\nfunction markdownToHtml(md) {\n  if (!md) return '';\n  let html = convertTables(md);\n\n  html = html.replace(/^###### (.*$)/gim, '<h6>$1</h6>');\n  html = html.replace(/^##### (.*$)/gim, '<h5>$1</h5>');\n  html = html.replace(/^#### (.*$)/gim, '<h4>$1</h4>');\n  html = html.replace(/^### (.*$)/gim, '<h3>$1</h3>');\n  html = html.replace(/^## (.*$)/gim, '<h2>$1</h2>');\n  html = html.replace(/^# (.*$)/gim, '<h1>$1</h1>');\n  html = html.replace(/\\*\\*(.*?)\\*\\*/g, '<strong>$1</strong>');\n  html = html.replace(/\\*(.*?)\\*/g, '<em>$1</em>');\n  html = html.replace(/`([^`]+)`/g, '<code>$1</code>');\n  html = html.replace(/\\[([^\\]]+)\\]\\(([^)]+)\\)/g, '<a href=\"$2\">$1</a>');\n  html = html.replace(/^---$/gim, '<hr/>');\n  html = html.replace(/^[\\*\\-] (.+)$/gim, '<li>$1</li>');\n  html = html.replace(/^(\\d+)\\. (.+)$/gim, '<li>$2</li>');\n  html = html.replace(/(<li>.*<\\/li>\\n?)+/g, m => '<ul>' + m + '</ul>');\n\n  const lines = html.split('\\n');\n  const result = [];\n  let currentParagraph = [];\n\n  for (const rawLine of lines) {\n    const line = rawLine.trim();\n    const isBlock = /^<table|^<\\/table|^<thead|^<tbody|^<tr|^<th|^<td|^<h[1-6]|^<ul|^<\\/ul|^<li|^<\\/li|^<hr|^<strong|^<em|^<code|^<a/.test(line);\n    if (isBlock) {\n      if (currentParagraph.length) {\n        result.push('<p>' + currentParagraph.join(' ') + '</p>');\n        currentParagraph = [];\n      }\n      result.push(line);\n      continue;\n    }\n    if (line === '') {\n      if (currentParagraph.length) {\n        result.push('<p>' + currentParagraph.join(' ') + '</p>');\n        currentParagraph = [];\n      }\n      continue;\n    }\n    currentParagraph.push(line);\n  }\n  if (currentParagraph.length) {\n    result.push('<p>' + currentParagraph.join(' ') + '</p>');\n  }\n\n  html = result.join('\\n');\n  html = html.replace(/<p>(<h[1-6]|<ul|<\\/ul|<table)/g, '$1');\n  html = html.replace(/(<\\/h[1-6]>|<\\/ul>|<\\/table>)<\\/p>/g, '$1');\n  return html;\n}\n\nconst cleaned = cleanEscapeChars(rawText);\nconst html = markdownToHtml(cleaned);\n\nreturn {\n  json: {\n    profile: data.profile,\n    calculations: data.calculations,\n    assessment: {\n      markdown: cleaned,\n      html: html\n    }\n  }\n};\n"
+      },
+      "id": "663f945e-f07a-488a-b757-8c0549dc64b3",
+      "name": "清理和转换评估结果1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        128,
+        416
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// 准备保存数据：生成JSON、HTML和Markdown三个文件\nconst data = $input.item.json;\n\n// 1. 准备JSON文件\nconst jsonString = JSON.stringify(data, null, 2);\nconst jsonFileName = 'health_plan_' + data.profileId + '.json';\n\n// 获取各个节点的数据（直接从上游节点获取，确保数据正确）\nconst assessmentData = $('清理和转换评估结果1').first().json.assessment || {};\nconst dietPlanData = $('清理和转换饮食计划1').first().json.assessment || {}; // 注意：这个节点输出的是assessment字段\nconst trainingPlanData = $('清理和转换训练计划1').first().json.assessment || {}; // 注意：这个节点输出的是assessment字段\n\n// 2. 准备HTML文件（美观的样式）\nconst htmlContent = `<!DOCTYPE html>\n<html lang=\"zh-CN\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>健康管理方案 - ${data.profileId}</title>\n    <style>\n        * {\n            margin: 0;\n            padding: 0;\n            box-sizing: border-box;\n        }\n        body {\n            font-family: -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", Arial, sans-serif;\n            line-height: 1.6;\n            color: #333;\n            background: #f5f5f5;\n            padding: 20px;\n        }\n        .container {\n            max-width: 1200px;\n            margin: 0 auto;\n            background: white;\n            padding: 40px;\n            border-radius: 8px;\n            box-shadow: 0 2px 10px rgba(0,0,0,0.1);\n        }\n        .header {\n            border-bottom: 3px solid #4CAF50;\n            padding-bottom: 20px;\n            margin-bottom: 30px;\n        }\n        .header h1 {\n            color: #4CAF50;\n            font-size: 2.5em;\n            margin-bottom: 10px;\n        }\n        .header .meta {\n            color: #666;\n            font-size: 0.9em;\n        }\n        .section {\n            margin-bottom: 40px;\n        }\n        .section-title {\n            font-size: 1.8em;\n            color: #2c3e50;\n            margin-bottom: 20px;\n            padding-bottom: 10px;\n            border-bottom: 2px solid #e0e0e0;\n        }\n        .profile-info {\n            display: grid;\n            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));\n            gap: 15px;\n            margin-bottom: 20px;\n        }\n        .info-item {\n            background: #f9f9f9;\n            padding: 15px;\n            border-radius: 5px;\n            border-left: 4px solid #4CAF50;\n        }\n        .info-label {\n            font-weight: bold;\n            color: #555;\n            margin-bottom: 5px;\n        }\n        .info-value {\n            color: #333;\n            font-size: 1.1em;\n        }\n        .calculations-grid {\n            display: grid;\n            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));\n            gap: 15px;\n            margin-bottom: 20px;\n        }\n        .calc-card {\n            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);\n            color: white;\n            padding: 20px;\n            border-radius: 8px;\n            text-align: center;\n        }\n        .calc-label {\n            font-size: 0.9em;\n            opacity: 0.9;\n            margin-bottom: 8px;\n        }\n        .calc-value {\n            font-size: 1.8em;\n            font-weight: bold;\n        }\n        .content-area {\n            background: #fafafa;\n            padding: 25px;\n            border-radius: 5px;\n            margin-top: 15px;\n        }\n        .content-area h1, .content-area h2, .content-area h3 {\n            color: #2c3e50;\n            margin-top: 20px;\n            margin-bottom: 15px;\n        }\n        .content-area h1 {\n            font-size: 2em;\n            border-bottom: 3px solid #4CAF50;\n            padding-bottom: 10px;\n        }\n        .content-area h2 {\n            font-size: 1.5em;\n            border-bottom: 2px solid #e0e0e0;\n            padding-bottom: 8px;\n        }\n        .content-area h3 {\n            font-size: 1.2em;\n        }\n        .content-area p {\n            margin-bottom: 15px;\n            text-align: justify;\n        }\n        .content-area ul, .content-area ol {\n            margin-left: 30px;\n            margin-bottom: 15px;\n        }\n        .content-area li {\n            margin-bottom: 8px;\n        }\n        .content-area strong {\n            color: #4CAF50;\n        }\n        .content-area code {\n            background: #f4f4f4;\n            padding: 2px 6px;\n            border-radius: 3px;\n            font-family: 'Courier New', monospace;\n        }\n        .content-area a {\n            color: #4CAF50;\n            text-decoration: none;\n        }\n        .content-area a:hover {\n            text-decoration: underline;\n        }\n        .footer {\n            margin-top: 40px;\n            padding-top: 20px;\n            border-top: 2px solid #e0e0e0;\n            text-align: center;\n            color: #666;\n            font-size: 0.9em;\n        }\n    </style>\n</head>\n<body>\n    <div class=\"container\">\n        <div class=\"header\">\n            <h1>🏥 个性化健康管理方案</h1>\n            <div class=\"meta\">\n                <p>生成时间：${new Date(data.generatedAt).toLocaleString('zh-CN')}</p>\n                <p>方案ID：${data.profileId}</p>\n            </div>\n        </div>\n\n        <div class=\"section\">\n            <h2 class=\"section-title\">👤 用户信息</h2>\n            <div class=\"profile-info\">\n                <div class=\"info-item\">\n                    <div class=\"info-label\">年龄</div>\n                    <div class=\"info-value\">${data.profile.age}岁</div>\n                </div>\n                <div class=\"info-item\">\n                    <div class=\"info-label\">性别</div>\n                    <div class=\"info-value\">${data.profile.gender}</div>\n                </div>\n                <div class=\"info-item\">\n                    <div class=\"info-label\">身高</div>\n                    <div class=\"info-value\">${data.profile.height}cm</div>\n                </div>\n                <div class=\"info-item\">\n                    <div class=\"info-label\">当前体重</div>\n                    <div class=\"info-value\">${data.profile.weight}kg</div>\n                </div>\n                <div class=\"info-item\">\n                    <div class=\"info-label\">目标类型</div>\n                    <div class=\"info-value\">${data.profile.goalType}</div>\n                </div>\n                <div class=\"info-item\">\n                    <div class=\"info-label\">目标体重</div>\n                    <div class=\"info-value\">${data.profile.goalValue}kg</div>\n                </div>\n                <div class=\"info-item\">\n                    <div class=\"info-label\">完成时间</div>\n                    <div class=\"info-value\">${data.profile.goalTime}周</div>\n                </div>\n                <div class=\"info-item\">\n                    <div class=\"info-label\">每日可用时间</div>\n                    <div class=\"info-value\">${data.profile.dailyTime}分钟</div>\n                </div>\n            </div>\n        </div>\n\n        <div class=\"section\">\n            <h2 class=\"section-title\">📊 健康指标</h2>\n            <div class=\"calculations-grid\">\n                <div class=\"calc-card\">\n                    <div class=\"calc-label\">BMI指数</div>\n                    <div class=\"calc-value\">${data.healthAssessment.calculations.bmi}</div>\n                    <div style=\"font-size: 0.8em; margin-top: 5px;\">${data.healthAssessment.calculations.bmiStatus}</div>\n                </div>\n                <div class=\"calc-card\">\n                    <div class=\"calc-label\">基础代谢率 (BMR)</div>\n                    <div class=\"calc-value\">${data.healthAssessment.calculations.bmr}</div>\n                    <div style=\"font-size: 0.8em; margin-top: 5px;\">kcal/天</div>\n                </div>\n                <div class=\"calc-card\">\n                    <div class=\"calc-label\">每日总消耗 (TDEE)</div>\n                    <div class=\"calc-value\">${data.healthAssessment.calculations.tdee}</div>\n                    <div style=\"font-size: 0.8em; margin-top: 5px;\">kcal/天</div>\n                </div>\n                <div class=\"calc-card\">\n                    <div class=\"calc-label\">目标热量</div>\n                    <div class=\"calc-value\">${data.healthAssessment.calculations.targetCalories}</div>\n                    <div style=\"font-size: 0.8em; margin-top: 5px;\">kcal/天</div>\n                </div>\n            </div>\n            <div class=\"calculations-grid\" style=\"margin-top: 15px;\">\n                <div class=\"calc-card\" style=\"background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);\">\n                    <div class=\"calc-label\">蛋白质</div>\n                    <div class=\"calc-value\">${data.healthAssessment.calculations.nutrients.protein}</div>\n                    <div style=\"font-size: 0.8em; margin-top: 5px;\">g/天</div>\n                </div>\n                <div class=\"calc-card\" style=\"background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);\">\n                    <div class=\"calc-label\">碳水化合物</div>\n                    <div class=\"calc-value\">${data.healthAssessment.calculations.nutrients.carbs}</div>\n                    <div style=\"font-size: 0.8em; margin-top: 5px;\">g/天</div>\n                </div>\n                <div class=\"calc-card\" style=\"background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);\">\n                    <div class=\"calc-label\">脂肪</div>\n                    <div class=\"calc-value\">${data.healthAssessment.calculations.nutrients.fat}</div>\n                    <div style=\"font-size: 0.8em; margin-top: 5px;\">g/天</div>\n                </div>\n            </div>\n        </div>\n\n        <div class=\"section\">\n            <h2 class=\"section-title\">📋 健康评估报告</h2>\n            <div class=\"content-area\">\n                ${assessmentData.html || assessmentData.markdown || '暂无健康评估报告'}\n            </div>\n        </div>\n\n        <div class=\"section\">\n            <h2 class=\"section-title\">🍽️ 饮食计划</h2>\n            <div class=\"content-area\">\n                ${dietPlanData.html || dietPlanData.markdown || '暂无饮食计划'}\n            </div>\n        </div>\n\n        <div class=\"section\">\n            <h2 class=\"section-title\">💪 训练计划</h2>\n            <div class=\"content-area\">\n                ${trainingPlanData.html || trainingPlanData.markdown || '暂无训练计划'}\n            </div>\n        </div>\n\n        <div class=\"footer\">\n            <p>本报告由AI健康管理系统自动生成 | ${new Date().toLocaleDateString('zh-CN')}</p>\n        </div>\n    </div>\n</body>\n</html>`;\n\nconst htmlFileName = 'health_plan_' + data.profileId + '.html';\n\n// 3. 准备Markdown文件\nconst markdownContent = `# 个性化健康管理方案\n\n**生成时间：** ${new Date(data.generatedAt).toLocaleString('zh-CN')}  \n**方案ID：** ${data.profileId}\n\n---\n\n## 👤 用户信息\n\n- **年龄：** ${data.profile.age}岁\n- **性别：** ${data.profile.gender}\n- **身高：** ${data.profile.height}cm\n- **当前体重：** ${data.profile.weight}kg\n- **目标类型：** ${data.profile.goalType}\n- **目标体重：** ${data.profile.goalValue}kg\n- **完成时间：** ${data.profile.goalTime}周\n- **每日可用时间：** ${data.profile.dailyTime}分钟\n- **厨房条件：** ${data.profile.kitchenCondition}\n- **运动设施：** ${data.profile.facility}\n- **运动经验：** ${data.profile.experience}\n\n---\n\n## 📊 健康指标\n\n### 基础指标\n- **BMI指数：** ${data.healthAssessment.calculations.bmi} (${data.healthAssessment.calculations.bmiStatus})\n- **基础代谢率 (BMR)：** ${data.healthAssessment.calculations.bmr} kcal/天\n- **每日总消耗 (TDEE)：** ${data.healthAssessment.calculations.tdee} kcal/天\n- **活动系数：** ${data.healthAssessment.calculations.activityFactor}\n- **目标热量：** ${data.healthAssessment.calculations.targetCalories} kcal/天\n- **热量缺口/盈余：** ${data.healthAssessment.calculations.calorieDeficitOrSurplus} kcal/天\n\n### 营养素目标\n- **蛋白质：** ${data.healthAssessment.calculations.nutrients.protein}g/天\n- **碳水化合物：** ${data.healthAssessment.calculations.nutrients.carbs}g/天\n- **脂肪：** ${data.healthAssessment.calculations.nutrients.fat}g/天\n\n### 目标分析\n- **目标类型：** ${data.healthAssessment.calculations.goalAnalysis.goalType}\n- **每周变化：** ${data.healthAssessment.calculations.goalAnalysis.weeklyChange}kg\n- **总周数：** ${data.healthAssessment.calculations.goalAnalysis.totalWeeks}周\n\n---\n\n## 📋 健康评估报告\n\n${assessmentData.markdown || assessmentData.html || '暂无健康评估报告'}\n\n---\n\n## 🍽️ 饮食计划\n\n${dietPlanData.markdown || dietPlanData.html || '暂无饮食计划'}\n\n---\n\n## 💪 训练计划\n\n${trainingPlanData.markdown || trainingPlanData.html || '暂无训练计划'}\n\n---\n\n*本报告由AI健康管理系统自动生成*\n`;\n\nconst markdownFileName = 'health_plan_' + data.profileId + '.md';\n\n// 返回三个文件\nreturn {\n  json: {\n    ...data,\n    jsonFileName: jsonFileName,\n    htmlFileName: htmlFileName,\n    markdownFileName: markdownFileName\n  },\n  binary: {\n    json: {\n      data: Buffer.from(jsonString, 'utf8').toString('base64'),\n      mimeType: 'application/json',\n      fileName: jsonFileName\n    },\n    html: {\n      data: Buffer.from(htmlContent, 'utf8').toString('base64'),\n      mimeType: 'text/html',\n      fileName: htmlFileName\n    },\n    markdown: {\n      data: Buffer.from(markdownContent, 'utf8').toString('base64'),\n      mimeType: 'text/markdown',\n      fileName: markdownFileName\n    }\n  }\n};\n\n"
+      },
+      "id": "ad1f2ca6-2f59-4f46-9737-c707b824a149",
+      "name": "准备保存数据1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        80,
+        1120
+      ]
+    },
+    {
+      "parameters": {
+        "fileName": "=./outputs/health/{{ $json.jsonFileName }}",
+        "dataPropertyName": "json",
+        "options": {}
+      },
+      "id": "04c3c15b-92a5-4310-b831-88c18500ba3f",
+      "name": "保存文件-json1",
+      "type": "n8n-nodes-base.writeBinaryFile",
+      "typeVersion": 1,
+      "position": [
+        464,
+        976
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "fileName": "=./outputs/health/{{ $json.markdownFileName }}",
+        "dataPropertyName": "=markdown",
+        "options": {}
+      },
+      "id": "07a23b07-1a30-41e4-9877-cfb459992565",
+      "name": "保存文件-md1",
+      "type": "n8n-nodes-base.writeBinaryFile",
+      "typeVersion": 1,
+      "position": [
+        464,
+        1280
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "fileName": "=./outputs/health/{{ $json.htmlFileName }}",
+        "dataPropertyName": "html",
+        "options": {}
+      },
+      "id": "5d332f80-83a9-4c55-bccb-0b4afb4ab2ad",
+      "name": "保存文件-html1",
+      "type": "n8n-nodes-base.writeBinaryFile",
+      "typeVersion": 1,
+      "position": [
+        464,
+        1120
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "// 解析饮食计划\nconst aiResponse = $input.item.json;\nconst profile = $('清理和转换评估结果1').item.json.profile;\nconst calculations = $('清理和转换评估结果1').item.json.calculations;\nconst assessment = $('清理和转换评估结果1').item.json.assessment;\n\nlet dietPlanText = '';\nif (aiResponse.choices && aiResponse.choices[0] && aiResponse.choices[0].message) {\n  dietPlanText = aiResponse.choices[0].message.content;\n} else if (aiResponse.content) {\n  dietPlanText = aiResponse.content;\n} else if (typeof aiResponse === 'string') {\n  dietPlanText = aiResponse;\n}\n\nreturn {\n  json: {\n    profile: profile,\n    calculations: calculations,\n    assessment: assessment,\n    dietPlan: dietPlanText\n  }\n};"
+      },
+      "id": "9f9cd18f-f661-4b9d-82db-d85a0d42e59e",
+      "name": "解析饮食计划1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -96,
+        624
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "age",
+              "name": "age",
+              "value": "={{ $('转换表单数据').item.json.age }}",
+              "type": "number"
+            },
+            {
+              "id": "gender",
+              "name": "gender",
+              "value": "={{ $('转换表单数据').item.json.gender }}",
+              "type": "string"
+            },
+            {
+              "id": "height",
+              "name": "height",
+              "value": "={{ $('转换表单数据').item.json.height }}",
+              "type": "number"
+            },
+            {
+              "id": "weight",
+              "name": "weight",
+              "value": "={{ $('转换表单数据').item.json.weight }}",
+              "type": "number"
+            },
+            {
+              "id": "goalType",
+              "name": "goalType",
+              "value": "={{ $('转换表单数据').item.json.goalType }}",
+              "type": "string"
+            },
+            {
+              "id": "goalValue",
+              "name": "goalValue",
+              "value": "={{ $('转换表单数据').item.json.goalValue }}",
+              "type": "number"
+            },
+            {
+              "id": "goalTime",
+              "name": "goalTime",
+              "value": "={{ $('转换表单数据').item.json.goalTime }}",
+              "type": "number"
+            },
+            {
+              "id": "dailyTime",
+              "name": "dailyTime",
+              "value": "={{ $('转换表单数据').item.json.dailyTime }}",
+              "type": "number"
+            },
+            {
+              "id": "kitchenCondition",
+              "name": "kitchenCondition",
+              "value": "={{ $('转换表单数据').item.json.kitchenCondition }}",
+              "type": "string"
+            },
+            {
+              "id": "facility",
+              "name": "facility",
+              "value": "={{ $('转换表单数据').item.json.facility }}",
+              "type": "string"
+            },
+            {
+              "id": "experience",
+              "name": "experience",
+              "value": "={{ $('转换表单数据').item.json.experience }}",
+              "type": "string"
+            },
+            {
+              "id": "8a936324-0c26-4ec9-8b9b-b191b3bb43e7",
+              "name": "email",
+              "value": "={{ $('转换表单数据').item.json.email }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "76d6593c-b70c-4d65-8d83-28a98e4b2b61",
+      "name": "提取数据1",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1568,
+        432
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// 数据验证\nconst data = $input.item.json;\nconst errors = [];\n\n// 验证必填字段\nif (!data.age || data.age < 10 || data.age > 100) {\n  errors.push('年龄必须在10-100之间');\n}\n\nif (!data.gender || !['男', '女'].includes(data.gender)) {\n  errors.push('性别必须是\"男\"或\"女\"');\n}\n\nif (!data.height || data.height < 100 || data.height > 250) {\n  errors.push('身高必须在100-250cm之间');\n}\n\nif (!data.weight || data.weight < 30 || data.weight > 300) {\n  errors.push('体重必须在30-300kg之间');\n}\n\n// 计算BMI并验证\nconst heightInMeters = data.height / 100;\nconst bmi = data.weight / (heightInMeters * heightInMeters);\n\nif (bmi < 10 || bmi > 50) {\n  errors.push(`BMI值异常：${bmi.toFixed(1)}，请检查输入数据`);\n}\n\n// 验证目标合理性\nif (data.goalType === '减肥' && data.goalValue >= data.weight) {\n  errors.push('目标体重必须小于当前体重');\n}\n\nif (data.goalType === '增肌' && data.goalValue <= data.weight) {\n  errors.push('目标体重必须大于当前体重');\n}\n\nconst weightDiff = Math.abs(data.goalValue - data.weight);\nconst weightDiffPercent = (weightDiff / data.weight) * 100;\n\nif (weightDiffPercent > 30) {\n  errors.push('目标体重与当前体重差异过大（超过30%），请确认目标是否合理');\n}\n\n// 验证时间合理性\nif (!data.goalTime || data.goalTime < 1 || data.goalTime > 52) {\n  errors.push('完成时间必须在1-52周之间');\n}\n\n// 如果有错误，返回错误信息\nif (errors.length > 0) {\n  return {\n    json: {\n      valid: false,\n      errors: errors,\n      data: data\n    }\n  };\n}\n\n// 计算BMI\nreturn {\n  json: {\n    valid: true,\n    data: {\n      ...data,\n      bmi: parseFloat(bmi.toFixed(2)),\n      heightInMeters: parseFloat(heightInMeters.toFixed(2)),\n      createdAt: new Date().toISOString()\n    }\n  }\n};"
+      },
+      "id": "72ea4524-fe71-49df-b59e-08f9409bf025",
+      "name": "数据验证1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1344,
+        432
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "validation-check",
+              "leftValue": "={{ $json.valid }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "da560bea-101e-4ee5-aeb6-afad51aaf8cc",
+      "name": "验证是否通过1",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        -1168,
+        432
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// 计算BMR和TDEE\nconst data = $input.item.json.data;\nconst { age, gender, height, weight, experience, dailyTime } = data;\n\n// 计算BMR (Harris-Benedict公式)\nlet bmr;\nconst heightInMeters = height / 100;\n\nif (gender === '男') {\n  bmr = 88.362 + (13.397 * weight) + (4.799 * height) - (5.677 * age);\n} else {\n  bmr = 447.593 + (9.247 * weight) + (3.098 * height) - (4.330 * age);\n}\n\n// 根据运动经验确定活动系数\nlet activityFactor;\nif (experience === '新手') {\n  activityFactor = dailyTime < 30 ? 1.2 : 1.375;\n} else if (experience === '有经验') {\n  activityFactor = dailyTime < 30 ? 1.375 : dailyTime < 60 ? 1.55 : 1.725;\n} else {\n  activityFactor = dailyTime < 60 ? 1.55 : 1.9;\n}\n\n// 计算TDEE\nconst tdee = bmr * activityFactor;\n\n// 计算目标热量\nconst { goalType, goalValue, goalTime, weight: currentWeight } = data;\nconst weightDiff = goalValue - currentWeight;\nconst weeklyWeightChange = Math.abs(weightDiff) / goalTime;\n\nlet targetCalories, calorieDeficitOrSurplus;\n\nif (goalType === '减肥') {\n  const targetWeeklyLoss = Math.min(weeklyWeightChange, 1);\n  calorieDeficitOrSurplus = -(targetWeeklyLoss * 7700) / 7;\n  targetCalories = tdee + calorieDeficitOrSurplus;\n  targetCalories = Math.max(targetCalories, bmr * 0.8);\n} else if (goalType === '增肌') {\n  const targetWeeklyGain = Math.min(weeklyWeightChange, 0.5);\n  calorieDeficitOrSurplus = (targetWeeklyGain * 7700) / 7;\n  targetCalories = tdee + calorieDeficitOrSurplus;\n} else {\n  targetCalories = tdee;\n  calorieDeficitOrSurplus = 0;\n}\n\n// 计算营养素分配\nlet protein, carbs, fat;\n\nif (goalType === '增肌') {\n  protein = weight * 2.0;\n} else if (goalType === '减肥') {\n  protein = weight * 1.4;\n} else {\n  protein = weight * 1.0;\n}\n\nconst proteinCalories = protein * 4;\nconst remainingCalories = targetCalories - proteinCalories;\n\nconst fatCalories = targetCalories * 0.25;\nfat = fatCalories / 9;\n\nconst carbCalories = remainingCalories - fatCalories;\ncarbs = carbCalories / 4;\n\n// BMI评估\nconst bmi = weight / (heightInMeters * heightInMeters);\nlet bmiStatus;\nif (bmi < 18.5) bmiStatus = '偏瘦';\nelse if (bmi < 24) bmiStatus = '正常';\nelse if (bmi < 28) bmiStatus = '偏胖';\nelse bmiStatus = '肥胖';\n\nreturn {\n  json: {\n    profile: data,\n    calculations: {\n      bmr: Math.round(bmr),\n      tdee: Math.round(tdee),\n      activityFactor: activityFactor,\n      targetCalories: Math.round(targetCalories),\n      calorieDeficitOrSurplus: Math.round(calorieDeficitOrSurplus),\n      bmi: parseFloat(bmi.toFixed(1)),\n      bmiStatus: bmiStatus,\n      nutrients: {\n        protein: Math.round(protein),\n        carbs: Math.round(carbs),\n        fat: Math.round(fat)\n      },\n      goalAnalysis: {\n        goalType: goalType,\n        weeklyChange: parseFloat(weeklyWeightChange.toFixed(2)),\n        totalWeeks: goalTime\n      }\n    }\n  }\n};"
+      },
+      "id": "242b65cb-8419-411a-a3dd-6ec4d3634bd1",
+      "name": "计算健康指标1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -768,
+        416
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "error-response",
+              "name": "success",
+              "value": false,
+              "type": "boolean"
+            },
+            {
+              "id": "error-message",
+              "name": "message",
+              "value": "={{ $json.errors.join('; ') }}",
+              "type": "string"
+            },
+            {
+              "id": "error-data",
+              "name": "errors",
+              "value": "={{ $json.errors }}",
+              "type": "array"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "26a86459-9dbb-471c-9bf2-ad528ca6bb2b",
+      "name": "错误响应1",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -912,
+        576
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.deepseek.com/v1/chat/completions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({\n  model: 'deepseek-chat',\n  messages: [\n    {\n      role: 'system',\n      content: '你是一位专业的健身营养师，拥有10年以上的健康管理经验。你擅长科学计算BMI、BMR、TDEE等健康指标，能够为用户提供专业、准确、实用的健康评估和建议。你的回答要基于科学公式和数据，同时要通俗易懂，让用户能够理解和执行。'\n    },\n    {\n      role: 'user',\n      content: $json.userPrompt\n    }\n  ],\n  temperature: 0.7,\n  max_tokens: 4000\n}) }}",
+        "options": {}
+      },
+      "id": "4e8d55ac-0007-46df-ac7a-35937359d9ff",
+      "name": "DeepSeek评估身体指标1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -320,
+        416
+      ],
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "AZ1aklY1RZIpED5g",
+          "name": "Deepseek"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// 解析DeepSeek响应\nconst aiResponse = $input.item.json;\nconst calculations = $('计算健康指标1').item.json.calculations;\nconst profile = $('计算健康指标1').item.json.profile;\n\n// 提取AI生成的文本\nlet assessmentText = '';\nif (aiResponse.choices && aiResponse.choices[0] && aiResponse.choices[0].message) {\n  assessmentText = aiResponse.choices[0].message.content;\n} else if (aiResponse.content) {\n  assessmentText = aiResponse.content;\n} else if (typeof aiResponse === 'string') {\n  assessmentText = aiResponse;\n}\n\nreturn {\n  json: {\n    profile: profile,\n    calculations: calculations,\n    assessment: assessmentText\n  }\n};"
+      },
+      "id": "293d93bb-8ce9-4481-9135-3225e872850c",
+      "name": "解析评估结果1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -96,
+        416
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "format-diet-prompt",
+              "name": "userPrompt",
+              "value": "=作为专业营养师，请为用户制定一份详细、实用、易执行的一周饮食计划。\n\n## 营养目标\n- **每日总热量**：{{ $('清理和转换评估结果1').item.json.calculations.targetCalories }} kcal\n- **蛋白质**：{{ $('清理和转换评估结果1').item.json.calculations.nutrients.protein }}g/天\n- **碳水化合物**：{{ $('清理和转换评估结果1').item.json.calculations.nutrients.carbs }}g/天\n- **脂肪**：{{ $('清理和转换评估结果1').item.json.calculations.nutrients.fat }}g/天\n\n## 用户条件\n- **厨房条件**：{{ $('清理和转换评估结果1').item.json.profile.kitchenCondition }}\n- **目标类型**：{{ $('清理和转换评估结果1').item.json.profile.goalType }}\n- **年龄**：{{ $('清理和转换评估结果1').item.json.profile.age }}岁\n- **性别**：{{ $('清理和转换评估结果1').item.json.profile.gender }}\n- **当前体重**：{{ $('清理和转换评估结果1').item.json.profile.weight }}kg\n\n## 核心要求\n\n### 1. 饮食计划内容\n- 提供早、午、晚、加餐（可选）的具体食物和分量\n- **自己做饭版本**：精确到克数，考虑食材易得性和价格\n- **外卖版本**：提供\"沙县小吃怎么选\"、\"麻辣烫如何搭配\"、\"便利店怎么选\"等实用指南\n- **综合版本**：兼顾自己做饭和外卖，提供灵活选择\n- 标注每餐的热量和营养素构成（蛋白质、碳水、脂肪）\n- 为每餐提供3-5种可替换的同类食物选择，并标注替换后的营养差异\n- 确保每日总热量和营养素接近目标值（允许±5%的误差）\n\n### 2. 营养分析（每日总结）\n- 每日总热量、蛋白质、碳水、脂肪的实际值\n- 与目标值的对比分析\n- 营养均衡性评估\n- 改进建议（如需要）\n\n### 3. 食物替换建议（增强）\n- 为每个主要食物提供3-5种替换选项\n- 标注替换后的热量和营养素差异\n- 说明什么情况下适合替换（如食材买不到、价格太贵、口味不喜欢等）\n- 提供替换后的营养分析\n\n### 4. 常见问题解答\n- **如果某样食物买不到怎么办？**\n- **如果某天热量超标了怎么办？**\n- **如果某天热量不足怎么办？**\n- **如何在外就餐时选择合适食物？**\n- **如何应对聚餐或应酬？**\n- **如何应对食欲不振或暴饮暴食？**\n\n### 5. 应急调整方案\n- 如果某天无法按计划执行，如何快速调整？\n- 如果某天热量严重超标，如何补救？\n- 如果某天热量严重不足，如何补充？\n- 提供3-5个应急调整方案\n\n### 6. 执行建议\n- 如何准备食材（采购清单建议）\n- 如何记录饮食（推荐APP或方法）\n- 如何判断计划是否有效\n- 建议多久调整一次计划\n\n## 输出格式（使用Markdown）\n\n### 每日格式\n## 【周一】\n\n**早餐**：\n- **主餐**：[食物名称] [分量]（约[热量]kcal，蛋白质[数值]g，碳水[数值]g，脂肪[数值]g）\n- **替换选项**：\n  1. [替换食物1] [分量]（热量差异：+/-X kcal）\n  2. [替换食物2] [分量]（热量差异：+/-X kcal）\n  3. [替换食物3] [分量]（热量差异：+/-X kcal）\n\n**午餐**：\n[同上格式]\n\n**晚餐**：\n[同上格式]\n\n**加餐（可选）**：\n[同上格式]\n\n**每日营养分析**：\n- 总热量：[实际值]kcal（目标：{{ $('清理和转换评估结果1').item.json.calculations.targetCalories }}kcal，差异：+/-X%）\n- 蛋白质：[实际值]g（目标：{{ $('清理和转换评估结果1').item.json.calculations.nutrients.protein }}g，差异：+/-X%）\n- 碳水化合物：[实际值]g（目标：{{ $('清理和转换评估结果1').item.json.calculations.nutrients.carbs }}g，差异：+/-X%）\n- 脂肪：[实际值]g（目标：{{ $('清理和转换评估结果1').item.json.calculations.nutrients.fat }}g，差异：+/-X%）\n- **营养均衡性**：[评估结果]\n- **改进建议**：[如有需要]\n\n### 周计划格式\n请按照上述格式，生成完整的7天饮食计划（周一到周日）。\n\n### 补充内容格式\n在7天计划之后，请添加以下内容：\n\n---\n\n## 📚 常见问题解答\n\n### Q1: 如果某样食物买不到怎么办？\n[详细解答]\n\n### Q2: 如果某天热量超标了怎么办？\n[详细解答]\n\n### Q3: 如何在外就餐时选择合适食物？\n[详细解答]\n\n---\n\n## 🔄 应急调整方案\n\n### 方案1: 热量超标时的调整\n[详细方案]\n\n### 方案2: 热量不足时的调整\n[详细方案]\n\n---\n\n## 💡 执行建议\n\n### 食材准备\n[建议]\n\n### 饮食记录\n[建议]\n\n### 进度追踪\n[建议]\n\n## 特别要求\n- 根据用户的厨房条件（自己做饭/外卖/综合）提供相应的方案\n- 考虑食材的易得性和价格\n- 根据目标类型（减肥/增肌/维持）调整食物选择\n- 使用通俗易懂的语言，避免过于专业的术语\n- 提供实用的、可执行的建议\n- 使用友好的语气，给予鼓励和支持",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "a57f2627-e4d5-4600-8ec3-378dc5c7048b",
+      "name": "格式化饮食计划提示词1",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -528,
+        624
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.deepseek.com/v1/chat/completions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({\n  model: 'deepseek-chat',\n  messages: [\n    {\n      role: 'system',\n      content: '你是一位专业的营养师，擅长制定个性化饮食计划。你熟悉各种食材的营养成分，能够根据用户的目标、条件和偏好，制定科学、实用、易执行的饮食方案。'\n    },\n    {\n      role: 'user',\n      content: $json.userPrompt\n    }\n  ],\n  temperature: 0.8,\n  max_tokens: 8000\n}) }}",
+        "options": {}
+      },
+      "id": "2725fc9e-5065-4b18-9e8f-58543912c95b",
+      "name": "DeepSeek生成饮食计划1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -320,
+        624
+      ],
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "AZ1aklY1RZIpED5g",
+          "name": "Deepseek"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "format-training-prompt",
+              "name": "userPrompt",
+              "value": "=作为专业健身教练，请为用户制定一份详细、安全、有效的{{ $('清理和转换饮食计划1').item.json.profile.goalTime }}周渐进式训练计划。\n\n## 用户信息\n- **目标**：{{ $('清理和转换饮食计划1').item.json.profile.goalType }}\n- **可用设施**：{{ $('清理和转换饮食计划1').item.json.profile.facility }}\n- **可用时间**：每日{{ $('清理和转换饮食计划1').item.json.profile.dailyTime }}分钟\n- **运动经验**：{{ $('清理和转换饮食计划1').item.json.profile.experience }}\n- **当前体重**：{{ $('清理和转换饮食计划1').item.json.profile.weight }}kg\n- **目标体重**：{{ $('清理和转换饮食计划1').item.json.profile.goalValue }}kg\n- **训练周数**：{{ $('清理和转换饮食计划1').item.json.profile.goalTime }}周\n- **年龄**：{{ $('清理和转换饮食计划1').item.json.profile.age }}岁\n- **性别**：{{ $('清理和转换饮食计划1').item.json.profile.gender }}\n\n## 核心要求\n\n### 1. 训练计划内容\n- **训练频率**：每周3-5次训练（根据用户时间和经验调整）\n- **每次训练结构**：必须包含热身（5-10分钟）、主训（根据可用时间）、拉伸（5-10分钟）\n- **动作选择**：考虑用户条件和安全性\n  - 居家无器材：充分利用身体重量，提供动作变式\n  - 健身房：提供器械训练方案\n  - 户外：提供户外运动方案\n  - 综合：提供多种选择\n- **渐进式设计**：每周逐渐增加强度（重量、组数、次数或时间）\n- **安全性**：考虑用户运动经验，新手从基础动作开始，提供详细的动作说明和注意事项\n\n### 2. 动作说明要求（详细）\n为每个动作提供：\n- **动作名称**：标准名称\n- **组数和次数/时间**：具体的训练参数\n- **动作描述**：如何正确执行动作（详细步骤）\n- **注意事项**：常见错误、安全提示、禁忌人群\n- **动作变式**：如果标准动作太难或太容易，提供变式\n- **目标肌群**：主要锻炼的肌肉群\n\n### 3. 训练计划完整性\n- **必须生成完整的{{ $('清理和转换饮食计划1').item.json.profile.goalTime }}周计划**\n- 每周都要包含完整的训练安排\n- 不要省略任何一周\n- 每周的训练要有明确的进步目标\n\n### 4. 常见问题解答\n- **如果某天没时间训练怎么办？**\n- **如果某天身体不适怎么办？**\n- **如果某个动作做不了怎么办？**\n- **如何判断训练强度是否合适？**\n- **如何应对训练平台期？**\n- **如何应对运动损伤？**\n\n### 5. 应急调整方案\n- **方案1**：如果某天无法按计划执行，如何调整？\n- **方案2**：如果某天身体不适，如何调整？\n- **方案3**：如果某个动作做不了，如何替换？\n- **方案4**：如果训练强度不够，如何增加？\n- **方案5**：如果训练强度太大，如何降低？\n\n### 6. 进度追踪建议\n- **建议记录哪些数据**：体重、体围、训练完成情况、感受等\n- **建议多久记录一次**：每天/每周\n- **如何判断进度是否正常**：提供判断标准\n- **如何调整计划**：提供调整时机和标准\n\n### 7. 安全提示\n- **运动前检查**：身体状况检查清单\n- **运动中的注意事项**：如何避免受伤\n- **运动后的恢复**：拉伸、休息、营养补充\n- **禁忌人群提醒**：什么情况下应该停止训练\n\n## 输出格式（使用Markdown）\n\n### 每周格式\n## 【第X周】\n\n**训练频率**：[X]次/周（[训练日安排，如：周一、周三、周五]）\n**本周目标**：[本周的训练目标，如：增加训练强度、学习新动作等]\n**本周重点**：[本周需要特别注意的事项]\n\n### 周一计划\n\n**热身**（5-10分钟）：\n1. **[动作名称]**：[时间/次数] - [详细描述如何执行]\n   - **注意事项**：[安全提示、常见错误]\n   - **目标**：[热身目的]\n\n2. [其他热身动作...]\n\n**主训**（[X]分钟）：\n1. **[动作名称]**：[组数]×[次数] - [详细描述如何执行]\n   - **目标肌群**：[主要锻炼的肌肉]\n   - **注意事项**：[安全提示、常见错误、禁忌人群]\n   - **动作变式**：\n     - 如果太容易：[变式1]\n     - 如果太难：[变式2]\n   - **休息时间**：组间休息[X]秒\n\n2. [其他主训动作...]\n\n**拉伸**（5-10分钟）：\n1. **[动作名称]**：保持[时间]秒 - [详细描述]\n   - **目标**：[拉伸的肌肉群]\n   - **注意事项**：[安全提示]\n\n2. [其他拉伸动作...]\n\n### 周三计划\n[同上格式]\n\n### 周五计划\n[同上格式]\n\n**本周总结**：\n- 本周完成情况：[如何评估]\n- 下周调整建议：[如有需要]\n\n### 完整周计划\n请按照上述格式，生成完整的{{ $('清理和转换饮食计划1').item.json.profile.goalTime }}周训练计划（第1周至第{{ $('清理和转换饮食计划1').item.json.profile.goalTime }}周）。\n\n### 补充内容格式\n在{{ $('清理和转换饮食计划1').item.json.profile.goalTime }}周计划之后，请添加以下内容：\n\n---\n\n## 📚 常见问题解答\n\n### Q1: 如果某天没时间训练怎么办？\n[详细解答，提供替代方案]\n\n### Q2: 如果某天身体不适怎么办？\n[详细解答，提供判断标准和调整方案]\n\n### Q3: 如果某个动作做不了怎么办？\n[详细解答，提供替换动作]\n\n### Q4: 如何判断训练强度是否合适？\n[详细解答，提供判断标准]\n\n---\n\n## 🔄 应急调整方案\n\n### 方案1: 无法按计划执行时的调整\n[详细方案]\n\n### 方案2: 身体不适时的调整\n[详细方案]\n\n### 方案3: 动作做不了时的替换\n[详细方案]\n\n---\n\n## 📊 进度追踪建议\n\n### 记录内容\n[建议记录哪些数据]\n\n### 记录频率\n[建议多久记录一次]\n\n### 进度评估\n[如何判断进度是否正常]\n\n### 计划调整\n[如何调整计划]\n\n---\n\n## ⚠️ 安全提示\n\n### 运动前检查\n[检查清单]\n\n### 运动中的注意事项\n[安全提示]\n\n### 运动后的恢复\n[恢复建议]\n\n### 禁忌人群提醒\n[什么情况下应该停止训练]\n\n## 特别要求\n- 根据用户的运动经验（没经验/有经验/经验丰富）提供适合的训练方案\n- 根据可用设施（居家/健身房/户外/综合）提供相应的动作选择\n- 根据目标类型（减肥/增肌/维持）调整训练重点\n- 根据可用时间调整训练强度和内容\n- 使用通俗易懂的语言，避免过于专业的术语\n- 提供实用的、可执行的建议\n- 使用友好的语气，给予鼓励和支持\n- 强调安全第一，提供详细的安全提示",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "0338ac87-911e-4ad9-86d0-3a805433886f",
+      "name": "格式化健身计划提示词1",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -528,
+        832
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.deepseek.com/v1/chat/completions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({\n  model: 'deepseek-chat',\n  messages: [\n    {\n      role: 'system',\n      content: '你是一位专业的健身教练，拥有丰富的训练计划制定经验。你熟悉各种训练方式，包括健身房器械训练、居家自重训练、户外运动等。你能够根据用户的目标、设施条件、时间安排和经验水平，制定科学、安全、有效的渐进式训练计划。'\n    },\n    {\n      role: 'user',\n      content: $json.userPrompt\n    }\n  ],\n  temperature: 0.8,\n  max_tokens: 8000\n}) }}",
+        "options": {}
+      },
+      "id": "e12535b2-6152-4072-8f29-4e2ba4351a5a",
+      "name": "DeepSeek生成健身计划1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -336,
+        832
+      ],
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "AZ1aklY1RZIpED5g",
+          "name": "Deepseek"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// 组合所有结果\nconst data = $input.item.json;\n\nconst result = {\n  success: true,\n  message: '健康方案生成完成',\n  profileId: 'profile_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),\n  generatedAt: new Date().toISOString(),\n  profile: data.profile,\n  healthAssessment: {\n    calculations: data.calculations,\n    aiAnalysis: data.assessment\n  },\n  dietPlan: data.dietPlan,\n  trainingPlan: data.trainingPlan\n};\n\nreturn {\n  json: result\n};"
+      },
+      "id": "59292565-3d71-4104-a548-ae9f2b59777d",
+      "name": "组合所有结果1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -144,
+        1120
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// 转换表单数据节点 - 完整代码（包含邮箱字段）\n// 转换表单数据并生成提交ID\nconst input = $input.item.json;\n\nlet formData = input.body;\nif (typeof formData === 'string') {\n  try {\n    formData = JSON.parse(formData);\n  } catch (e) {\n    formData = input.body || input;\n  }\n}\n\nif (!formData || typeof formData !== 'object') {\n  formData = input;\n}\n\n// 生成唯一的提交ID\nconst submissionId = 'sub_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);\n\n// 转换数据类型\nconst convertedData = {\n  submissionId: submissionId,\n  age: parseInt(formData.age) || 0,\n  gender: formData.gender || '',\n  height: parseInt(formData.height) || 0,\n  weight: parseFloat(formData.weight) || 0,\n  email: (formData.email || '').trim(), // 新增：邮箱字段\n  goalType: formData.goalType || '',\n  goalValue: parseFloat(formData.goalValue) || 0,\n  goalTime: parseInt(formData.goalTime) || 0,\n  dailyTime: parseInt(formData.dailyTime) || 0,\n  kitchenCondition: formData.kitchenCondition || '',\n  facility: formData.facility || '',\n  experience: formData.experience || ''\n};\n\nreturn {\n  json: convertedData\n};\n\n"
+      },
+      "id": "48be5d1f-b2aa-4045-9e4e-5fe8aadaaf61",
+      "name": "转换表单数据",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -784,
+        176
+      ]
+    },
+    {
+      "parameters": {
+        "fromEmail": "W1041859017@163.com",
+        "toEmail": "={{ $json.profile.email }}",
+        "subject": "您的AI健康报告",
+        "html": "<!DOCTYPE html>\n<html lang=\"zh-CN\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>您的个性化健康管理方案</title>\n    <style>\n        body {\n            font-family: -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", Arial, \"Microsoft YaHei\", sans-serif;\n            line-height: 1.6;\n            color: #333;\n            max-width: 600px;\n            margin: 0 auto;\n            padding: 20px;\n            background-color: #f5f5f5;\n        }\n        .email-container {\n            background-color: #ffffff;\n            border-radius: 8px;\n            padding: 30px;\n            box-shadow: 0 2px 10px rgba(0,0,0,0.1);\n        }\n        .header {\n            text-align: center;\n            border-bottom: 3px solid #4CAF50;\n            padding-bottom: 20px;\n            margin-bottom: 30px;\n        }\n        .header h1 {\n            color: #4CAF50;\n            font-size: 24px;\n            margin: 0 0 10px 0;\n        }\n        .content-section {\n            margin-bottom: 25px;\n        }\n        .content-section h2 {\n            color: #2c3e50;\n            font-size: 18px;\n            margin-bottom: 15px;\n            padding-left: 10px;\n            border-left: 4px solid #4CAF50;\n        }\n        .content-section p {\n            color: #555;\n            margin-bottom: 12px;\n            text-align: justify;\n        }\n        .highlight-box {\n            background-color: #e8f5e9;\n            border-left: 4px solid #4CAF50;\n            padding: 15px;\n            margin: 20px 0;\n            border-radius: 4px;\n        }\n        .highlight-box strong {\n            color: #2e7d32;\n        }\n        .theory-list {\n            background-color: #f9f9f9;\n            padding: 15px;\n            border-radius: 4px;\n            margin: 15px 0;\n        }\n        .theory-list ul {\n            margin: 0;\n            padding-left: 20px;\n        }\n        .theory-list li {\n            margin-bottom: 8px;\n            color: #555;\n        }\n        .attachment-notice {\n            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);\n            color: white;\n            padding: 20px;\n            border-radius: 8px;\n            text-align: center;\n            margin: 30px 0;\n        }\n        .attachment-notice h3 {\n            margin: 0 0 10px 0;\n            font-size: 20px;\n        }\n        .attachment-notice p {\n            margin: 0;\n            opacity: 0.95;\n        }\n        .footer {\n            text-align: center;\n            margin-top: 30px;\n            padding-top: 20px;\n            border-top: 1px solid #e0e0e0;\n            color: #999;\n            font-size: 12px;\n        }\n        .emoji {\n            font-size: 20px;\n            margin-right: 5px;\n        }\n    </style>\n</head>\n<body>\n    <div class=\"email-container\">\n        <div class=\"header\">\n            <h1>🏥 您的个性化健康管理方案已生成</h1>\n            <p style=\"color: #666; margin: 0;\">感谢您使用我们的健康管理服务</p>\n        </div>\n\n        <div class=\"content-section\">\n            <h2>📋 报告的重要意义</h2>\n            <p>这份个性化健康管理方案是基于您提供的基础信息，通过科学的计算方法与AI智能分析相结合，为您量身定制的专属健康指南。</p>\n            \n            <div class=\"highlight-box\">\n                <p><strong>为什么这份报告对您很重要？</strong></p>\n                <p>• <strong>科学精准</strong>：基于国际公认的健康指标计算公式，确保数据的准确性和可靠性</p>\n                <p>• <strong>个性化定制</strong>：充分考虑您的年龄、性别、目标和生活条件，制定最适合您的方案</p>\n                <p>• <strong>可执行性强</strong>：提供具体的饮食计划和训练安排，让健康管理变得简单易行</p>\n                <p>• <strong>目标导向</strong>：围绕您的健康目标（减肥/增肌/维持），提供清晰的执行路径</p>\n            </div>\n        </div>\n\n        <div class=\"content-section\">\n            <h2>🔬 基于的科学理论</h2>\n            <p>本报告的计算和分析基于以下经过验证的科学理论和公式：</p>\n            \n            <div class=\"theory-list\">\n                <ul>\n                    <li><strong>Harris-Benedict公式</strong>：用于计算基础代谢率（BMR），这是制定热量目标的基础</li>\n                    <li><strong>BMI指数评估</strong>：世界卫生组织（WHO）标准，评估体重与身高的比例关系</li>\n                    <li><strong>TDEE计算</strong>：每日总能量消耗，结合活动系数，科学评估您的日常热量需求</li>\n                    <li><strong>三大营养素配比</strong>：基于运动营养学原理，合理分配蛋白质、碳水化合物和脂肪的比例</li>\n                    <li><strong>渐进式训练原则</strong>：遵循运动生理学规律，确保训练计划的安全性和有效性</li>\n                    <li><strong>热量平衡理论</strong>：根据您的目标（减脂/增肌），科学计算热量缺口或盈余</li>\n                </ul>\n            </div>\n            \n            <p style=\"margin-top: 15px;\">这些理论和方法已被广泛应用于运动营养学、健康管理和临床实践中，具有高度的科学性和可靠性。</p>\n        </div>\n\n        <div class=\"content-section\">\n            <h2>📊 报告包含的内容</h2>\n            <p>您的健康管理方案包含以下核心内容：</p>\n            <ul style=\"color: #555; padding-left: 20px;\">\n                <li><strong>健康评估报告</strong>：详细的BMI、BMR、TDEE等指标分析</li>\n                <li><strong>个性化饮食计划</strong>：一周的详细饮食安排，包含具体食物和分量</li>\n                <li><strong>训练计划</strong>：4周渐进式训练方案，适合您的运动条件和经验</li>\n                <li><strong>营养素目标</strong>：每日蛋白质、碳水、脂肪的精确目标值</li>\n            </ul>\n        </div>\n\n        <div class=\"attachment-notice\">\n            <h3>📎 重要提示</h3>\n            <p>请务必查看邮件附件中的完整健康管理方案！</p>\n            <p style=\"margin-top: 10px; font-size: 14px;\">附件包含详细的HTML格式报告，您可以保存到本地随时查看，或打印出来作为日常参考。</p>\n        </div>\n\n        <div class=\"content-section\">\n            <h2>💡 使用建议</h2>\n            <p>为了获得最佳效果，建议您：</p>\n            <ol style=\"color: #555; padding-left: 20px;\">\n                <li>仔细阅读附件中的完整报告</li>\n                <li>根据饮食计划准备食材，或选择相似的食物替代</li>\n                <li>按照训练计划循序渐进，不要急于求成</li>\n                <li>定期记录体重变化，根据实际情况调整计划</li>\n                <li>如有疑问或需要调整，欢迎随时联系我们</li>\n            </ol>\n        </div>\n\n        <div class=\"footer\">\n            <p>祝您健康生活，早日达成目标！</p>\n            <p style=\"margin-top: 10px;\">AI健康管理系统</p>\n            <p style=\"margin-top: 5px; font-size: 11px;\">本报告仅供参考，如有健康问题请咨询专业医生</p>\n        </div>\n    </div>\n</body>\n</html>",
+        "options": {
+          "appendAttribution": false,
+          "attachments": "=html"
+        }
+      },
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        480,
+        1440
+      ],
+      "id": "652a1f57-1d27-4af5-86c4-cef60f30d2cf",
+      "name": "Send email",
+      "webhookId": "22527fb6-169a-4fca-8ec5-f7b3ae8fd481",
+      "credentials": {
+        "smtp": {
+          "id": "1SfxpBYrbGKQUVst",
+          "name": "SMTP account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "table": {
+          "__rl": true,
+          "value": "health_form_submissions",
+          "mode": "list",
+          "cachedResultName": "health_form_submissions"
+        },
+        "dataMode": "defineBelow",
+        "columnToMatchOn": "submission_id",
+        "valueToMatchOn": "={{ $('转换表单数据').item.json.submissionId }}",
+        "valuesToSend": {
+          "values": [
+            {
+              "column": "status",
+              "value": "completed"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.5,
+      "position": [
+        688,
+        1440
+      ],
+      "id": "c632e48a-dca5-4ecf-91ef-a5f2b1f2ad9b",
+      "name": "Update rows in a table",
+      "credentials": {
+        "mySql": {
+          "id": "Bo7ZmDWsF0ElfN14",
+          "name": "MySQL account"
+        }
+      }
+    }
+  ],
+  "pinData": {
+    "测试手动触发": [
+      {
+        "json": {
+          "age": 27,
+          "gender": "男",
+          "height": 175,
+          "weight": 75,
+          "goalType": "减肥",
+          "goalValue": 70,
+          "goalTime": 12,
+          "dailyTime": 45,
+          "kitchenCondition": "综合",
+          "facility": "居家",
+          "experience": "没经验"
+        }
+      }
+    ]
+  },
+  "connections": {
+    "返回成功响应": {
+      "main": [
+        [
+          {
+            "node": "返回提交成功",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "处理表单提交Webhook1": {
+      "main": [
+        [
+          {
+            "node": "提取HTTP方法2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "提取HTTP方法2": {
+      "main": [
+        [
+          {
+            "node": "判断请求类型2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "判断请求类型2": {
+      "main": [
+        [
+          {
+            "node": "返回OPTIONS响应1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "返回OPTIONS响应1": {
+      "main": [
+        [
+          {
+            "node": "转换表单数据",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "测试手动触发": {
+      "main": [
+        [
+          {
+            "node": "数据验证1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "格式化评估提示词": {
+      "main": [
+        [
+          {
+            "node": "DeepSeek评估身体指标1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "清理和转换饮食计划1": {
+      "main": [
+        [
+          {
+            "node": "格式化健身计划提示词1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "解析训练计划1": {
+      "main": [
+        [
+          {
+            "node": "清理和转换训练计划1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "清理和转换训练计划1": {
+      "main": [
+        [
+          {
+            "node": "组合所有结果1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "清理和转换评估结果1": {
+      "main": [
+        [
+          {
+            "node": "格式化饮食计划提示词1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "准备保存数据1": {
+      "main": [
+        [
+          {
+            "node": "保存文件-json1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "保存文件-html1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "保存文件-md1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Send email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "解析饮食计划1": {
+      "main": [
+        [
+          {
+            "node": "清理和转换饮食计划1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "提取数据1": {
+      "main": [
+        [
+          {
+            "node": "数据验证1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "数据验证1": {
+      "main": [
+        [
+          {
+            "node": "验证是否通过1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "验证是否通过1": {
+      "main": [
+        [
+          {
+            "node": "Insert rows in a table",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "错误响应1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "计算健康指标1": {
+      "main": [
+        []
+      ]
+    },
+    "DeepSeek评估身体指标1": {
+      "main": [
+        [
+          {
+            "node": "解析评估结果1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "解析评估结果1": {
+      "main": [
+        [
+          {
+            "node": "清理和转换评估结果1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "格式化饮食计划提示词1": {
+      "main": [
+        [
+          {
+            "node": "DeepSeek生成饮食计划1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "DeepSeek生成饮食计划1": {
+      "main": [
+        [
+          {
+            "node": "解析饮食计划1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "格式化健身计划提示词1": {
+      "main": [
+        [
+          {
+            "node": "DeepSeek生成健身计划1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "DeepSeek生成健身计划1": {
+      "main": [
+        [
+          {
+            "node": "解析训练计划1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "组合所有结果1": {
+      "main": [
+        [
+          {
+            "node": "准备保存数据1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "保存文件-json1": {
+      "main": [
+        []
+      ]
+    },
+    "保存文件-html1": {
+      "main": [
+        []
+      ]
+    },
+    "保存文件-md1": {
+      "main": [
+        []
+      ]
+    },
+    "转换表单数据": {
+      "main": [
+        [
+          {
+            "node": "提取数据1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Insert rows in a table": {
+      "main": [
+        [
+          {
+            "node": "计算健康指标1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send email": {
+      "main": [
+        [
+          {
+            "node": "Update rows in a table",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "Asia/Shanghai",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "versionId": "44f977b1-bd9b-4844-a660-ad835732926e",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "d3a129b57836a923df617b291f6dc4e215f7ce8ec15c520d1aef17ee296a9dba"
+  },
+  "id": "HpjkHxOM8njnpLMx",
+  "tags": []
+}
