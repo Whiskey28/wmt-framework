@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
@@ -21,7 +21,7 @@
             <artifactId>wmt-common</artifactId>
         </dependency>
 
-        <!-- DB 鐩稿叧 -->
+        <!-- DB 相关 -->
         <dependency>
             <groupId>com.wmt</groupId>
             <artifactId>wmt-spring-boot-starter-mybatis</artifactId>
@@ -32,7 +32,7 @@
             <artifactId>wmt-spring-boot-starter-redis</artifactId>
         </dependency>
 
-        <!-- Test 娴嬭瘯鐩稿叧 -->
+        <!-- Test 测试相关 -->
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-inline</artifactId>
@@ -43,19 +43,18 @@
         </dependency>
 
         <dependency>
-            <groupId>com.h2database</groupId> <!-- 鍗曞厓娴嬭瘯锛屾垜浠噰鐢?H2 浣滀负鏁版嵁搴?-->
+            <groupId>com.h2database</groupId> <!-- 单元测试，我们采用 H2 作为数据库 -->
             <artifactId>h2</artifactId>
         </dependency>
 
         <dependency>
-            <groupId>com.github.fppt</groupId> <!-- 鍗曞厓娴嬭瘯锛屾垜浠噰鐢ㄥ唴宓岀殑 Redis 鏁版嵁搴?-->
+            <groupId>com.github.fppt</groupId> <!-- 单元测试，我们采用内嵌的 Redis 数据库 -->
             <artifactId>jedis-mock</artifactId>
         </dependency>
 
         <dependency>
-            <groupId>uk.co.jemos.podam</groupId> <!-- 鍗曞厓娴嬭瘯锛岄殢鏈虹敓鎴?POJO 绫?-->
+            <groupId>uk.co.jemos.podam</groupId> <!-- 单元测试，随机生成 POJO 类 -->
             <artifactId>podam</artifactId>
         </dependency>
     </dependencies>
 </project>
-

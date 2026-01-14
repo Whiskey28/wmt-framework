@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
@@ -16,7 +16,6 @@
         1. security：用户的认证、权限的校验，实现「谁」可以做「什么事」
         2. operatelog：操作日志，实现「谁」在「什么时间」对「什么」做了「什么事」
     </description>
-
     <url>https://github.com/Wmt/wmt-framework</url>
 
     <dependencies>
@@ -25,18 +24,18 @@
             <artifactId>wmt-common</artifactId>
         </dependency>
 
-        <!-- Spring 鏍稿績 -->
+        <!-- Spring 核心 -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-aop</artifactId>
         </dependency>
 
-        <!-- Web 鐩稿叧 -->
+        <!-- Web 相关 -->
         <dependency>
             <groupId>com.wmt</groupId>
             <artifactId>wmt-spring-boot-starter-web</artifactId>
         </dependency>
-        <!-- spring boot 閰嶇疆鎵€闇€渚濊禆 -->
+        <!-- spring boot 配置所需依赖 -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-configuration-processor</artifactId>
@@ -48,19 +47,18 @@
             <artifactId>spring-boot-starter-security</artifactId>
         </dependency>
 
-        <!-- 宸ュ叿绫荤浉鍏?-->
+        <!-- 工具类相关 -->
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
         </dependency>
 
         <dependency>
-            <!-- Spring Boot 閫氱敤鎿嶄綔鏃ュ織缁勪欢锛屽熀浜庢敞瑙ｅ疄鐜?-->
-            <!-- 姝ょ粍浠惰В鍐崇殑闂鏄細銆岃皝銆嶅湪銆屼粈涔堟椂闂淬€嶅銆屼粈涔堛€嶅仛浜嗐€屼粈涔堜簨銆?-->
+            <!-- Spring Boot 通用操作日志组件，基于注解实现 -->
+            <!-- 此组件解决的问题是：「谁」在「什么时间」对「什么」做了「什么事」 -->
             <groupId>io.github.mouzt</groupId>
             <artifactId>bizlog-sdk</artifactId>
         </dependency>
     </dependencies>
 
 </project>
-

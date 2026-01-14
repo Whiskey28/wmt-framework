@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
@@ -21,20 +21,20 @@
             <artifactId>wmt-common</artifactId>
         </dependency>
 
-        <!-- Web 鐩稿叧 -->
+        <!-- Web 相关 -->
         <dependency>
             <groupId>com.wmt</groupId>
             <artifactId>wmt-spring-boot-starter-security</artifactId>
-            <optional>true</optional> <!-- 鍙€夛紝濡傛灉浣跨敤 DeptDataPermissionRule 蹇呴』鎻愪緵 -->
+            <optional>true</optional> <!-- 可选，如果使用 DeptDataPermissionRule 必须提供 -->
         </dependency>
 
-        <!-- DB 鐩稿叧 -->
+        <!-- DB 相关 -->
         <dependency>
             <groupId>com.wmt</groupId>
             <artifactId>wmt-spring-boot-starter-mybatis</artifactId>
         </dependency>
 
-        <!-- Test 娴嬭瘯鐩稿叧 -->
+        <!-- Test 测试相关 -->
         <dependency>
             <groupId>com.wmt</groupId>
             <artifactId>wmt-spring-boot-starter-test</artifactId>
@@ -43,4 +43,3 @@
     </dependencies>
 
 </project>
-

@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
@@ -21,13 +21,13 @@
             <artifactId>wmt-common</artifactId>
         </dependency>
 
-        <!-- Web 鐩稿叧 -->
+        <!-- Web 相关 -->
         <dependency>
             <groupId>com.wmt</groupId>
             <artifactId>wmt-spring-boot-starter-security</artifactId>
         </dependency>
 
-        <!-- DB 鐩稿叧 -->
+        <!-- DB 相关 -->
         <dependency>
             <groupId>com.wmt</groupId>
             <artifactId>wmt-spring-boot-starter-mybatis</artifactId>
@@ -38,13 +38,13 @@
             <artifactId>wmt-spring-boot-starter-redis</artifactId>
         </dependency>
 
-        <!-- Job 瀹氭椂浠诲姟鐩稿叧 -->
+        <!-- Job 定时任务相关 -->
         <dependency>
             <groupId>com.wmt</groupId>
             <artifactId>wmt-spring-boot-starter-job</artifactId>
         </dependency>
 
-        <!-- 娑堟伅闃熷垪鐩稿叧 -->
+        <!-- 消息队列相关 -->
         <dependency>
             <groupId>com.wmt</groupId>
             <artifactId>wmt-spring-boot-starter-mq</artifactId>
@@ -66,14 +66,14 @@
             <optional>true</optional>
         </dependency>
 
-        <!-- Test 娴嬭瘯鐩稿叧 -->
+        <!-- Test 测试相关 -->
         <dependency>
             <groupId>com.wmt</groupId>
             <artifactId>wmt-spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
 
-        <!-- 宸ュ叿绫荤浉鍏?-->
+        <!-- 工具类相关 -->
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
@@ -81,4 +81,3 @@
     </dependencies>
 
 </project>
-

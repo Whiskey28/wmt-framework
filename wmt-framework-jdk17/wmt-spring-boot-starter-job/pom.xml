@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
@@ -24,13 +24,13 @@
             <artifactId>wmt-common</artifactId>
         </dependency>
 
-        <!-- Job 瀹氭椂浠诲姟鐩稿叧 -->
+        <!-- Job 定时任务相关 -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-quartz</artifactId>
         </dependency>
 
-        <!-- 宸ュ叿绫荤浉鍏?-->
+        <!-- 工具类相关 -->
         <dependency>
             <groupId>jakarta.validation</groupId>
             <artifactId>jakarta.validation-api</artifactId>
@@ -39,4 +39,3 @@
     </dependencies>
 
 </project>
-

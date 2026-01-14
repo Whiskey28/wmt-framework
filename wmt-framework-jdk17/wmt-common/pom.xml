@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
@@ -16,61 +16,61 @@
     <url>https://github.com/Wmt/wmt-framework</url>
 
     <dependencies>
-        <!-- Spring 鏍稿績 -->
+        <!-- Spring 核心 -->
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-core</artifactId>
-            <scope>provided</scope> <!-- 璁剧疆涓?provided锛屽彧鏈夊伐鍏风被闇€瑕佷娇鐢ㄥ埌 -->
+            <scope>provided</scope> <!-- 设置为 provided，只有工具类需要使用到 -->
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-expression</artifactId>
-            <scope>provided</scope> <!-- 璁剧疆涓?provided锛屽彧鏈夊伐鍏风被闇€瑕佷娇鐢ㄥ埌 -->
+            <scope>provided</scope> <!-- 设置为 provided，只有工具类需要使用到 -->
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-aop</artifactId>
-            <scope>provided</scope> <!-- 璁剧疆涓?provided锛屽彧鏈夊伐鍏风被闇€瑕佷娇鐢ㄥ埌 -->
+            <scope>provided</scope> <!-- 设置为 provided，只有工具类需要使用到 -->
         </dependency>
         <dependency>
             <groupId>org.aspectj</groupId>
             <artifactId>aspectjweaver</artifactId>
-            <scope>provided</scope> <!-- 璁剧疆涓?provided锛屽彧鏈夊伐鍏风被闇€瑕佷娇鐢ㄥ埌 -->
+            <scope>provided</scope> <!-- 设置为 provided，只有工具类需要使用到 -->
         </dependency>
 
         <dependency>
-            <!-- 鐢ㄤ簬鐢熸垚鑷畾涔夌殑 Spring @ConfigurationProperties 閰嶇疆绫荤殑璇存槑鏂囦欢 -->
+            <!-- 用于生成自定义的 Spring @ConfigurationProperties 配置类的说明文件 -->
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-configuration-processor</artifactId>
             <optional>true</optional>
         </dependency>
 
-        <!-- Web 鐩稿叧 -->
+        <!-- Web 相关 -->
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-web</artifactId>
-            <scope>provided</scope> <!-- 璁剧疆涓?provided锛屽彧鏈夊伐鍏风被闇€瑕佷娇鐢ㄥ埌 -->
+            <scope>provided</scope> <!-- 设置为 provided，只有工具类需要使用到 -->
         </dependency>
 
         <dependency>
             <groupId>jakarta.servlet</groupId>
             <artifactId>jakarta.servlet-api</artifactId>
-            <scope>provided</scope> <!-- 璁剧疆涓?provided锛屽彧鏈夊伐鍏风被闇€瑕佷娇鐢ㄥ埌 -->
+            <scope>provided</scope> <!-- 设置为 provided，只有工具类需要使用到 -->
         </dependency>
 
         <dependency>
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
-            <scope>provided</scope> <!-- 璁剧疆涓?provided锛屼富瑕佹槸 PageParam 浣跨敤鍒?-->
+            <scope>provided</scope> <!-- 设置为 provided，主要是 PageParam 使用到 -->
         </dependency>
 
-        <!-- 鐩戞帶鐩稿叧 -->
+        <!-- 监控相关 -->
         <dependency>
             <groupId>org.apache.skywalking</groupId>
             <artifactId>apm-toolkit-trace</artifactId>
         </dependency>
 
-        <!-- 宸ュ叿绫荤浉鍏?-->
+        <!-- 工具类相关 -->
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
@@ -92,35 +92,35 @@
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <scope>provided</scope> <!-- 璁剧疆涓?provided锛屽彧鏈夊伐鍏风被闇€瑕佷娇鐢ㄥ埌 -->
+            <scope>provided</scope> <!-- 设置为 provided，只有工具类需要使用到 -->
         </dependency>
 
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-            <scope>provided</scope> <!-- 璁剧疆涓?provided锛屽彧鏈夊伐鍏风被闇€瑕佷娇鐢ㄥ埌 -->
+            <scope>provided</scope> <!-- 设置为 provided，只有工具类需要使用到 -->
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-core</artifactId>
-            <scope>provided</scope> <!-- 璁剧疆涓?provided锛屽彧鏈夊伐鍏风被闇€瑕佷娇鐢ㄥ埌 -->
+            <scope>provided</scope> <!-- 设置为 provided，只有工具类需要使用到 -->
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.datatype</groupId>
             <artifactId>jackson-datatype-jsr310</artifactId>
-            <scope>provided</scope> <!-- 璁剧疆涓?provided锛屽彧鏈夊伐鍏风被闇€瑕佷娇鐢ㄥ埌 -->
+            <scope>provided</scope> <!-- 设置为 provided，只有工具类需要使用到 -->
         </dependency>
 
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
-            <scope>provided</scope> <!-- 璁剧疆涓?provided锛屽彧鏈夊伐鍏风被闇€瑕佷娇鐢ㄥ埌 -->
+            <scope>provided</scope> <!-- 设置为 provided，只有工具类需要使用到 -->
         </dependency>
 
         <dependency>
             <groupId>jakarta.validation</groupId>
             <artifactId>jakarta.validation-api</artifactId>
-            <scope>provided</scope> <!-- 璁剧疆涓?provided锛屼富瑕佹槸 PageParam 浣跨敤鍒?-->
+            <scope>provided</scope> <!-- 设置为 provided，主要是 PageParam 使用到 -->
         </dependency>
 
         <dependency>
@@ -134,11 +134,11 @@
         </dependency>
 
         <dependency>
-            <groupId>com.fhs-opensource</groupId> <!-- VO 鏁版嵁缈昏瘧 -->
-            <artifactId>easy-trans-anno</artifactId> <!-- 榛樿寮曞叆鐨勫師鍥狅紝鏂逛究 xxx-module-api 鍖呬娇鐢?-->
+            <groupId>com.fhs-opensource</groupId> <!-- VO 数据翻译 -->
+            <artifactId>easy-trans-anno</artifactId> <!-- 默认引入的原因，方便 xxx-module-api 包使用 -->
         </dependency>
 
-        <!-- Test 娴嬭瘯鐩稿叧 -->
+        <!-- Test 测试相关 -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
@@ -147,4 +147,3 @@
     </dependencies>
 
 </project>
-

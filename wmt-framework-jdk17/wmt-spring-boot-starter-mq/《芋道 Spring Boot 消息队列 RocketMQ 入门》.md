@@ -1,1 +1,1 @@
-<http://www.iocoder.cn/Spring-Boot/RocketMQ/?ahzx>
+<http://www.iocoder.cn/Spring-Boot/RocketMQ/?wmt>

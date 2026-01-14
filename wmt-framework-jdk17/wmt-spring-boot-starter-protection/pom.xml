@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
@@ -16,27 +16,27 @@
     <url>https://github.com/Wmt/wmt-framework</url>
 
     <dependencies>
-        <!-- Web 鐩稿叧 -->
+        <!-- Web 相关 -->
         <dependency>
             <groupId>com.wmt</groupId>
             <artifactId>wmt-spring-boot-starter-web</artifactId>
-            <scope>provided</scope> <!-- 璁剧疆涓?provided锛屽彧鏈夐檺娴併€佸箓绛変娇鐢ㄥ埌 -->
+            <scope>provided</scope> <!-- 设置为 provided，只有限流、幂等使用到 -->
         </dependency>
 
-        <!-- DB 鐩稿叧 -->
+        <!-- DB 相关 -->
         <dependency>
             <groupId>com.wmt</groupId>
             <artifactId>wmt-spring-boot-starter-redis</artifactId>
         </dependency>
 
-        <!-- 鏈嶅姟淇濋殰鐩稿叧 -->
+        <!-- 服务保障相关 -->
         <dependency>
             <groupId>com.baomidou</groupId>
             <artifactId>lock4j-redisson-spring-boot-starter</artifactId>
             <optional>true</optional>
         </dependency>
 
-        <!-- Test 娴嬭瘯鐩稿叧 -->
+        <!-- Test 测试相关 -->
         <dependency>
             <groupId>com.wmt</groupId>
             <artifactId>wmt-spring-boot-starter-test</artifactId>
@@ -45,4 +45,3 @@
     </dependencies>
 
 </project>
-

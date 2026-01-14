@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
@@ -21,12 +21,12 @@
             <artifactId>wmt-common</artifactId>
         </dependency>
 
-        <!-- Web 鐩稿叧 -->
+        <!-- Web 相关 -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
-        <!-- spring boot 閰嶇疆鎵€闇€渚濊禆 -->
+        <!-- spring boot 配置所需依赖 -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-configuration-processor</artifactId>
@@ -35,7 +35,7 @@
         <dependency>
             <groupId>org.aspectj</groupId>
             <artifactId>aspectjweaver</artifactId>
-            <scope>provided</scope> <!-- 瑙ｅ喅宸ュ叿绫?SpringExpressionUtils 鍔犺浇鐨勬椂鍊欒闂笉鍒?org.aspectj.lang.JoinPoint 闂 -->
+            <scope>provided</scope> <!-- 解决工具类 SpringExpressionUtils 加载的时候访问不到 org.aspectj.lang.JoinPoint 问题 -->
         </dependency>
 
         <dependency>
@@ -50,14 +50,14 @@
         <dependency>
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-core</artifactId>
-            <scope>provided</scope> <!-- 璁剧疆涓?provided锛屼富瑕佹槸 GlobalExceptionHandler 浣跨敤 -->
+            <scope>provided</scope> <!-- 设置为 provided，主要是 GlobalExceptionHandler 使用 -->
         </dependency>
 
-        <!-- 宸ュ叿绫荤浉鍏?-->
+        <!-- 工具类相关 -->
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <scope>provided</scope> <!-- 璁剧疆涓?provided锛屽彧鏈夊伐鍏风被闇€瑕佷娇鐢ㄥ埌 -->
+            <scope>provided</scope> <!-- 设置为 provided，只有工具类需要使用到 -->
         </dependency>
 
         <dependency>
@@ -65,7 +65,7 @@
             <artifactId>jsoup</artifactId>
         </dependency>
 
-        <!-- Test 娴嬭瘯鐩稿叧 -->
+        <!-- Test 测试相关 -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
@@ -79,4 +79,3 @@
     </dependencies>
 
 </project>
-

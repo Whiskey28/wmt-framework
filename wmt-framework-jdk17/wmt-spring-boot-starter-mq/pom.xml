@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
@@ -16,13 +16,13 @@
     <url>https://github.com/Wmt/wmt-framework</url>
 
     <dependencies>
-        <!-- DB 鐩稿叧 -->
+        <!-- DB 相关 -->
         <dependency>
             <groupId>com.wmt</groupId>
             <artifactId>wmt-spring-boot-starter-redis</artifactId>
         </dependency>
 
-        <!-- 娑堟伅闃熷垪鐩稿叧 -->
+        <!-- 消息队列相关 -->
         <dependency>
             <groupId>org.springframework.kafka</groupId>
             <artifactId>spring-kafka</artifactId>
@@ -41,4 +41,3 @@
     </dependencies>
 
 </project>
-
