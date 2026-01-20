@@ -443,9 +443,9 @@ public class GlobalExceptionHandler {
         }
         // 9. IoT 物联网
         if (message.contains("iot_")) {
-            log.error("[IoT 物联网 wmt-module-iot - 表结构未导入][参考 https://doc.iocoder.cn/iot/build/ 开启]");
+            log.error("[IoT 物联网 wmt-module-iot - 表结构未导入][参考 iot/build/ 开启]");
             return CommonResult.error(NOT_IMPLEMENTED.getCode(),
-                    "[IoT 物联网 wmt-module-iot - 表结构未导入][参考 https://doc.iocoder.cn/iot/build/ 开启]");
+                    "[IoT 物联网 wmt-module-iot - 表结构未导入][参考 iot/build/ 开启]");
         }
         return null;
     }

@@ -4,21 +4,17 @@
     "type": "split",
     "children": [
       {
-        "id": "443322f069247990",
+        "id": "e3baba995f473d6d",
         "type": "tabs",
         "children": [
           {
-            "id": "110ad326cde951be",
+            "id": "6d44b18b66f62295",
             "type": "leaf",
             "state": {
-              "type": "markdown",
-              "state": {
-                "file": "chuang/教育类、管理类毕业论文选题指南20260113.md",
-                "mode": "preview",
-                "source": false
-              },
+              "type": "empty",
+              "state": {},
               "icon": "lucide-file",
-              "title": "教育类、管理类毕业论文选题指南20260113"
+              "title": "新标签页"
             }
           }
         ]
@@ -142,13 +138,12 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "chuang/教育类、管理类毕业论文选题指南20260113.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "教育类、管理类毕业论文选题指南20260113 的大纲"
+              "title": "大纲"
             }
           }
         ],
@@ -169,53 +164,53 @@
       "bases:创建新数据库": false
     }
   },
-  "active": "110ad326cde951be",
+  "active": "6d44b18b66f62295",
   "lastOpenFiles": [
-    "devops/sql/grafana_代码质量项目排行.zip",
-    "devops/grafana/DevOps-代码质量项目排行看板.json",
-    "devops/DevOps-代码质量项目排行看板.json",
-    "devops/grafana/ahcEnv/DevOps-代码质量项目排行看板.json",
-    "wmt-framework-jdk17/wmt-spring-boot-starter-websocket/target/reports/apidocs/resources/x.png",
-    "wmt-framework-jdk17/wmt-spring-boot-starter-websocket/target/reports/apidocs/resources/glass.png",
-    "wmt-framework-jdk17/wmt-spring-boot-starter-websocket/target/reports/apidocs/resources",
-    "wmt-framework-jdk17/wmt-spring-boot-starter-websocket/target/reports/apidocs/com/wmt/framework/websocket/core/sender/local/class-use/LocalWebSocketMessageSender.html",
-    "wmt-framework-jdk17/wmt-spring-boot-starter-websocket/target/reports/apidocs/com/wmt/framework/websocket/core/sender/local/class-use",
-    "wmt-framework-jdk17/wmt-spring-boot-starter-websocket/target/reports/apidocs/com/wmt/framework/websocket/core/sender/kafka/class-use/KafkaWebSocketMessageSender.html",
-    "wmt-framework-jdk17/wmt-spring-boot-starter-websocket/target/reports/apidocs/com/wmt/framework/websocket/core/sender/kafka/class-use/KafkaWebSocketMessageConsumer.html",
-    "wmt-framework-jdk17/wmt-spring-boot-starter-websocket/target/reports/apidocs/com/wmt/framework/websocket/core/sender/kafka/class-use/KafkaWebSocketMessage.html",
-    "wmt-framework-jdk17/wmt-spring-boot-starter-websocket/target/reports/apidocs/com/wmt/framework/websocket/core/sender/kafka/class-use",
-    "wmt-framework-jdk17/wmt-spring-boot-starter-biz-tenant/target/reports/apidocs/resources/x.png",
-    "wmt-framework-jdk17/wmt-spring-boot-starter-biz-tenant/target/reports/apidocs/resources/glass.png",
-    "wmt-framework-jdk17/wmt-spring-boot-starter-biz-ip/target/reports/apidocs/resources/x.png",
-    "wmt-framework-jdk17/wmt-spring-boot-starter-biz-ip/target/reports/apidocs/resources/glass.png",
-    "wmt-framework-jdk17/wmt-spring-boot-starter-biz-ip/target/reports/apidocs/legal/jqueryUI.md",
-    "wmt-framework-jdk17/wmt-spring-boot-starter-biz-ip/target/reports/apidocs/legal/jquery.md",
-    "devops/sql/代码质量数据表设计方案.md",
-    "wmt-framework-jdk17/wmt-spring-boot-starter-excel/target/reports/apidocs/legal/jqueryUI.md",
-    "wmt-framework-jdk17/wmt-spring-boot-starter-excel/target/reports/apidocs/legal/jquery.md",
-    "wmt-framework-jdk17/wmt-spring-boot-starter-monitor/target/reports/apidocs/legal/jqueryUI.md",
-    "wmt-framework-jdk17/wmt-spring-boot-starter-monitor/target/reports/apidocs/legal/jquery.md",
-    "wmt-framework-jdk17/wmt-spring-boot-starter-websocket/target/reports/apidocs/legal/jquery.md",
-    "wmt-framework-jdk17/wmt-spring-boot-starter-websocket/target/reports/apidocs/legal/jqueryUI.md",
-    "wmt-framework-jdk17/wmt-spring-boot-starter-biz-tenant/target/reports/apidocs/legal/jqueryUI.md",
-    "wmt-framework-jdk17/wmt-spring-boot-starter-biz-tenant/target/reports/apidocs/legal/jquery.md",
-    "wmt-framework-jdk17/wmt-spring-boot-starter-job/target/reports/apidocs/legal/jqueryUI.md",
-    "wmt-framework-jdk17/wmt-spring-boot-starter-job/target/reports/apidocs/legal/jquery.md",
-    "wmt-framework-jdk17/wmt-spring-boot-starter-mq/target/reports/apidocs/resources/x.png",
-    "wmt-framework-jdk17/wmt-spring-boot-starter-mq/target/reports/apidocs/resources/glass.png",
-    "wmt-framework-jdk17/wmt-spring-boot-starter-redis/target/reports/apidocs/legal/jqueryUI.md",
-    "wmt-framework-jdk17/wmt-spring-boot-starter-redis/target/reports/apidocs/legal/jquery.md",
-    "wmt-framework-jdk17/wmt-spring-boot-starter-mybatis/target/reports/apidocs/resources/glass.png",
-    "wmt-framework-jdk17/wmt-spring-boot-starter-mybatis/target/reports/apidocs/resources/x.png",
-    "wmt-framework-jdk17/wmt-common/target/reports/apidocs/legal/jqueryUI.md",
-    "wmt-framework-jdk17/wmt-common/target/reports/apidocs/legal/jquery.md",
-    "wmt-framework-jdk17/wmt-spring-boot-starter-monitor/《芋道 Spring Boot 链路追踪 SkyWalking 入门》.md",
-    "wmt-framework-jdk17/wmt-spring-boot-starter-monitor/《芋道 Spring Boot 监控工具 Admin 入门》.md",
-    "wmt-framework-jdk17/wmt-spring-boot-starter-monitor/《芋道 Spring Boot 监控端点 Actuator 入门》.md",
-    "wmt-framework-jdk17/wmt-spring-boot-starter-websocket/《芋道 Spring Boot WebSocket 入门》.md",
-    "wmt-framework-jdk17/wmt-spring-boot-starter-web/《芋道 Spring Boot SpringMVC 入门》.md",
-    "wmt-framework-jdk17/wmt-spring-boot-starter-web/《芋道 Spring Boot API 接口文档 Swagger 入门》.md",
-    "wmt-framework-jdk17/wmt-spring-boot-starter-test/《芋道 Spring Boot 单元测试 Test 入门》.md",
-    "wmt-framework-jdk17/wmt-spring-boot-starter-security/《芋道 Spring Boot 安全框架 Spring Security 入门》.md"
+    "wmt-framework-jdk17/wmt-spring-boot-starter-biz-data-permission/target/reports/apidocs/options",
+    "wmt-framework-jdk17/wmt-spring-boot-starter-websocket/target/reports/apidocs/options",
+    "wmt-framework-jdk17/wmt-common/target/wmt-common-2025.12-jdk17-SNAPSHOT-javadoc.jar",
+    "wmt-dependencies-jdk17/pom.xml~",
+    "chuang/教育类、管理类毕业论文选题指南20260113.md",
+    "wmt-framework-jdk17/wmt-spring-boot-starter-excel/target/reports/apidocs/packages",
+    "wmt-framework-jdk17/wmt-spring-boot-starter-excel/target/reports/apidocs/options",
+    "docs/ahc/2025年度先进个人申报-主要业绩（创新成果）.md",
+    "wmt-framework-jdk17/wmt-spring-boot-starter-biz-data-permission/target/reports/apidocs/packages",
+    "wmt-framework-jdk17/wmt-spring-boot-starter-protection/target/test-classes/com/wmt/framework/signature/core/ApiSignatureTest.class",
+    "wmt-framework-jdk17/wmt-spring-boot-starter-protection/target/classes/com/wmt/framework/signature/package-info.class",
+    "wmt-framework-jdk17/wmt-spring-boot-starter-protection/target/classes/com/wmt/framework/lock4j/package-info.class",
+    "wmt-framework-jdk17/wmt-spring-boot-starter-protection/target/classes/com/wmt/framework/ratelimiter/package-info.class",
+    "wmt-framework-jdk17/wmt-spring-boot-starter-xxljob/target/reports/apidocs/resources/glass.png",
+    "wmt-framework-jdk17/wmt-spring-boot-starter-xxljob/target/reports/apidocs/resources/x.png",
+    "wmt-framework-jdk17/wmt-spring-boot-starter-sjb/target/reports/apidocs/resources/glass.png",
+    "wmt-framework-jdk17/wmt-spring-boot-starter-sjb/target/reports/apidocs/resources/x.png",
+    "wmt-framework-jdk17/wmt-spring-boot-starter-sjb/target/reports/apidocs/legal/jqueryUI.md",
+    "wmt-framework-jdk17/wmt-spring-boot-starter-sjb/target/reports/apidocs/legal/jquery.md",
+    "wmt-framework-jdk17/wmt-spring-boot-starter-xxljob/target/reports/apidocs/legal/jqueryUI.md",
+    "wmt-framework-jdk17/wmt-spring-boot-starter-xxljob/target/reports/apidocs/legal/jquery.md",
+    "wmt-framework-jdk17/wmt-spring-boot-starter-xxljob/XXLJOB_STANDARDS.md",
+    "wmt-framework-jdk17/wmt-spring-boot-starter-xxljob/MIGRATION_GUIDE.md",
+    "wmt-framework-jdk17/wmt-spring-boot-starter-xxljob/README.md",
+    "wmt-framework-jdk17/wmt-spring-boot-starter-prometheus-grafana/GRAFANA_PERMISSION_DESIGN.md",
+    "wmt-framework-jdk17/wmt-spring-boot-starter-prometheus-grafana/DASHBOARD_TROUBLESHOOTING.md",
+    "wmt-framework-jdk17/wmt-spring-boot-starter-prometheus-grafana/VMWARE_NETWORK_SETUP.md",
+    "wmt-framework-jdk17/wmt-spring-boot-starter-prometheus-grafana/GRAFANA_VERIFICATION.md",
+    "wmt-framework-jdk17/wmt-spring-boot-starter-prometheus-grafana/TESTING_GUIDE.md",
+    "wmt-framework-jdk17/wmt-spring-boot-starter-prometheus-grafana/QUICK_FIX.md",
+    "wmt-framework-jdk17/wmt-spring-boot-starter-prometheus-grafana/README.md",
+    "wmt-framework-jdk17/wmt-spring-boot-starter-web/target/reports/apidocs/legal/jquery.md",
+    "wmt-framework-jdk17/wmt-spring-boot-starter-web/target/reports/apidocs/legal/jqueryUI.md",
+    "wmt-framework-jdk17/wmt-spring-boot-starter-test/target/reports/apidocs/resources/x.png",
+    "wmt-framework-jdk17/wmt-spring-boot-starter-test/target/reports/apidocs/resources/glass.png",
+    "wmt-framework-jdk17/wmt-spring-boot-starter-test/target/reports/apidocs/legal/jquery.md",
+    "wmt-framework-jdk17/wmt-spring-boot-starter-test/target/reports/apidocs/legal/jqueryUI.md",
+    "wmt-framework-jdk17/wmt-spring-boot-starter-security/target/reports/apidocs/resources/x.png",
+    "wmt-framework-jdk17/wmt-spring-boot-starter-security/target/reports/apidocs/resources/glass.png",
+    "wmt-framework-jdk17/wmt-spring-boot-starter-security/target/reports/apidocs/legal/jqueryUI.md",
+    "wmt-framework-jdk17/wmt-spring-boot-starter-security/target/reports/apidocs/legal/jquery.md",
+    "wmt-framework-jdk17/wmt-spring-boot-starter-redis/target/reports/apidocs/resources/x.png",
+    "wmt-framework-jdk17/wmt-spring-boot-starter-redis/target/reports/apidocs/resources/glass.png",
+    "wmt-framework-jdk17/wmt-spring-boot-starter-mybatis/target/reports/apidocs/legal/jquery.md",
+    "wmt-framework-jdk17/wmt-spring-boot-starter-mybatis/target/reports/apidocs/legal/jqueryUI.md",
+    "wmt-framework-jdk17/wmt-spring-boot-starter-mq/target/reports/apidocs/legal/jqueryUI.md"
   ]
 }
