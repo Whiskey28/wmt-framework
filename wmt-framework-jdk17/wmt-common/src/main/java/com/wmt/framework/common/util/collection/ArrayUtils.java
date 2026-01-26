@@ -13,7 +13,7 @@ import static com.wmt.framework.common.util.collection.CollectionUtils.convertLi
 /**
  * Array 工具类
  *
- * @author 芋道源码
+ * @author wmt
  */
 public class ArrayUtils {
 

@@ -1,6 +1,6 @@
 /**
  * 基于部门的数据权限规则
  *
- * @author 芋道源码
+ * @author wmt
  */
 package com.wmt.framework.datapermission.core.rule.dept;

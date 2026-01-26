@@ -5,7 +5,7 @@ import com.wmt.framework.common.biz.system.permission.dto.DeptDataPermissionResp
 /**
  * 权限 API 接口
  *
- * @author 芋道源码
+ * @author wmt
  */
 public interface PermissionCommonApi {
 

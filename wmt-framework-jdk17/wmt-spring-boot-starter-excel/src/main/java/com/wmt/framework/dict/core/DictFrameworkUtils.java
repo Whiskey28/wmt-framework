@@ -18,7 +18,7 @@ import static com.wmt.framework.common.util.collection.CollectionUtils.convertLi
 /**
  * 字典工具类
  *
- * @author 芋道源码
+ * @author wmt
  */
 @Slf4j
 public class DictFrameworkUtils {

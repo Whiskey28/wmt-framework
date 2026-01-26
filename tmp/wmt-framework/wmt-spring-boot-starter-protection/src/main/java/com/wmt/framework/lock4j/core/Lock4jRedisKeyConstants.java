@@ -3,7 +3,7 @@ package com.wmt.framework.lock4j.core;
 /**
  * Lock4j Redis Key 枚举类
  *
- * @author 芋道源码
+ * @author wmt
  */
 public interface Lock4jRedisKeyConstants {
 

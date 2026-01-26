@@ -1,0 +1,807 @@
+{
+  "name": "Fada-抖音版数据分析",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "2834335a-f0b7-4645-bb6b-0fc7c0c8dbf1",
+      "name": "手动触发",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -640,
+        -416
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "={{$json.sql}}",
+        "options": {}
+      },
+      "id": "da949811-651e-427a-9a58-a2813b9896a2",
+      "name": "数据库查询",
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.5,
+      "position": [
+        -432,
+        -224
+      ],
+      "credentials": {
+        "mySql": {
+          "id": "gQmUuvItSkBKiyUd",
+          "name": "MySQL account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// 数据验证节点 - 基础数据验证\n// 在数据清洗之前进行验证，过滤明显无效的数据\n\nconst items = $input.all();\n\n// ============================================\n// 验证规则配置\n// ============================================\n\nconst validationRules = {\n  // 标题长度限制\n  titleMinLength: 5,\n  titleMaxLength: 200,\n  \n  // 内容长度限制\n  contentMinLength: 10,\n  contentMaxLength: 50000,\n  \n  // 数值范围限制\n  maxLikes: 100000000,      // 最大点赞数（防止异常数据）\n  maxComments: 10000000,    // 最大评论数\n  maxViews: 10000000000,    // 最大播放量\n  \n  // 时间戳范围（毫秒）\n  minTimestamp: 946684800000,   // 2000-01-01\n  maxTimestamp: Date.now() + 86400000, // 允许未来1天（时区差异）\n  \n  // 必填字段\n  requiredFields: ['title', 'content_id']\n};\n\n// ============================================\n// 验证函数\n// ============================================\n\nfunction validateItem(item) {\n  const errors = [];\n  const warnings = [];\n  const data = item.json || item;\n  \n  // 1. 必填字段检查\n  if (!data.title || data.title.trim() === '') {\n    errors.push('标题(title)不能为空');\n  }\n  \n  if (!data.content_id && !data.aweme_id && !data.note_id && !data.video_id) {\n    errors.push('内容ID不能为空');\n  }\n  \n  // 2. 标题长度验证\n  if (data.title) {\n    const titleLength = data.title.trim().length;\n    if (titleLength < validationRules.titleMinLength) {\n      errors.push(`标题过短（${titleLength}字符，最少${validationRules.titleMinLength}字符）`);\n    }\n    if (titleLength > validationRules.titleMaxLength) {\n      warnings.push(`标题过长（${titleLength}字符，建议不超过${validationRules.titleMaxLength}字符）`);\n    }\n  }\n  \n  // 3. 内容长度验证\n  const content = data.content || data.desc || '';\n  const contentLength = content.trim().length;\n  if (contentLength < validationRules.contentMinLength) {\n    errors.push(`内容过短（${contentLength}字符，最少${validationRules.contentMinLength}字符）`);\n  }\n  if (contentLength > validationRules.contentMaxLength) {\n    warnings.push(`内容过长（${contentLength}字符，建议不超过${validationRules.contentMaxLength}字符）`);\n  }\n  \n  // 4. 数值范围验证\n  const likes = parseInt(data.liked_count || data.like_count || 0);\n  if (likes < 0) {\n    errors.push('点赞数不能为负数');\n  }\n  if (likes > validationRules.maxLikes) {\n    warnings.push(`点赞数异常大（${likes}），可能是异常数据`);\n  }\n  \n  const comments = parseInt(data.comment_count || 0);\n  if (comments < 0) {\n    errors.push('评论数不能为负数');\n  }\n  if (comments > validationRules.maxComments) {\n    warnings.push(`评论数异常大（${comments}），可能是异常数据`);\n  }\n  \n  // 5. 时间戳验证\n  if (data.create_time) {\n    const createTime = parseInt(data.create_time);\n    if (isNaN(createTime)) {\n      errors.push('创建时间格式无效');\n    } else {\n      // 判断是秒还是毫秒\n      const timestamp = createTime < 10000000000 ? createTime * 1000 : createTime;\n      if (timestamp < validationRules.minTimestamp) {\n        errors.push('创建时间过旧（早于2000年）');\n      }\n      if (timestamp > validationRules.maxTimestamp) {\n        warnings.push('创建时间在未来，可能是时区问题或异常数据');\n      }\n    }\n  }\n  \n  if (data.add_ts) {\n    const addTime = parseInt(data.add_ts);\n    if (isNaN(addTime)) {\n      errors.push('入库时间格式无效');\n    } else {\n      const timestamp = addTime < 10000000000 ? addTime * 1000 : addTime;\n      if (timestamp < validationRules.minTimestamp) {\n        errors.push('入库时间过旧');\n      }\n      if (timestamp > validationRules.maxTimestamp) {\n        warnings.push('入库时间在未来');\n      }\n    }\n  }\n  \n  // 6. 异常数据检测\n  // 点赞数为0但评论数很多（可能是异常）\n  if (likes === 0 && comments > 100) {\n    warnings.push('点赞数为0但评论数较多，可能是异常数据');\n  }\n  \n  // 7. 平台标识验证\n  const platform = data.platform || '';\n  const validPlatforms = ['douyin', 'xhs', 'bilibili', 'kuaishou', 'tieba', 'weibo', 'zhihu'];\n  if (platform && !validPlatforms.includes(platform)) {\n    warnings.push(`未知的平台标识: ${platform}`);\n  }\n  \n  // 8. 重复数据检测（基于内容ID）\n  // 注意：这个需要在全局范围内检测，这里只做标记\n  \n  return {\n    valid: errors.length === 0,\n    errors: errors,\n    warnings: warnings,\n    data: data\n  };\n}\n\n// ============================================\n// 批量验证\n// ============================================\n\nconst validatedItems = items.map(item => {\n  const result = validateItem(item);\n  \n  return {\n    json: {\n      ...result.data,\n      _validation: {\n        valid: result.valid,\n        errors: result.errors,\n        warnings: result.warnings,\n        error_count: result.errors.length,\n        warning_count: result.warnings.length\n      }\n    }\n  };\n});\n\n// 统计信息\nconst stats = {\n  total: validatedItems.length,\n  valid: validatedItems.filter(item => item.json._validation.valid).length,\n  invalid: validatedItems.filter(item => !item.json._validation.valid).length,\n  with_warnings: validatedItems.filter(item => item.json._validation.warnings.length > 0).length\n};\n\n// 返回验证结果\nreturn validatedItems;\n\n// 注意：如果需要过滤无效数据，可以在下一个节点中使用IF节点\n// 条件：{{ $json._validation.valid }} === true\n"
+      },
+      "id": "ddfc0a3a-e611-4303-b726-0edf5f42dd9a",
+      "name": "数据验证",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -208,
+        -224
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "validation-check",
+              "leftValue": "={{ $json._validation.valid }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "2266ef12-9b45-4b29-99e6-e15876a3034e",
+      "name": "过滤有效数据",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        16,
+        -224
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// 数据清洗节点 - 处理数字格式转换和时间戳统一\n// 输入：从数据库查询的原始数据\n// 输出：清洗后的标准化数据\n\nconst items = $input.all();\n\n// ============================================\n// 工具函数：数字格式转换\n// ============================================\n\n/**\n * 将字符串格式的数字转换为数值\n * 支持格式：\n * - \"1234\" -> 1234\n * - \"9.2万\" -> 92000\n * - \"1.5千\" -> 1500\n * - \"10.5万\" -> 105000\n */\nfunction parseNumber(value) {\n  if (value === null || value === undefined || value === '') {\n    return 0;\n  }\n  \n  // 如果已经是数字类型，直接返回\n  if (typeof value === 'number') {\n    return value;\n  }\n  \n  // 转换为字符串处理\n  const str = String(value).trim();\n  \n  // 处理\"万\"、\"千\"等中文单位\n  if (str.includes('万')) {\n    const num = parseFloat(str.replace('万', ''));\n    return isNaN(num) ? 0 : Math.round(num * 10000);\n  }\n  \n  if (str.includes('千')) {\n    const num = parseFloat(str.replace('千', ''));\n    return isNaN(num) ? 0 : Math.round(num * 1000);\n  }\n  \n  // 处理普通数字字符串\n  const num = parseFloat(str);\n  return isNaN(num) ? 0 : Math.round(num);\n}\n\n/**\n * 安全地解析数字，如果失败返回默认值\n */\nfunction safeParseNumber(value, defaultValue = 0) {\n  try {\n    return parseNumber(value);\n  } catch (e) {\n    return defaultValue;\n  }\n}\n\n// ============================================\n// 工具函数：时间戳统一处理\n// ============================================\n\n/**\n * 统一时间戳处理\n * 输入可能是秒或毫秒，统一转换为毫秒\n */\nfunction normalizeTimestamp(timestamp, platform) {\n  if (!timestamp) {\n    return null;\n  }\n  \n  // 判断单位：小于10位数是秒，大于等于10位数是毫秒\n  const ts = Number(timestamp);\n  if (isNaN(ts)) {\n    return null;\n  }\n  \n  // 根据平台判断（更准确）\n  const platformTimeUnits = {\n    douyin: 'seconds',      // create_time是秒\n    xhs: 'milliseconds',    // time是毫秒\n    bilibili: 'seconds',    // create_time是秒\n    kuaishou: 'seconds',    // create_time是秒\n    weibo: 'seconds',       // create_time是秒\n    tieba: 'string',        // publish_time是字符串\n    zhihu: 'string'         // created_time是字符串\n  };\n  \n  const unit = platformTimeUnits[platform] || 'auto';\n  \n  if (unit === 'milliseconds') {\n    return ts; // 已经是毫秒\n  } else if (unit === 'seconds') {\n    return ts * 1000; // 转换为毫秒\n  } else if (unit === 'string') {\n    // 字符串格式的时间，尝试解析\n    return parseStringTime(timestamp);\n  } else {\n    // 自动判断\n    if (ts < 10000000000) {\n      return ts * 1000; // 秒转毫秒\n    } else {\n      return ts; // 已经是毫秒\n    }\n  }\n}\n\n/**\n * 解析字符串格式的时间\n */\nfunction parseStringTime(timeStr) {\n  if (!timeStr) return null;\n  \n  try {\n    // 尝试解析常见格式\n    const date = new Date(timeStr);\n    if (!isNaN(date.getTime())) {\n      return date.getTime();\n    }\n    \n    // 尝试解析Unix时间戳字符串\n    const ts = parseInt(timeStr);\n    if (!isNaN(ts)) {\n      return ts < 10000000000 ? ts * 1000 : ts;\n    }\n    \n    return null;\n  } catch (e) {\n    return null;\n  }\n}\n\n/**\n * 将时间戳转换为可读日期格式\n */\nfunction formatTimestamp(timestamp) {\n  if (!timestamp) return null;\n  \n  try {\n    const date = new Date(timestamp);\n    return date.toISOString().replace('T', ' ').substring(0, 19);\n  } catch (e) {\n    return null;\n  }\n}\n\n// ============================================\n// 数据清洗主函数\n// ============================================\n\nfunction cleanAndNormalizeData(item) {\n  const platform = item.platform || item.json?.platform || 'douyin';\n  \n  // 提取原始数据\n  const raw = item.json || item;\n  \n  // 1. 数字字段转换\n  const likes = safeParseNumber(raw.liked_count || raw.like_count || raw.likes || 0);\n  const comments = safeParseNumber(raw.comment_count || raw.comments || raw.comment_count_from_table || 0);\n  const shares = safeParseNumber(raw.share_count || raw.shares || 0);\n  const collected = safeParseNumber(raw.collected_count || raw.collected || 0);\n  \n  // 处理播放量（不同平台字段名不同）\n  let views = 0;\n  if (raw.video_play_count) views = safeParseNumber(raw.video_play_count);\n  else if (raw.viewd_count) views = safeParseNumber(raw.viewd_count);\n  else if (raw.views) views = safeParseNumber(raw.views);\n  \n  // 2. 时间戳统一处理\n  let createTime = null;\n  let createTimeReadable = null;\n  \n  // 优先使用create_time，如果没有则使用time\n  if (raw.create_time) {\n    createTime = normalizeTimestamp(raw.create_time, platform);\n    createTimeReadable = formatTimestamp(createTime);\n  } else if (raw.time) {\n    createTime = normalizeTimestamp(raw.time, platform);\n    createTimeReadable = formatTimestamp(createTime);\n  }\n  \n  // 处理入库时间\n  let addTime = null;\n  let addTimeReadable = null;\n  if (raw.add_ts) {\n    addTime = normalizeTimestamp(raw.add_ts, platform);\n    addTimeReadable = formatTimestamp(addTime);\n  }\n  \n  // 3. 内容处理\n  const title = (raw.title || '').trim();\n  const content = (raw.content || raw.desc || '').trim();\n  const contentLength = content.length;\n  const titleLength = title.length;\n  \n  // 4. 关键词处理\n  const sourceKeyword = raw.source_keyword || '';\n  const extractedKeywords = sourceKeyword ? [sourceKeyword] : [];\n  \n  // 5. 计算衍生指标\n  // 互动率计算\n  let interactionRate = 0;\n  if (views > 0) {\n    interactionRate = (likes + comments) / views;\n  } else if (likes > 0 || comments > 0) {\n    // 无播放量时，使用点赞评论比\n    interactionRate = comments / (likes + comments || 1);\n  }\n  \n  // 热度评分基础值\n  const heatScoreBase = likes + comments * 2 + shares * 0.5 + collected * 0.3;\n  \n  // 时间衰减因子（新内容加权）\n  let timeDecay = 1;\n  if (createTime) {\n    const now = Date.now();\n    const daysSince = (now - createTime) / (1000 * 60 * 60 * 24);\n    timeDecay = Math.max(0.5, 1 - daysSince / 30); // 30天内线性衰减\n  }\n  \n  const heatScore = heatScoreBase * timeDecay;\n  \n  // 6. 数据验证标记\n  const isValid = \n    title.length >= 5 && \n    title.length <= 200 && \n    content.length >= 10 &&\n    likes >= 0 && \n    comments >= 0 &&\n    createTime !== null;\n  \n  // 7. 构建标准化数据\n  const cleaned = {\n    // 原始ID\n    id: raw.id,\n    content_id: raw.content_id || raw.aweme_id || raw.note_id || raw.video_id,\n    platform: platform,\n    \n    // 用户信息\n    user_id: raw.user_id || '',\n    nickname: raw.nickname || '',\n    avatar: raw.avatar || '',\n    ip_location: raw.ip_location || '',\n    \n    // 内容信息\n    title: title,\n    content: content,\n    content_length: contentLength,\n    title_length: titleLength,\n    content_url: raw.content_url || raw.aweme_url || raw.note_url || raw.video_url || '',\n    \n    // 关键词\n    source_keyword: sourceKeyword,\n    extracted_keywords: extractedKeywords,\n    \n    // 标准化数字字段\n    likes: likes,\n    comments: comments,\n    shares: shares,\n    collected: collected,\n    views: views,\n    sub_comments: safeParseNumber(raw.sub_comment_count || 0),\n    \n    // 时间戳（统一为毫秒）\n    create_time: createTime,\n    create_time_readable: createTimeReadable,\n    add_ts: addTime,\n    add_ts_readable: addTimeReadable,\n    \n    // 衍生指标\n    interaction_rate: parseFloat(interactionRate.toFixed(4)),\n    heat_score: parseFloat(heatScore.toFixed(2)),\n    time_decay_factor: parseFloat(timeDecay.toFixed(4)),\n    \n    // 元数据\n    content_type: raw.content_type || raw.aweme_type || raw.type || '',\n    is_valid: isValid,\n    quality_score: isValid ? 0.85 : 0.5, // 基础质量评分，后续可优化\n    \n    // 保留原始数据（用于调试）\n    _raw: {\n      liked_count: raw.liked_count,\n      comment_count: raw.comment_count,\n      share_count: raw.share_count,\n      create_time: raw.create_time,\n      add_ts: raw.add_ts\n    }\n  };\n  \n  return cleaned;\n}\n\n// ============================================\n// 批量处理\n// ============================================\n\nconst cleanedItems = items.map(item => {\n  try {\n    return cleanAndNormalizeData(item);\n  } catch (error) {\n    // 错误处理：记录错误但继续处理其他数据\n    console.error('数据清洗错误:', error);\n    return {\n      ...item.json,\n      is_valid: false,\n      error: error.message\n    };\n  }\n});\n\n// 返回清洗后的数据\nreturn cleanedItems.map(item => ({ json: item }));\n"
+      },
+      "id": "27ff87ca-79e6-4b35-b47b-c24f26b7610e",
+      "name": "数据清洗",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        224,
+        -224
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// TODO: 请实现Top10计算逻辑\n// 功能: 计算各类别的Top10热门内容\n// Mode: Run Once for All Items\n// 参考: 工作流设计文档.md 中的热度评分计算逻辑\n\nconst groupedData = $('数据分组').item.json;\n\n// 计算热度评分函数\nfunction calculateHeatScore(item) {\n  const likes = item.likes || 0;\n  const comments = item.comments || 0;\n  const shares = item.shares || 0;\n  const collected = item.collected || 0;\n  \n  let baseScore = likes * 1.0 + comments * 2.0 + shares * 0.5 + collected * 0.3;\n  \n  // 时间衰减因子\n  if (item.create_time) {\n    const now = Date.now();\n    const daysSince = (now - item.create_time) / (1000 * 60 * 60 * 24);\n    const timeDecay = Math.max(0.5, 1 - daysSince / 30);\n    baseScore = baseScore * timeDecay;\n  }\n  \n  return baseScore;\n}\n\n// 为每个分类计算Top10\nconst top10ByCategory = {};\nObject.keys(groupedData.groupedByCategory).forEach(category => {\n  const items = groupedData.groupedByCategory[category];\n  items.forEach(item => {\n    item.heat_score = calculateHeatScore(item);\n  });\n  \n  top10ByCategory[category] = items\n    .sort((a, b) => b.heat_score - a.heat_score)\n    .slice(0, 10);\n});\n\nreturn {\n  json: {\n    top10ByCategory,\n    generatedAt: new Date().toISOString()\n  }\n};"
+      },
+      "id": "ac4a37bc-e2ab-4b24-920b-44c2fcbf8987",
+      "name": "计算Top10",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -432,
+        224
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// TODO: 请实现统计分析逻辑\n// 功能: 生成全量数据统计\n// Mode: Run Once for All Items\n\nconst allItems = $('过滤低置信度').all().map(item => item.json);\nconst top10Data = $('计算Top10').item.json;\n\n// 生成统计信息\nconst stats = {\n  total_count: allItems.length,\n  category_stats: {},\n  platform_stats: {},\n  generated_at: new Date().toISOString()\n};\n\n// 按分类统计\nallItems.forEach(item => {\n  const category = item.category || '未分类';\n  if (!stats.category_stats[category]) {\n    stats.category_stats[category] = {\n      count: 0,\n      total_likes: 0,\n      total_comments: 0\n    };\n  }\n  stats.category_stats[category].count++;\n  stats.category_stats[category].total_likes += item.likes || 0;\n  stats.category_stats[category].total_comments += item.comments || 0;\n});\n\n// 计算平均值\nObject.keys(stats.category_stats).forEach(category => {\n  const cat = stats.category_stats[category];\n  cat.avg_likes = cat.total_likes / cat.count;\n  cat.avg_comments = cat.total_comments / cat.count;\n});\n\nreturn {\n  json: {\n    ...stats,\n    top10: top10Data.top10ByCategory\n  }\n};"
+      },
+      "id": "da32150a-7278-4155-becb-c8ee987d2c92",
+      "name": "统计分析",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -208,
+        224
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// 生成报表节点 - Fada抖音版\n// 功能：生成HTML格式报表，并转换为二进制格式供Write Binary File节点使用\n// Mode: Run Once for All Items\n\nconst stats = $('统计分析').item.json;\n\n// ============================================\n// 生成HTML报表内容\n// ============================================\n\nconst htmlReport = `\n<!DOCTYPE html>\n<html lang=\"zh-CN\">\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <title>Fada抖音数据分析报告</title>\n  <style>\n    * {\n      margin: 0;\n      padding: 0;\n      box-sizing: border-box;\n    }\n    body {\n      font-family: -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", Arial, sans-serif;\n      line-height: 1.6;\n      color: #333;\n      background: #f5f5f5;\n      padding: 20px;\n    }\n    .container {\n      max-width: 1200px;\n      margin: 0 auto;\n      background: white;\n      padding: 40px;\n      border-radius: 8px;\n      box-shadow: 0 2px 10px rgba(0,0,0,0.1);\n    }\n    .header {\n      border-bottom: 3px solid #4CAF50;\n      padding-bottom: 20px;\n      margin-bottom: 30px;\n    }\n    .header h1 {\n      color: #4CAF50;\n      font-size: 2.5em;\n      margin-bottom: 10px;\n    }\n    .header .meta {\n      color: #666;\n      font-size: 0.9em;\n    }\n    .section {\n      margin-bottom: 40px;\n    }\n    .section-title {\n      font-size: 1.8em;\n      color: #2c3e50;\n      margin-bottom: 20px;\n      padding-bottom: 10px;\n      border-bottom: 2px solid #e0e0e0;\n    }\n    .stats-grid {\n      display: grid;\n      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));\n      gap: 15px;\n      margin-bottom: 20px;\n    }\n    .stat-card {\n      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);\n      color: white;\n      padding: 20px;\n      border-radius: 8px;\n      text-align: center;\n    }\n    .stat-label {\n      font-size: 0.9em;\n      opacity: 0.9;\n      margin-bottom: 8px;\n    }\n    .stat-value {\n      font-size: 1.8em;\n      font-weight: bold;\n    }\n    .category-stats {\n      background: #f9f9f9;\n      padding: 15px;\n      border-radius: 5px;\n      margin-bottom: 15px;\n    }\n    .category-item {\n      padding: 10px;\n      border-bottom: 1px solid #e0e0e0;\n    }\n    .category-item:last-child {\n      border-bottom: none;\n    }\n    .category-name {\n      font-weight: bold;\n      color: #4CAF50;\n      margin-bottom: 5px;\n    }\n    .category-details {\n      font-size: 0.9em;\n      color: #666;\n    }\n    table {\n      width: 100%;\n      border-collapse: collapse;\n      margin-top: 20px;\n    }\n    th, td {\n      border: 1px solid #ddd;\n      padding: 12px;\n      text-align: left;\n    }\n    th {\n      background-color: #4CAF50;\n      color: white;\n    }\n    tr:nth-child(even) {\n      background-color: #f9f9f9;\n    }\n    .footer {\n      margin-top: 40px;\n      padding-top: 20px;\n      border-top: 2px solid #e0e0e0;\n      text-align: center;\n      color: #666;\n      font-size: 0.9em;\n    }\n  </style>\n</head>\n<body>\n  <div class=\"container\">\n    <div class=\"header\">\n      <h1>📊 Fada抖音数据分析报告</h1>\n      <div class=\"meta\">\n        <p>生成时间：${new Date(stats.generated_at).toLocaleString('zh-CN')}</p>\n        <p>报告ID：${stats.report_id || 'report_' + Date.now()}</p>\n      </div>\n    </div>\n\n    <div class=\"section\">\n      <h2 class=\"section-title\">📈 总体统计</h2>\n      <div class=\"stats-grid\">\n        <div class=\"stat-card\">\n          <div class=\"stat-label\">总数据量（抖音）</div>\n          <div class=\"stat-value\">${stats.total_count || 0}</div>\n        </div>\n        <div class=\"stat-card\" style=\"background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);\">\n          <div class=\"stat-label\">分类数量</div>\n          <div class=\"stat-value\">${Object.keys(stats.category_stats || {}).length}</div>\n        </div>\n        <div class=\"stat-card\" style=\"background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);\">\n          <div class=\"stat-label\">平台数量</div>\n          <div class=\"stat-value\">1</div>\n        </div>\n      </div>\n    </div>\n\n    <div class=\"section\">\n      <h2 class=\"section-title\">📋 分类统计</h2>\n      ${Object.keys(stats.category_stats || {}).map(category => {\n        const catStat = stats.category_stats[category];\n        return `\n        <div class=\"category-stats\">\n          <div class=\"category-item\">\n            <div class=\"category-name\">${category}</div>\n            <div class=\"category-details\">\n              数量: ${catStat.count} | \n              平均点赞: ${Math.round(catStat.avg_likes || 0)} | \n              平均评论: ${Math.round(catStat.avg_comments || 0)}\n            </div>\n          </div>\n        </div>\n        `;\n      }).join('')}\n    </div>\n\n    <div class=\"section\">\n      <h2 class=\"section-title\">🏆 抖音热门内容Top10</h2>\n      ${Object.keys(stats.top10 || {}).map(category => {\n        const top10List = stats.top10[category] || [];\n        if (top10List.length === 0) return '';\n        \n        return `\n        <h3 style=\"margin-top: 20px; color: #4CAF50;\">${category}</h3>\n        <table>\n          <thead>\n            <tr>\n              <th>排名</th>\n              <th>标题</th>\n              <th>平台</th>\n              <th>点赞数</th>\n              <th>评论数</th>\n              <th>热度评分</th>\n            </tr>\n          </thead>\n          <tbody>\n            ${top10List.map((item, index) => `\n            <tr>\n              <td>${index + 1}</td>\n              <td>${(item.title || '').substring(0, 50)}${(item.title || '').length > 50 ? '...' : ''}</td>\n              <td>${item.platform || 'douyin'}</td>\n              <td>${item.likes || 0}</td>\n              <td>${item.comments || 0}</td>\n              <td>${(item.heat_score || 0).toFixed(2)}</td>\n            </tr>\n            `).join('')}\n          </tbody>\n        </table>\n        `;\n      }).join('')}\n    </div>\n\n    <div class=\"footer\">\n      <p>本报告由 Fada抖音 数据分析系统自动生成</p>\n      <p>生成时间：${new Date().toLocaleString('zh-CN')}</p>\n    </div>\n  </div>\n</body>\n</html>\n`.trim();\n\n// ============================================\n// 生成报表ID和时间戳\n// ============================================\n\nconst reportId = 'report_' + Date.now();\nconst generatedAt = new Date().toISOString();\n\n// ============================================\n// 返回JSON和Binary数据\n// ============================================\n\n// 将HTML字符串转换为base64编码的二进制数据\nconst htmlBuffer = Buffer.from(htmlReport, 'utf8');\nconst htmlBase64 = htmlBuffer.toString('base64');\n\nreturn {\n  json: {\n    report_id: reportId,\n    generated_at: generatedAt,\n    total_count: stats.total_count || 0,\n    category_count: Object.keys(stats.category_stats || {}).length,\n    platform_count: 1\n  },\n  binary: {\n    html: {\n      data: htmlBase64,\n      mimeType: 'text/html',\n      fileName: `${reportId}.html`\n    }\n  }\n};"
+      },
+      "id": "d85483c0-0b25-4dcc-8fb9-c021d8c998df",
+      "name": "生成报表",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        16,
+        224
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "write",
+        "fileName": "=./outputs/report/{{ $json.report_id }}.html",
+        "dataPropertyName": "html",
+        "options": {}
+      },
+      "id": "6614e49f-6167-4ba4-bf4f-c86a2e769f68",
+      "name": "保存报表",
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        400,
+        224
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "// AI分类节点 - 批量处理版本\n// 功能：将多条数据批量发送给AI，一次性处理，减少API调用次数\n// Mode: Run Once for All Items\n\nconst items = $input.all();\n\n// ============================================\n// 配置参数\n// ============================================\n\nconst config = {\n  // 每批处理的数据量（建议10-20条，根据AI模型token限制调整）\n  batchSize: 60,\n  \n  // AI模型配置\n  model: 'deepseek-chat',\n  temperature: 0.7,\n  maxTokens: 4000,\n  \n  // 置信度阈值（低于此值的结果将被过滤）\n  confidenceThreshold: 0.6\n};\n\n// ============================================\n// 构建批量分类提示词\n// ============================================\n\nfunction buildBatchPrompt(batch, batchIndex) {\n  const itemsText = batch.map((item, idx) => {\n    const data = item.json;\n    return `\n===内容${idx + 1}===\nID: ${data.id || data.content_id}\n平台: ${data.platform || 'unknown'}\n标题: ${data.title || ''}\n内容: ${(data.content || '').substring(0, 500)}${(data.content || '').length > 500 ? '...' : ''}\n点赞数: ${data.likes || 0}\n评论数: ${data.comments || 0}\n分享数: ${data.shares || 0}\n创建时间: ${data.create_time_readable || ''}\n关键词: ${data.source_keyword || ''}\n`.trim();\n  }).join('\\n\\n');\n\n  const prompt = `你是一位专业的内容分类专家。请对以下${batch.length}条内容进行智能分类分析。\n\n## 任务要求\n1. 仔细分析每条内容的主题、意图、表达方式\n2. 根据内容特征，自主确定最合适的分类类别\n3. 可以参考以下类别，但不限于这些：\n   - 论文求助：用户寻求论文帮助、研究方法、写作指导、问题咨询等\n   - 论文科普：知识分享、论文解读、学术观点传播、经验分享等\n   - 资源分享：论文资源、工具推荐、资料分享等\n   - 经验交流：写作经验、研究心得、学术讨论等\n   - 其他：如果内容不符合上述类别，可以创建新的类别名称\n4. 一个内容可以属于多个类别（多标签分类）\n\n## 内容列表\n${itemsText}\n\n## 输出要求\n请返回JSON数组格式，每个元素对应一条内容的分类结果：\n[\n  {\n    \"id\": 内容ID,\n    \"categories\": [\"类别1\", \"类别2\"],\n    \"primary_category\": \"类别1\",\n    \"confidence\": 0.0-1.0,\n    \"reason\": \"分类理由的详细说明\",\n    \"keywords\": [\"关键词1\", \"关键词2\"],\n    \"tags\": [\"标签1\", \"标签2\"],\n    \"intent\": \"内容意图描述\",\n    \"content_type\": \"内容类型\"\n  },\n  ...\n]\n\n## 注意事项\n- 分类要准确反映内容的本质特征\n- 如果内容模糊或难以分类，降低confidence值\n- 新类别名称要简洁明了，便于理解\n- 多标签分类时，按重要性排序\n- 返回的数组长度必须与输入的内容数量一致\n- 确保每个结果都包含id字段，对应输入内容的ID\n\n请开始分析并返回JSON数组：`;\n\n  return prompt;\n}\n\n// ============================================\n// 批量处理主逻辑\n// ============================================\n\n// 将数据分批\nconst batches = [];\nfor (let i = 0; i < items.length; i += config.batchSize) {\n  batches.push(items.slice(i, i + config.batchSize));\n}\n\nconsole.log(`总共${items.length}条数据，分为${batches.length}批处理，每批${config.batchSize}条`);\n\n// 存储所有分类结果\nconst allResults = [];\n\n// 为每批数据构建提示词并返回\n// 注意：n8n的HTTP Request节点会自动循环处理每个输出项\n// 所以这里返回多个项，每个项对应一批数据\nconst batchOutputs = batches.map((batch, batchIndex) => {\n  const prompt = buildBatchPrompt(batch, batchIndex);\n  \n  return {\n    json: {\n      batchIndex: batchIndex + 1,\n      batchSize: batch.length,\n      totalBatches: batches.length,\n      prompt: prompt,\n      // 保存原始数据，用于后续合并\n      items: batch.map(item => item.json),\n      // aiResponse 将在HTTP Request节点后填充\n      aiResponse: null\n    }\n  };\n});\n\n// 返回所有批次的数据\n// 每个批次会作为单独的输出项传递给HTTP Request节点\nreturn batchOutputs;\n\n// ============================================\n// 使用说明：\n// 1. 这个节点用于准备批量提示词\n// 2. Mode: Run Once for All Items\n// 3. 输出：每个批次作为一个输出项（n8n会自动循环处理）\n// 4. 连接到HTTP Request节点，HTTP Request节点会对每批数据调用AI API\n// 5. AI返回结果后，使用\"合并AI响应\"节点将结果合并\n// 6. 最后使用\"解析批量分类结果\"节点解析所有批次的结果\n// ============================================\n"
+      },
+      "id": "942f877c-4667-4c1c-80df-5bc6137fdaad",
+      "name": "准备批量分类",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        432,
+        -224
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.deepseek.com/v1/chat/completions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({\n  model: 'deepseek-chat',\n  messages: [\n    {\n      role: 'system',\n      content: '你是一位专业的内容分类专家，擅长对社交媒体内容进行智能分类。请严格按照JSON数组格式返回结果，确保数组长度与输入内容数量一致。'\n    },\n    {\n      role: 'user',\n      content: $json.prompt\n    }\n  ],\n  temperature: 0.7,\n  max_tokens: 8000,\n  response_format: { type: 'json_object' }\n}) }}",
+        "options": {}
+      },
+      "id": "16b4a820-cf7a-4584-8351-44269fe2f02e",
+      "name": "AI批量分类",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        656,
+        -224
+      ],
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "AZ1aklY1RZIpED5g",
+          "name": "Deepseek"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// 合并AI响应节点\n// 功能：将AI返回的结果合并到批量数据中（每个批次输出1条）\n// Mode: ✅ Run Once for Each Item\n//\n// 说明：\n// - 在 “Run Once for Each Item” 模式下，只能用 $input.item 取当前这一条\n// - HTTP Request 节点会为每个输入批次返回一个输出，并通过 pairedItem 关联到原始批次\n// - 我们用 pairedItem.item 作为批次索引，到“准备批量分类”里把对应的 batch 拿回来\n\n// 当前 HTTP Request（AI批量分类）输出的这一条\nconst currentItem = $input.item;\nconst aiResponse = currentItem.json;\n\n// pairedItem.item 指向“AI批量分类”的输入索引，也就是“准备批量分类”的批次索引\nconst pairedIndex =\n  typeof currentItem.pairedItem?.item === 'number'\n    ? currentItem.pairedItem.item\n    : 0;\n\n// ✅ 注意：这里必须用 .all() 拿到“准备批量分类”的所有批次数据，否则 prompt/items 会丢\nconst preparedBatches = $('准备批量分类').all();\n\n// 找到这一批对应的原始 batch 数据\nconst batchData = preparedBatches[pairedIndex]?.json ?? {\n  batchIndex: pairedIndex + 1,\n  batchSize: 0,\n  totalBatches: preparedBatches.length,\n  prompt: '',\n  items: [],\n};\n\n// 输出：每个批次 1 条，带上 prompt / items / aiResponse\nreturn {\n  json: {\n    ...batchData,\n    aiResponse,\n  },\n};"
+      },
+      "id": "01be4340-3e30-4ffb-8499-bf76b6ba50d8",
+      "name": "合并AI响应",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -656,
+        16
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// 解析批量分类结果节点\n// 功能：解析AI返回的批量分类结果，合并到原始数据中\n// Mode: ✅ Run Once for All Items\n//\n// 上游输入结构（来自「合并AI响应」节点，每个 item 表示一个批次）：\n// {\n//   batchIndex: number,      // 批次序号（1-based）\n//   batchSize: number,       // 本批条数\n//   totalBatches: number,    // 总批次数\n//   prompt: string,          // 发送给 AI 的完整 prompt\n//   items: [ {...}, ... ],   // 本批原始内容数组（每条是一个 json）\n//   aiResponse: {...}        // AI 返回的原始响应（DeepSeek / OpenAI 风格）\n// }\n//\n// 本节点目标：把所有批次展开，变成一条条带分类结果的 item 流输出。\n\n// 一次性拿到上游「合并AI响应」输出的所有批次\nconst batchResults = $input.all();\n\n// ============================================\n// 工具函数：解析 AI 返回的 JSON\n// ============================================\n\nfunction parseAIResponse(aiResponse) {\n  if (!aiResponse) {\n    return null;\n  }\n\n  // 提取 AI 返回内容\n  let content = '';\n  if (aiResponse.choices && aiResponse.choices[0] && aiResponse.choices[0].message) {\n    // OpenAI / DeepSeek Chat Completion 格式\n    content = aiResponse.choices[0].message.content;\n  } else if (aiResponse.content) {\n    // 兼容 content 字段\n    content = aiResponse.content;\n  } else if (typeof aiResponse === 'string') {\n    content = aiResponse;\n  }\n\n  if (!content) {\n    return null;\n  }\n\n  // 清理可能的 markdown 代码块包裹并解析 JSON\n  try {\n    content = content.trim();\n    if (content.startsWith('```json')) {\n      content = content.replace(/```json\\s*/g, '').replace(/```\\s*/g, '');\n    } else if (content.startsWith('```')) {\n      content = content.replace(/```\\s*/g, '');\n    }\n\n    const parsed = JSON.parse(content);\n\n    // 确保返回数组\n    if (Array.isArray(parsed)) {\n      return parsed;\n    } else if (parsed.results && Array.isArray(parsed.results)) {\n      return parsed.results;\n    } else {\n      return [parsed];\n    }\n  } catch (e) {\n    console.error('解析AI响应失败:', e);\n    console.error('响应内容(前500字符):', content.substring(0, 500));\n    return null;\n  }\n}\n\n// ============================================\n// 主逻辑：把分类结果合并回原始 items\n// ============================================\n\nconst allClassifiedItems = [];\n\nbatchResults.forEach(batchResult => {\n  const batchData = batchResult.json || {};\n  const items = Array.isArray(batchData.items) ? batchData.items : [];\n  const aiResponse = batchData.aiResponse;\n\n  // 解析本批 AI 的分类结果\n  const classifications = parseAIResponse(aiResponse);\n\n  if (!classifications || !Array.isArray(classifications)) {\n    console.warn(`批次 ${batchData.batchIndex} 解析失败，使用默认“未分类”结果`);\n\n    // 解析失败时，为每条 item 填一个兜底分类\n    items.forEach(item => {\n      allClassifiedItems.push({\n        ...item,\n        category: '未分类',\n        categories: [],\n        category_confidence: 0,\n        category_reason: 'AI解析失败',\n        keywords: [],\n        tags: [],\n        intent: '',\n        content_type: '',\n        classification_error: true,\n      });\n    });\n    return;\n  }\n\n  // 将分类结果逐条合并到原始 items\n  items.forEach((item, index) => {\n    let classification = null;\n\n    // 1）优先按同索引匹配\n    if (classifications[index]) {\n      classification = classifications[index];\n    } else {\n      // 2）尝试按 ID 匹配\n      classification = classifications.find(c =>\n        c.id === item.id ||\n        c.id === item.content_id ||\n        (c.id === undefined && index < classifications.length)\n      );\n    }\n\n    // 3）仍然匹配不到则给一个默认分类\n    if (!classification) {\n      classification = {\n        categories: [],\n        primary_category: '未分类',\n        confidence: 0,\n        reason: '未找到匹配的分类结果',\n        keywords: [],\n        tags: [],\n        intent: '',\n        content_type: '',\n      };\n    }\n\n    allClassifiedItems.push({\n      ...item,\n      category: classification.primary_category || '未分类',\n      categories: classification.categories || [],\n      category_confidence: classification.confidence || 0,\n      category_reason: classification.reason || '',\n      keywords: classification.keywords || [],\n      tags: classification.tags || [],\n      intent: classification.intent || '',\n      content_type: classification.content_type || '',\n    });\n  });\n});\n\n// ============================================\n// 返回结果（含兜底逻辑）\n// ============================================\n\n// 如果一个结果都没有，返回一条 warning，避免 n8n 显示 “No output data returned”\nif (allClassifiedItems.length === 0) {\n  return [\n    {\n      json: {\n        _warning:\n          '解析批量分类结果：没有生成任何输出项（通常是上游合并后的 batchData.items 为空或 AI 返回为空）',\n        batches_in: batchResults.length,\n        sample_batch: batchResults[0]?.json\n          ? {\n              batchIndex: batchResults[0].json.batchIndex,\n              batchSize: batchResults[0].json.batchSize,\n              totalBatches: batchResults[0].json.totalBatches,\n              items_len: Array.isArray(batchResults[0].json.items)\n                ? batchResults[0].json.items.length\n                : null,\n              has_aiResponse: !!batchResults[0].json.aiResponse,\n            }\n          : null,\n      },\n    },\n  ];\n}\n\n// 正常情况：展开为逐条 item 流\nreturn allClassifiedItems.map(item => ({ json: item }));\n"
+      },
+      "id": "682fa0eb-89d3-465d-9256-912cb861b1b3",
+      "name": "解析批量分类结果",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -448,
+        16
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "confidence-check",
+              "leftValue": "={{ $json.category_confidence }}",
+              "rightValue": 0.6,
+              "operator": {
+                "type": "number",
+                "operation": "gte"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "fb892ac9-f4ca-4c89-bbe6-513e0c277104",
+      "name": "过滤低置信度",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        -224,
+        16
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// TODO: 请实现数据分组逻辑\n// 功能: 按分类和平台分组数据\n// Mode: Run Once for All Items\n\nconst items = $input.all();\n\n// 按主要分类分组\nconst groupedByCategory = {};\nconst groupedByPlatform = {};\nconst groupedByCategoryAndPlatform = {};\n\nitems.forEach(item => {\n  const data = item.json;\n  const category = data.category || '未分类';\n  const platform = data.platform || 'unknown';\n  \n  // 按分类分组\n  if (!groupedByCategory[category]) {\n    groupedByCategory[category] = [];\n  }\n  groupedByCategory[category].push(data);\n  \n  // 按平台分组\n  if (!groupedByPlatform[platform]) {\n    groupedByPlatform[platform] = [];\n  }\n  groupedByPlatform[platform].push(data);\n  \n  // 按分类+平台组合分组\n  const key = `${category}_${platform}`;\n  if (!groupedByCategoryAndPlatform[key]) {\n    groupedByCategoryAndPlatform[key] = [];\n  }\n  groupedByCategoryAndPlatform[key].push(data);\n});\n\nreturn {\n  json: {\n    groupedByCategory,\n    groupedByPlatform,\n    groupedByCategoryAndPlatform,\n    totalItems: items.length\n  }\n};"
+      },
+      "id": "b3139e0f-d3f6-4c72-8f01-ab616c3bfbd4",
+      "name": "数据分组",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -656,
+        224
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// 确保文件夹存在节点\n// 功能：在保存文件之前，确保目标文件夹存在\n// Mode: Run Once for All Items\n// \n// ⚠️ 注意：n8n的Code节点不允许使用fs模块\n// 解决方案：使用Execute Command节点或手动创建文件夹\n// \n// 这个节点现在只做数据传递，不执行文件系统操作\n// 请使用以下方法之一确保文件夹存在：\n// \n// 方法1：手动创建文件夹（推荐）\n//   在n8n工作目录下创建 outputs/report 文件夹\n//\n// 方法2：使用Execute Command节点\n//   在\"生成报表\"和\"保存报表\"之间添加Execute Command节点\n//   命令：mkdir -p ./outputs/report  (Linux/Mac)\n//   或：   if not exist \"outputs\\report\" mkdir \"outputs\\report\"  (Windows)\n//\n// 方法3：删除此节点，直接让Write Binary File节点处理\n//   Write Binary File节点可能会自动创建目录（取决于n8n版本）\n\n// ============================================\n// 输出目录信息（用于日志）\n// ============================================\n\nconst outputDirs = [\n  './outputs/report',      // 报表目录\n  './outputs/reports',     // 备选报表目录\n  './reports',             // 简单报表目录\n  './storage/reports'      // n8n存储目录\n];\n\nconsole.log('📁 目标输出目录:');\noutputDirs.forEach(dir => {\n  console.log(`  - ${dir}`);\n});\n\nconsole.log('⚠️ 请确保这些文件夹已存在，否则文件保存可能失败');\nconsole.log('💡 建议：手动创建 outputs/report 文件夹');\n\n// ============================================\n// 返回原始数据\n// ============================================\n\n// 不做任何修改，直接返回输入数据\nreturn $input.all();\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        224,
+        224
+      ],
+      "id": "82e31bb3-2e60-4f8d-b718-619e935d9a6b",
+      "name": "确保文件夹存在节点"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT \n  da.source_keyword,\n  COUNT(*) AS keyword_count,\n  MIN(FROM_UNIXTIME(da.create_time)) AS first_time,\n  MAX(FROM_UNIXTIME(da.create_time)) AS last_time\nFROM douyin_aweme da\nWHERE da.source_keyword IS NOT NULL\n  AND da.source_keyword != ''\nGROUP BY da.source_keyword\nORDER BY keyword_count DESC, da.source_keyword ASC;",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.5,
+      "position": [
+        -432,
+        -416
+      ],
+      "id": "8bca9257-32d4-4108-897f-92f2b2e7dbb9",
+      "name": "抖音关键词列表",
+      "credentials": {
+        "mySql": {
+          "id": "gQmUuvItSkBKiyUd",
+          "name": "MySQL account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "8eaeacaf-8959-4da9-b051-321aac8df8f3",
+              "name": "keywords_raw",
+              "value": "毕业论文",
+              "type": "string"
+            },
+            {
+              "id": "1f84c9db-6497-4bf3-8417-270f92b5350c",
+              "name": "days",
+              "value": 180,
+              "type": "number"
+            },
+            {
+              "id": "3f3ee3ab-f7e4-4140-a207-edd8144513e4",
+              "name": "limit",
+              "value": 20,
+              "type": "number"
+            },
+            {
+              "id": "6fb081bd-5ee7-4c8d-a9f8-0a8155866a60",
+              "name": "useSourceKeyword",
+              "value": true,
+              "type": "boolean"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -224,
+        -416
+      ],
+      "id": "42937013-bb19-4143-8730-5d72a00f68ad",
+      "name": "工作流参数"
+    },
+    {
+      "parameters": {
+        "jsCode": "// 解析工作流参数，生成标准化配置\n// 输入：来自“工作流参数” Set 节点\n\nconst input = $input.item.json || {};\n\nconst keywordsRaw = String(input.keywords_raw || '')\n  .split(/[,\\n，]/)\n  .map(k => k.trim())\n  .filter(k => k.length > 0);\n\nconst days = Number(input.days ?? 7);\nconst limit = Number(input.limit ?? 1000);\nconst useSourceKeyword = input.useSourceKeyword !== false;\n\n// 输出为后续“数据查询-SQL生成”节点使用\nreturn {\n  json: {\n    keywords: keywordsRaw.length > 0 ? keywordsRaw : ['论文', 'AI', '人工智能'],\n    days,\n    limit,\n    useSourceKeyword,\n    platforms: ['douyin']  // Fada抖音：只分析抖音\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -16,
+        -416
+      ],
+      "id": "ce19c4f0-0491-4fb7-b469-32fe342daa4a",
+      "name": "解析关键词参数"
+    },
+    {
+      "parameters": {
+        "jsCode": "// 数据查询节点 - Fada抖音专用 SQL 生成\n// 功能：根据“工作流参数”节点中的关键词和时间范围，动态生成只针对 douyin_aweme 的 SQL\n// Mode: Run Once for All Items\n\nconst params = $('解析关键词参数').item.json || {};\n\n// ============================================\n// 配置\n// ============================================\n\nconst config = {\n  keywords: params.keywords || ['论文', 'AI', '人工智能'],\n  days: params.days ?? 7,\n  limit: params.limit ?? 1000,\n  useSourceKeyword: params.useSourceKeyword !== false\n};\n\n// ============================================\n// 工具函数：生成关键词条件\n// ============================================\n\nfunction generateKeywordCondition(keywords, useSourceKeyword = true) {\n  if (!keywords || keywords.length === 0) {\n    return '1=1'; // 无关键词限制\n  }\n\n  const escapedKeywords = keywords\n    .map(k => `'${String(k).replace(/'/g, \"''\")}'`)\n    .join(', ');\n\n  if (useSourceKeyword) {\n    const keywordCondition = `da.source_keyword IN (${escapedKeywords})`;\n    const fallbackCondition = keywords\n      .map(k => {\n        const escaped = String(k).replace(/'/g, \"''\");\n        return `(da.title LIKE '%${escaped}%' OR da.desc LIKE '%${escaped}%')`;\n      })\n      .join(' OR ');\n\n    return `(\n      ${keywordCondition}\n      OR (da.source_keyword IS NULL AND (${fallbackCondition}))\n    )`;\n  } else {\n    const conditions = keywords\n      .map(k => {\n        const escaped = String(k).replace(/'/g, \"''\");\n        return `(da.title LIKE '%${escaped}%' OR da.desc LIKE '%${escaped}%')`;\n      })\n      .join(' OR ');\n    return `(${conditions})`;\n  }\n}\n\n// 时间范围（最近 N 天），针对 add_ts（毫秒）\nfunction generateTimeCondition(days) {\n  return `da.add_ts >= UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL ${days} DAY)) * 1000`;\n}\n\n// ============================================\n// 生成抖音 SQL\n// ============================================\n\nfunction generateDouyinSQL(config) {\n  const keywordCondition = generateKeywordCondition(\n    config.keywords,\n    config.useSourceKeyword\n  );\n  const timeCondition = generateTimeCondition(config.days);\n\n  const sql = `\nSELECT \n  'douyin' AS platform,\n  da.id,\n  da.aweme_id AS content_id,\n  da.user_id,\n  da.nickname,\n  da.avatar,\n  da.title,\n  da.desc AS content,\n  da.source_keyword,\n  da.liked_count,\n  da.comment_count,\n  da.share_count,\n  da.collected_count,\n  da.create_time,\n  da.add_ts,\n  da.last_modify_ts,\n  da.aweme_type AS content_type,\n  da.ip_location,\n  da.aweme_url AS content_url,\n  -- 评论数（备用）\n  (SELECT COUNT(*) \n   FROM douyin_aweme_comment dac \n   WHERE dac.aweme_id = da.aweme_id) AS comment_count_from_table,\n  -- 子评论数（备用）\n  (SELECT COALESCE(SUM(CAST(dac.sub_comment_count AS UNSIGNED)), 0) \n   FROM douyin_aweme_comment dac \n   WHERE dac.aweme_id = da.aweme_id) AS sub_comment_count\nFROM douyin_aweme da\nWHERE\n  ${keywordCondition}\n  AND ${timeCondition}\n  AND da.title IS NOT NULL\n  AND da.title != ''\n  AND da.desc IS NOT NULL\nORDER BY da.add_ts DESC\nLIMIT ${config.limit};\n  `.trim();\n\n  return sql;\n}\n\nconst sql = generateDouyinSQL(config);\n\n// 输出给下游 MySQL 节点使用\nreturn {\n  json: {\n    sql,\n    config\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        192,
+        -416
+      ],
+      "id": "c1437c22-c4a0-4a73-bdc0-d10cc1d9b275",
+      "name": "数据查询-SQL生成"
+    },
+    {
+      "parameters": {
+        "jsCode": "// 生成内容生成上下文 - 为阶段4内容生成提供 summary / top10_list / key_findings\n// Mode: Run Once for All Items\n\nconst stats = $('统计分析').item.json;\nconst top10ByCategory = stats.top10 || {};\n\n// 1. 总体摘要\nconst total = stats.total_count || 0;\nconst categoryCount = Object.keys(stats.category_stats || {}).length;\n\nconst summaryLines = [];\nsummaryLines.push(`本次 Fada抖音 共分析抖音内容 ${total} 条，AI 自动识别出 ${categoryCount} 个主要内容类别。`);\n\nif (stats.category_stats) {\n  const sortedCats = Object.entries(stats.category_stats)\n    .sort((a, b) => (b[1].count || 0) - (a[1].count || 0))\n    .slice(0, 3);\n\n  if (sortedCats.length > 0) {\n    const catSummary = sortedCats\n      .map(([name, s]) => `${name}（${s.count} 条，平均点赞约 ${Math.round(s.avg_likes || 0)}）`)\n      .join('，');\n    summaryLines.push(`其中，数量和互动表现较突出的类别包括：${catSummary}。`);\n  }\n}\n\nconst summary = summaryLines.join('\\n');\n\n// 2. Top10 列表（按分类）\nconst top10Lines = [];\nObject.keys(top10ByCategory).forEach(category => {\n  const list = top10ByCategory[category] || [];\n  if (!list.length) return;\n\n  top10Lines.push(`### 类别：${category}`);\n  list.slice(0, 10).forEach((item, idx) => {\n    const title = (item.title || '').trim();\n    const likes = item.likes || 0;\n    const comments = item.comments || 0;\n    const heat = item.heat_score || 0;\n    const url = item.content_url || '';\n    top10Lines.push(\n      `- TOP${idx + 1}：${title}（点赞：${likes}，评论：${comments}，热度评分：${heat.toFixed(2)}）` +\n      (url ? ` [链接](${url})` : '')\n    );\n  });\n  top10Lines.push(''); // 空行分隔\n});\n\nconst top10_list = top10Lines.join('\\n');\n\n// 3. 关键发现（简单规则版，可以后面再优化）\nconst keyFindingLines = [];\n\nif (stats.category_stats) {\n  const sortedByCount = Object.entries(stats.category_stats)\n    .sort((a, b) => (b[1].count || 0) - (a[1].count || 0));\n  if (sortedByCount.length > 0) {\n    const [topCat, topStat] = sortedByCount[0];\n    keyFindingLines.push(\n      `- 在所有抖音内容中，「${topCat}」类占比最高，共 ${topStat.count} 条，是当前最值得重点关注的方向。`\n    );\n  }\n}\n\nif (stats.platform_stats && stats.platform_stats.douyin) {\n  const ps = stats.platform_stats.douyin;\n  keyFindingLines.push(\n    `- 从平台维度看，本次分析仅针对抖音，平均点赞约 ${Math.round(ps.avg_likes || 0)}，平均评论约 ${Math.round(ps.avg_comments || 0)}。`\n  );\n}\n\nif (!keyFindingLines.length) {\n  keyFindingLines.push('- 当前样本量有限，建议后续扩大抓取范围以便形成更稳定的趋势判断。');\n}\n\nconst key_findings = keyFindingLines.join('\\n');\n\n// 4. 输出给阶段4使用\nreturn {\n  json: {\n    summary,\n    top10_list,\n    key_findings,\n    platform: '抖音',\n    platform_key: 'douyin',\n    style: '适合抖音的短视频口语化文案风格，轻松、有画面感，带一点故事性和互动感。',\n    word_limit: '800-1200字'\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -656,
+        448
+      ],
+      "id": "fc952f78-11f4-4068-b9cb-a750dc1deb81",
+      "name": "生成内容生成上下文"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.deepseek.com/v1/chat/completions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({\n  model: 'deepseek-chat',\n  messages: [\n    {\n      role: 'system',\n      content: '你是一位专业的内容创作专家，擅长根据数据分析结果生成高质量的社交媒体文章。'\n    },\n    {\n      role: 'user',\n      content: $json.userPrompt\n    }\n  ],\n  temperature: 0.8,\n  max_tokens: 4000\n}) }}",
+        "options": {}
+      },
+      "id": "e1b9646f-ffb4-4a27-9744-f75db567cf5d",
+      "name": "AI生成内容",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -112,
+        448
+      ],
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "AZ1aklY1RZIpED5g",
+          "name": "Deepseek"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// 格式化内容\n// 功能: 格式化生成的内容，提取标题、正文、标签\n// Mode: Run Once for Each Item\n\nconst aiResponse = $input.item.json;\n\n// 提取AI生成的内容\nlet content = '';\nif (aiResponse.choices && aiResponse.choices[0] && aiResponse.choices[0].message) {\n  content = aiResponse.choices[0].message.content;\n} else if (aiResponse.content) {\n  content = aiResponse.content;\n}\n\nconst lines = String(content || '').split('\\n');\nlet title = '';\nlet body = '';\nlet tags = [];\n\n// 提取标题（第一个 # 开头的行）\nfor (const line of lines) {\n  if (line.startsWith('# ')) {\n    title = line.replace('# ', '').trim();\n    break;\n  }\n}\n\n// 提取正文（去除标题后的所有内容）\nlet titleFound = false;\nfor (const line of lines) {\n  if (line.startsWith('# ')) {\n    titleFound = true;\n    continue;\n  }\n  if (titleFound) {\n    body += line + '\\n';\n  }\n}\n\n// 提取标签（从内容中查找 #标签）\nconst tagRegex = /#([^\\s#]+)/g;\nconst matches = String(content || '').match(tagRegex);\nif (matches) {\n  tags = matches.map(tag => tag.replace('#', ''));\n}\n\n// 平台从上游继承（若无则默认为 douyin）\nconst platform = $json.platform_key || $json.platform || 'douyin';\n\nreturn {\n  json: {\n    title: title || '未命名文章',\n    content: body.trim() || content,\n    raw_content: content,\n    tags,\n    generated_at: new Date().toISOString(),\n    platform\n  }\n};"
+      },
+      "id": "f1aeeec1-1399-40de-876b-87867bc903db",
+      "name": "格式化内容",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        208,
+        448
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// 发布准备 - 修复保存内容节点（支持二进制输出）\n// 功能: 准备发布所需的数据和文件，将 raw_content 转换为二进制格式供 Write Binary File 节点使用\n// Mode: Run Once for Each Item\n\nconst contentData = $('格式化内容').item.json;\n\n// 准备发布数据\nconst publishData = {\n  platform: contentData.platform || 'douyin',\n  title: contentData.title,\n  content: contentData.content,\n  raw_content: contentData.raw_content,\n  tags: contentData.tags || [],\n  publish_time: new Date().toISOString(),\n  metadata: {\n    generated_at: contentData.generated_at,\n    word_count: (contentData.content || '').length,\n    tag_count: (contentData.tags || []).length,\n    source: 'Fada抖音'\n  }\n};\n\n// ============================================\n// 关键修复：将 raw_content 字符串转换为二进制格式\n// ============================================\n\nconst rawContentText = String(publishData.raw_content || '');\nconst rawContentBuffer = Buffer.from(rawContentText, 'utf8');\nconst rawContentBase64 = rawContentBuffer.toString('base64');\n\n// 返回 JSON 和 Binary 数据\nreturn {\n  json: {\n    ...publishData,\n    publish_data: publishData  // 方便\"保存元数据\"节点使用\n  },\n  binary: {\n    raw_content: {\n      data: rawContentBase64,\n      mimeType: 'text/markdown',\n      fileName: `${publishData.platform}_${publishData.publish_time.replace(/[:.]/g, '-')}.md`\n    }\n  }\n};\n"
+      },
+      "id": "eecb2ed7-a888-4add-9ce9-c16431a59dc3",
+      "name": "发布准备",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        432,
+        448
+      ]
+    },
+    {
+      "parameters": {
+        "fileName": "=./content-to-publish/{{ $json.platform }}_{{ $json.publish_time }}.md",
+        "dataPropertyName": "raw_content",
+        "options": {}
+      },
+      "id": "99c53f41-2f5b-499c-861e-300e8f54849b",
+      "name": "保存内容（手动发布）",
+      "type": "n8n-nodes-base.writeBinaryFile",
+      "typeVersion": 1,
+      "position": [
+        848,
+        448
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "fileName": "=./content-to-publish/{{ $json.platform }}_{{ $json.publish_time }}.json",
+        "dataPropertyName": "publish_data",
+        "options": {}
+      },
+      "id": "c8b68758-9c15-4f40-b3e6-2f8ddfd14b9b",
+      "name": "保存元数据",
+      "type": "n8n-nodes-base.writeBinaryFile",
+      "typeVersion": 1,
+      "position": [
+        848,
+        624
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "// 转换元数据为二进制\n// Mode: Run Once for Each Item\n\nconst input = $input.item.json || {};\nconst publishData = input.publish_data || input;\n\nconst jsonString = JSON.stringify(publishData, null, 2);\nconst jsonBase64 = Buffer.from(jsonString, 'utf8').toString('base64');\n\nreturn {\n  json: input,\n  binary: {\n    publish_data: {\n      data: jsonBase64,\n      mimeType: 'application/json',\n      fileName: `${publishData.platform || 'douyin'}_${(publishData.publish_time || new Date().toISOString()).replace(/[:.]/g, '-')}.json`\n    }\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        640,
+        624
+      ],
+      "id": "ed2c6d58-372c-4a37-84c5-18fba5a6c523",
+      "name": "转换元数据为二进制"
+    },
+    {
+      "parameters": {
+        "jsCode": "// 格式化内容生成提示词 - Code 节点版本\n// Mode: Run Once for Each Item\n\nconst input = $input.item.json || {};\n\nconst userPrompt = `基于以下 Fada抖音 的数据分析结果，生成一篇适合在${input.platform || '抖音'}发布的文章。\n\n## 数据分析摘要\n${input.summary || ''}\n\n## 热门内容Top10\n${input.top10_list || ''}\n\n## 关键发现\n${input.key_findings || ''}\n\n## 要求\n1. 标题吸引人，符合抖音内容风格（适合短视频配文或图文说明）\n2. 内容结构清晰，包含：\n   - 引言（整体数据概览）\n   - 论文求助类内容分析\n   - 论文科普类内容分析\n   - 热门内容解读（结合 Top10 案例）\n   - 趋势洞察（对未来一段时间的方向性判断）\n   - 总结与行动建议\n3. 语言风格：${input.style || '适合抖音的短视频口语化文案风格，轻松、有画面感，带一点故事性和互动感。'}\n4. 字数：${input.word_limit || '800-1200字'}\n5. 适当加入话题标签（如 #论文 #毕业论文 #AI写作 等），以提升在抖音的曝光效果。\n\n请生成完整的文章内容（Markdown格式）。`;\n\nreturn {\n  json: {\n    userPrompt: userPrompt\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -448,
+        448
+      ],
+      "id": "eb854d7d-1836-409e-b3dc-39e6c67ea492",
+      "name": "格式化内容生成提示词1"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "手动触发": {
+      "main": [
+        [
+          {
+            "node": "抖音关键词列表",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "数据库查询": {
+      "main": [
+        [
+          {
+            "node": "数据验证",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "数据验证": {
+      "main": [
+        [
+          {
+            "node": "过滤有效数据",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "过滤有效数据": {
+      "main": [
+        [
+          {
+            "node": "数据清洗",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "数据清洗": {
+      "main": [
+        [
+          {
+            "node": "准备批量分类",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "计算Top10": {
+      "main": [
+        [
+          {
+            "node": "统计分析",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "统计分析": {
+      "main": [
+        [
+          {
+            "node": "生成报表",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "生成报表": {
+      "main": [
+        [
+          {
+            "node": "确保文件夹存在节点",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "生成内容生成上下文",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "准备批量分类": {
+      "main": [
+        [
+          {
+            "node": "AI批量分类",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI批量分类": {
+      "main": [
+        [
+          {
+            "node": "合并AI响应",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "合并AI响应": {
+      "main": [
+        [
+          {
+            "node": "解析批量分类结果",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "解析批量分类结果": {
+      "main": [
+        [
+          {
+            "node": "过滤低置信度",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "过滤低置信度": {
+      "main": [
+        [
+          {
+            "node": "数据分组",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "数据分组": {
+      "main": [
+        [
+          {
+            "node": "计算Top10",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "确保文件夹存在节点": {
+      "main": [
+        [
+          {
+            "node": "保存报表",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "抖音关键词列表": {
+      "main": [
+        [
+          {
+            "node": "工作流参数",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "工作流参数": {
+      "main": [
+        [
+          {
+            "node": "解析关键词参数",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "解析关键词参数": {
+      "main": [
+        [
+          {
+            "node": "数据查询-SQL生成",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "数据查询-SQL生成": {
+      "main": [
+        [
+          {
+            "node": "数据库查询",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI生成内容": {
+      "main": [
+        [
+          {
+            "node": "格式化内容",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "格式化内容": {
+      "main": [
+        [
+          {
+            "node": "发布准备",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "发布准备": {
+      "main": [
+        [
+          {
+            "node": "保存内容（手动发布）",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "转换元数据为二进制",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "生成内容生成上下文": {
+      "main": [
+        [
+          {
+            "node": "格式化内容生成提示词1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "转换元数据为二进制": {
+      "main": [
+        [
+          {
+            "node": "保存元数据",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "格式化内容生成提示词1": {
+      "main": [
+        [
+          {
+            "node": "AI生成内容",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "32e4ca93-345f-4886-b1e4-09c22060e84b",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "d3a129b57836a923df617b291f6dc4e215f7ce8ec15c520d1aef17ee296a9dba"
+  },
+  "id": "jhhaS1YQ9HvG98WlUdoq4",
+  "tags": []
+}
