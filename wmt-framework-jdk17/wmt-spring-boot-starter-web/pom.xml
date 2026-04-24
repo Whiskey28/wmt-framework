@@ -26,12 +26,17 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
             <exclusions>
-                <!-- 框架层不绑定具体 Servlet 容器，便于适配 TongWeb 等国产中间件 -->
+                <!-- 信创分支不透传内嵌 Tomcat，统一由 TongWeb 承载 Servlet 容器 -->
                 <exclusion>
                     <groupId>org.springframework.boot</groupId>
                     <artifactId>spring-boot-starter-tomcat</artifactId>
                 </exclusion>
             </exclusions>
+        </dependency>
+        <dependency>
+            <!-- 开箱即用：业务系统只引入框架即可使用 TongWeb -->
+            <groupId>com.tongweb.springboot</groupId>
+            <artifactId>tongweb-spring-boot-starter-3.x</artifactId>
         </dependency>
         <!-- spring boot 配置所需依赖 -->
         <dependency>
