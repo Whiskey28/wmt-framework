@@ -10,7 +10,7 @@ import static com.wmt.framework.web.core.util.WebFrameworkUtils.HEADER_TENANT_ID
 /**
  * 多租户 Util
  *
- * @author 芋道源码
+ * @author wmt
  */
 public class TenantUtils {
 

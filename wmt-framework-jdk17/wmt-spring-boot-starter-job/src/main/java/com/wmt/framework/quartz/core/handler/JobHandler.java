@@ -3,7 +3,7 @@ package com.wmt.framework.quartz.core.handler;
 /**
  * 任务处理器
  *
- * @author 芋道源码
+ * @author wmt
  */
 public interface JobHandler {
 

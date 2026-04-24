@@ -15,7 +15,7 @@ import static com.wmt.framework.common.exception.enums.GlobalErrorCodeConstants.
 /**
  * 演示 Filter，禁止用户发起写操作，避免影响测试数据
  *
- * @author 芋道源码
+ * @author wmt
  */
 public class DemoFilter extends OncePerRequestFilter {
 
