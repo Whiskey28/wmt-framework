@@ -170,6 +170,13 @@
                 <groupId>org.springdoc</groupId>
                 <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
                 <version>${springdoc.version}</version>
+                <exclusions>
+                    <!-- 信创环境统一移除 Tomcat EL 实现，避免被 validation 传递引入 -->
+                    <exclusion>
+                        <groupId>org.apache.tomcat.embed</groupId>
+                        <artifactId>tomcat-embed-el</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <!-- 统一去掉默认 Tomcat，框架及业务工程可按需接入 TongWeb 等容器 -->
@@ -192,6 +199,18 @@
                     <exclusion>
                         <groupId>org.springframework.boot</groupId>
                         <artifactId>spring-boot-starter-tomcat</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <!-- 兜底策略：即使某些三方 starter 引入 validation，也不允许传入 Tomcat EL -->
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-validation</artifactId>
+                <version>${spring.boot.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.apache.tomcat.embed</groupId>
+                        <artifactId>tomcat-embed-el</artifactId>
                     </exclusion>
                 </exclusions>
             </dependency>
@@ -337,6 +356,13 @@
                 <groupId>org.apache.rocketmq</groupId>
                 <artifactId>rocketmq-spring-boot-starter</artifactId>
                 <version>${rocketmq-spring.version}</version>
+                <exclusions>
+                    <!-- RocketMQ 会经由 spring-boot-starter-validation 传递 Tomcat EL -->
+                    <exclusion>
+                        <groupId>org.apache.tomcat.embed</groupId>
+                        <artifactId>tomcat-embed-el</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
 
             <!-- 服务保障相关 -->
