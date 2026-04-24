@@ -28,6 +28,9 @@
         <module>wmt-spring-boot-starter-biz-tenant</module>
         <module>wmt-spring-boot-starter-biz-data-permission</module>
         <module>wmt-spring-boot-starter-biz-ip</module>
+
+        <module>wmt-spring-boot-starter-sjb</module>
+        <module>wmt-spring-boot-starter-xxljob</module>
     </modules>
 
     <artifactId>wmt-framework-jdk17</artifactId>
@@ -41,6 +44,6 @@
             2. 业务组件：和业务相关的组件的封装，例如说数据字典、操作日志等等。
         如果是业务组件，Maven 名字会包含 biz
     </description>
-    <url>https://github.com/Wmt/wmt-framework</url>
+
 
 </project>
