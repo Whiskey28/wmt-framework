@@ -20,14 +20,16 @@
 - `wmt-framework-jdk17/wmt-spring-boot-starter-websocket`：
   - 排除 `spring-boot-starter-tomcat`。
   - 默认引入 `tongweb-spring-boot-starter-3.x`。
+  - 新增引入 `tongweb-spring-boot-websocket-3.x`，补齐 TongWeb WebSocket 官方适配链路。
 - `wmt-framework-jdk17/wmt-spring-boot-starter-mybatis`：在已有 `undertow` 排除基础上，新增 `tomcat` 排除。
 
 ## 业务工程验证建议
 
 1. 业务工程仅依赖本信创组件库（无需额外引入 TongWeb Starter）。
 2. 启动后验证：
-   - 登录鉴权链路（`security`）
-   - 全局异常、参数处理、过滤器链（`web`）
-   - WebSocket 握手与消息收发（`websocket`）
+  - 登录鉴权链路（`security`）
+  - 全局异常、参数处理、过滤器链（`web`）
+  - WebSocket 握手与消息收发（`websocket`）
 3. 通过 `mvn dependency:tree` 验证运行时容器依赖为 TongWeb，且无 `spring-boot-starter-tomcat`。
 4. 对比 Tomcat 基线回归核心接口，确认无行为回归。
+5. 若使用本地授权，将 `license.dat` 放入 `src/main/resources` 根目录，并确认日志出现 license 校验成功信息。

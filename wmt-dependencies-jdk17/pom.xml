@@ -220,6 +220,12 @@
                 <artifactId>tongweb-spring-boot-starter-3.x</artifactId>
                 <version>${tongweb-spring-boot.version}</version>
             </dependency>
+            <dependency>
+                <!-- WebSocket 场景需引入 TongWeb 对应 websocket 适配器 -->
+                <groupId>com.tongweb.springboot</groupId>
+                <artifactId>tongweb-spring-boot-websocket-3.x</artifactId>
+                <version>${tongweb-spring-boot.version}</version>
+            </dependency>
 
             <!-- DB 相关 -->
             <dependency>

@@ -49,6 +49,11 @@
             <groupId>com.tongweb.springboot</groupId>
             <artifactId>tongweb-spring-boot-starter-3.x</artifactId>
         </dependency>
+        <dependency>
+            <!-- TongWeb 官方建议：WebSocket 场景引入 websocket 专用 starter -->
+            <groupId>com.tongweb.springboot</groupId>
+            <artifactId>tongweb-spring-boot-websocket-3.x</artifactId>
+        </dependency>
 
         <!-- 消息队列相关 -->
         <dependency>
