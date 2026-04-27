@@ -9,12 +9,14 @@
 3. `03-配置手册.md`：常用配置与推荐值
 4. `04-开发指南.md`：典型业务开发路径和示例
 5. `05-排障手册.md`：常见问题、定位方式、处理建议
-6. `tongweb-xinchuang-verify-jdk17.md`：TongWeb 适配与验证说明
+6. `06-中间件替换SOP-v1.md`：Tomcat->TongWeb 与 Redis->TongRDS 整体替换流程
+7. `tongweb-xinchuang-verify-jdk17.md`：TongWeb 适配与验证说明
 
 ## 建议阅读顺序
 
 - 新项目接入：`01 -> 02 -> 03 -> 04`
 - 线上问题排查：`05`
+- 中间件替换实施：`06`
 - 信创容器核验：`tongweb-xinchuang-verify-jdk17.md`
 
 ## 版本说明
