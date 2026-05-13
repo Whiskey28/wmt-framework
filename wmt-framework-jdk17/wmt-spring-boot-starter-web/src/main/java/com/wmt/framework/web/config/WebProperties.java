@@ -20,6 +20,11 @@ public class WebProperties {
     private Api appApi = new Api("/app-api", "**.controller.app.**");
     @NotNull(message = "Admin API 不能为空")
     private Api adminApi = new Api("/admin-api", "**.controller.admin.**");
+    /**
+     * 普惠金融小程序等专用 C 端 API 前缀；与 {@code app-api}（如会员端）分离。
+     */
+    @NotNull(message = "PFB API 不能为空")
+    private Api pfbApi = new Api("/pfb-api", "**.controller.pfb.**");
 
     @NotNull(message = "Admin UI 不能为空")
     private Ui adminUi;
