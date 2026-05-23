@@ -47,7 +47,7 @@
 
     <properties>
         <!-- parent.parent = wmt-jdk17 仓库根；避免子模块二次插值 project.basedir 指到模块目录 -->
-        <proguard.config>${project.parent.parent.basedir}/docs/proguard/proguard-jdk17-starter.conf</proguard.config>
+        <proguard.config>${project.parent.parent.basedir}/docs/proguard/${proguard.starter.config.file}</proguard.config>
     </properties>
 
     <profiles>

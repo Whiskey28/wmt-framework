@@ -10,6 +10,13 @@ Spring Boot Starter 类库不适合「全量 shrink + 重命名」，否则易�
 
 JDK17 线采用 **分模块规则 + 库模块禁止 shrink** 的策略（见 `proguard-jdk17-library.conf` / `proguard-jdk17-starter.conf`）。
 
+默认规则已启用 **元数据剥离**（`-renamesourcefileattribute`、不保留 `SourceFile`/`LineNumberTable`），降低 jadx 还原度，不影响对外 API 与 Spring 装配。
+
+| Profile | 规则文件 | 说明 |
+|---------|----------|------|
+| `-Pobfuscate` | `proguard-jdk17-*.conf` | 默认发布混淆 |
+| `-Pobfuscate-strong` | `proguard-jdk17-*-strong.conf` | 加强版（独立规则链，便于后续收紧 keep） |
+
 ## 试点模块
 
 - 库模块：`wmt-common`（覆盖为 `proguard-jdk17-library.conf`）
@@ -26,6 +33,18 @@ mvn -pl wmt-framework-jdk17/wmt-common -am clean package -Pobfuscate -DskipTests
 export PROGUARD_JDK_HOME="$(/usr/libexec/java_home -v 17)"
 mvn -f wmt-framework-jdk17/pom.xml clean package -Pobfuscate -DskipTests
 # 等价：mvn -pl wmt-framework-jdk17 -amd clean package -Pobfuscate -DskipTests（需在仓库根目录）
+
+# 加强混淆（规则链独立，当前与默认等价，预留后续收紧）
+mvn -f wmt-framework-jdk17/pom.xml clean package -Pobfuscate-strong -DskipTests
+```
+
+## 切换分支后构建
+
+本地 `~/.m2` 可能残留另一分支的 `wmt-dependencies-jdk17` BOM；模块下的 `.flattened-pom.xml` 也可能过期。切换 `main` ↔ `xinchuang/tongweb` 后建议：
+
+```bash
+find wmt-framework-jdk17 wmt-dependencies-jdk17 -name '.flattened-pom.xml' -delete
+mvn -f wmt-dependencies-jdk17/pom.xml clean install -DskipTests
 ```
 
 产物：

@@ -12,7 +12,7 @@
     <packaging>jar</packaging>
 
     <properties>
-        <proguard.config>${project.parent.parent.basedir}/docs/proguard/proguard-jdk17-library.conf</proguard.config>
+        <proguard.config>${project.parent.parent.basedir}/docs/proguard/${proguard.library.config.file}</proguard.config>
     </properties>
 
     <name>${project.artifactId}</name>
