@@ -93,9 +93,43 @@ mvn -f wmt-framework-jdk17/pom.xml clean package -Pobfuscate -DskipTests
 
 全量构建需先修复 main 上 JDK17 编译（建议 `export JAVA_HOME=$(/usr/libexec/java_home -v 17)`，并排查 `starter-web` 编译链）。信创分支 `feat/pfb-api-c2` 上全量 `-Pobfuscate` 此前已通过。
 
-**尚未 push**（本地 main 领先 origin 3 commits）。
+**尚未 push**（本地 main 领先 origin 4 commits）。
 
-### 阶段 2：整理信创长期分支
+### 阶段 2：整理信创长期分支 ✅
+
+已完成（2026-05-23）：
+
+- 自 `feat/xinchuang-tongweb-verify` 创建 **`xinchuang/tongweb`**
+- Fast-forward 合入 `feat/pfb-api-c2`（PFB /pfb-api）
+- Merge **`main`**（单向同步 ProGuard 基建，无冲突）
+- 删除 `wmt-framework/`、`wmt-dependencies/`（JDK8 整树）
+- `.gitignore` 忽略 `docs/xinchuang-tongweb/TongWeb_Embed/license.dat`
+
+**验证（xinchuang/tongweb + JAVA_HOME=17）：**
+
+```bash
+export JAVA_HOME="$(/usr/libexec/java_home -v 17)"
+export PROGUARD_JDK_HOME="$JAVA_HOME"
+mvn -f wmt-framework-jdk17/pom.xml clean package -Pobfuscate -DskipTests
+```
+
+| 项 | 结果 |
+|----|------|
+| 全量 17 模块 + ProGuard | ✅ BUILD SUCCESS |
+| `proguard_map.txt` | ✅ 17 个模块各 1 份 |
+
+**分支关系（当前本地）：**
+
+```text
+main ──────────────► 传统线（Tomcat JDK8/JDK17 + ProGuard）；保留 JDK8 树
+xinchuang/tongweb ─► 信创线（TongWeb JDK17 + ProGuard + PFB）；无 JDK8 树
+```
+
+**尚未 push** `xinchuang/tongweb`（及 main 的 4 commits）。
+
+**待办（阶段 3 之后 / 另开任务）：** 修复 **main** 上 JDK17 全量编译 + ProGuard（与信创线无关，信创线已可用）。
+
+### 阶段 2 操作参考（已完成，留档）
 
 ```bash
 git checkout feat/xinchuang-tongweb-verify
