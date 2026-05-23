@@ -51,5 +51,8 @@ rebel.xml
 
 application-my.yaml
 
+# 信创 TongWeb 本地授权（勿提交仓库）
+docs/xinchuang-tongweb/TongWeb_Embed/license.dat
+
 /guarantee-ui-app/unpackage/
 **/.DS_Store

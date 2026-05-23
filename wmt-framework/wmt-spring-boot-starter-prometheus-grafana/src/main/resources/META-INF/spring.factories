@@ -1,6 +1,0 @@
-org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-com.wmt.framework.prometheus.config.WmtPrometheusGrafanaAutoConfiguration
-
-org.springframework.boot.env.EnvironmentPostProcessor=\
-com.wmt.framework.prometheus.config.WmtPrometheusEnvironmentPostProcessor
-
