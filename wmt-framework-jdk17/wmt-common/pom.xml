@@ -11,9 +11,12 @@
     <artifactId>wmt-common</artifactId>
     <packaging>jar</packaging>
 
+    <properties>
+        <proguard.config>${project.parent.parent.basedir}/docs/proguard/proguard-jdk17-library.conf</proguard.config>
+    </properties>
+
     <name>${project.artifactId}</name>
     <description>定义基础 pojo 类、枚举、工具类等等</description>
-
 
     <dependencies>
         <!-- Spring 核心 -->
