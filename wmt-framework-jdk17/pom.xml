@@ -45,5 +45,29 @@
         如果是业务组件，Maven 名字会包含 biz
     </description>
 
+    <properties>
+        <!-- parent.parent = wmt-jdk17 仓库根；避免子模块二次插值 project.basedir 指到模块目录 -->
+        <proguard.config>${project.parent.parent.basedir}/docs/proguard/proguard-jdk17-starter.conf</proguard.config>
+    </properties>
+
+    <profiles>
+        <!-- 仅对含 src/main/java 的 jar 子模块挂载 ProGuard（本 aggregator 不会激活） -->
+        <profile>
+            <id>proguard-jar-modules</id>
+            <activation>
+                <file>
+                    <exists>${basedir}/src/main/java</exists>
+                </file>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>com.github.wvengen</groupId>
+                        <artifactId>proguard-maven-plugin</artifactId>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 
 </project>
