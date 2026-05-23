@@ -78,7 +78,22 @@ mvn -f wmt-framework-jdk17/pom.xml clean package -Pobfuscate -DskipTests
 
 ### 阶段 1：ProGuard 合入 main ✅
 
-已完成：`feat/proguard-jdk17` → merge 至 `main`（见 git log）。
+已完成（2026-05-23）：
+
+- 分支：`feat/proguard-jdk17` → merge 至 `main`（`43260a0`）
+- Commits：`2d8b566`（ProGuard）、`8c0b1fb`（分支策略文档）
+
+**验证结果（main 上）：**
+
+| 项 | 结果 |
+|----|------|
+| `wmt-common` + `-Pobfuscate` | ✅ BUILD SUCCESS，生成 `proguard_map.txt` |
+| `proguard.config` 路径 | ✅ 指向 `docs/proguard/proguard-jdk17-library.conf` |
+| 全量 `wmt-framework-jdk17` reactor | ⚠️ 编译失败（`starter-web` Lombok/枚举，**合入前 main 已存在**） |
+
+全量构建需先修复 main 上 JDK17 编译（建议 `export JAVA_HOME=$(/usr/libexec/java_home -v 17)`，并排查 `starter-web` 编译链）。信创分支 `feat/pfb-api-c2` 上全量 `-Pobfuscate` 此前已通过。
+
+**尚未 push**（本地 main 领先 origin 3 commits）。
 
 ### 阶段 2：整理信创长期分支
 
