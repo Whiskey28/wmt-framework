@@ -25,18 +25,33 @@ JDK17 线采用 **分模块规则 + 库模块禁止 shrink** 的策略（见 `pr
 ## 构建命令
 
 ```bash
+# 使用 JDK 17 运行 Maven（java.home 即 ProGuard 引导库；也可显式 export PROGUARD_JDK_HOME）
+export JAVA_HOME="$(/usr/libexec/java_home -v 17)"
+
 # 单模块
-export PROGUARD_JDK_HOME="$(/usr/libexec/java_home -v 17)"
 mvn -pl wmt-framework-jdk17/wmt-common -am clean package -Pobfuscate -DskipTests
 
 # 全量 jdk17 组件库（推荐在仓库根目录执行，或 -f 子 POM 亦可）
-export PROGUARD_JDK_HOME="$(/usr/libexec/java_home -v 17)"
-mvn -f wmt-framework-jdk17/pom.xml clean package -Pobfuscate -DskipTests
+mvn -f wmt-framework-jdk17/pom.xml clean install -Pobfuscate -DskipTests
 # 等价：mvn -pl wmt-framework-jdk17 -amd clean package -Pobfuscate -DskipTests（需在仓库根目录）
 
 # 加强混淆（规则链独立，当前与默认等价，预留后续收紧）
-mvn -f wmt-framework-jdk17/pom.xml clean package -Pobfuscate-strong -DskipTests
+mvn -f wmt-framework-jdk17/pom.xml clean install -Pobfuscate-strong -DskipTests
 ```
+
+### 常见失败：`Obfuscation failed (result=1)` on wmt-common
+
+若 ProGuard 日志出现：
+
+```text
+No such file or directory: ${env.PROGUARD_JDK_HOME}/jmods/java.base.jmod
+```
+
+说明 **未设置 `PROGUARD_JDK_HOME` 且 Maven 未用 JDK 17 启动**（旧版 pom 会把未解析的环境变量字面量传给 ProGuard）。处理方式：
+
+1. 用 JDK 17 跑 Maven：`export JAVA_HOME=$(/usr/libexec/java_home -v 17)` 后再构建；或
+2. 显式指定：`export PROGUARD_JDK_HOME="$JAVA_HOME"`；或
+3. 升级到已修复的 pom（`proguard.jdk.home` 默认 `${java.home}`）。
 
 ## 切换分支后构建
 

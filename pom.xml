@@ -34,9 +34,8 @@
         <proguard.config>${wmt.repo.root}/docs/proguard/proguard-jdk17-library.conf</proguard.config>
         <proguard.library.config.file>proguard-jdk17-library.conf</proguard.library.config.file>
         <proguard.starter.config.file>proguard-jdk17-starter.conf</proguard.starter.config.file>
-        <!-- ProGuard 引导库 JDK：优先 PROGUARD_JDK_HOME，否则与编译目标一致的 java.home -->
-        <!-- 未设置 PROGUARD_JDK_HOME 时回退 java.home（发布机请 export PROGUARD_JDK_HOME=$(/usr/libexec/java_home -v 17)） -->
-        <proguard.jdk.home>${env.PROGUARD_JDK_HOME}</proguard.jdk.home>
+        <!-- ProGuard 引导库 JDK：默认 java.home；若 export PROGUARD_JDK_HOME 则优先使用 -->
+        <proguard.jdk.home>${java.home}</proguard.jdk.home>
         <!-- maven-surefire-plugin 暂时无法通过 bom 的依赖读取（兼容老版本 IDEA 2024 及以前版本） -->
         <lombok.version>1.18.42</lombok.version>
         <spring.boot.version>3.5.9</spring.boot.version>
@@ -292,6 +291,19 @@
                 <skip.proguard>false</skip.proguard>
                 <proguard.library.config.file>proguard-jdk17-library-strong.conf</proguard.library.config.file>
                 <proguard.starter.config.file>proguard-jdk17-starter-strong.conf</proguard.starter.config.file>
+            </properties>
+        </profile>
+
+        <!-- 显式指定 ProGuard 使用的 JDK（覆盖默认 java.home，例如 CI 多 JDK 并存） -->
+        <profile>
+            <id>proguard-jdk-from-env</id>
+            <activation>
+                <property>
+                    <name>env.PROGUARD_JDK_HOME</name>
+                </property>
+            </activation>
+            <properties>
+                <proguard.jdk.home>${env.PROGUARD_JDK_HOME}</proguard.jdk.home>
             </properties>
         </profile>
     </profiles>
