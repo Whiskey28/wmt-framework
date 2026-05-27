@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ProGuard 原理与 wmt-framework 实践</title>
+  <style>
+    :root {
+      --bg: #fbfbfd;
+      --bg-elevated: #ffffff;
+      --text: #1d1d1f;
+      --text-secondary: #6e6e73;
+      --text-tertiary: #86868b;
+      --accent: #0071e3;
+      --green: #34c759;
+      --orange: #ff9500;
+      --red: #ff3b30;
+      --purple: #5856d6;
+      --border: rgba(0, 0, 0, 0.06);
+      --shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+      --radius: 18px;
+      --radius-sm: 12px;
+      --mono: "SF Mono", SFMono-Regular, ui-monospace, Menlo, Monaco, monospace;
+      --sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--sans);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.47059;
+      letter-spacing: -0.022em;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .nav {
+      position: sticky; top: 0; z-index: 100;
+      backdrop-filter: saturate(180%) blur(20px);
+      background: rgba(251, 251, 253, 0.72);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-inner {
+      max-width: 980px; margin: 0 auto; padding: 14px 22px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .nav-title { font-size: 14px; font-weight: 600; }
+    .nav-links { display: flex; gap: 20px; list-style: none; flex-wrap: wrap; justify-content: flex-end; }
+    .nav-links a { font-size: 12px; color: var(--text-secondary); text-decoration: none; }
+    .nav-links a:hover { color: var(--accent); }
+
+    .hero {
+      text-align: center; padding: 80px 22px 56px;
+      max-width: 820px; margin: 0 auto;
+    }
+    .hero-badge {
+      display: inline-block; font-size: 12px; font-weight: 600;
+      letter-spacing: 0.04em; text-transform: uppercase; color: var(--accent);
+      background: rgba(0, 113, 227, 0.08); padding: 6px 14px;
+      border-radius: 980px; margin-bottom: 20px;
+    }
+    .hero h1 {
+      font-size: clamp(36px, 5.5vw, 52px); font-weight: 700;
+      letter-spacing: -0.025em; line-height: 1.08; margin-bottom: 16px;
+    }
+    .hero p {
+      font-size: 19px; color: var(--text-secondary); line-height: 1.42;
+      max-width: 660px; margin: 0 auto 28px;
+    }
+    .hero-toc {
+      display: flex; justify-content: center; gap: 12px; flex-wrap: wrap;
+    }
+    .hero-toc a {
+      font-size: 14px; font-weight: 500; color: var(--accent);
+      text-decoration: none; padding: 8px 16px; border-radius: 980px;
+      background: rgba(0, 113, 227, 0.06); border: 1px solid rgba(0, 113, 227, 0.12);
+    }
+    .hero-toc a:hover { background: rgba(0, 113, 227, 0.12); }
+
+    section { max-width: 980px; margin: 0 auto; padding: 0 22px 72px; }
+    .section-head { text-align: center; margin-bottom: 40px; }
+    .section-head h2 {
+      font-size: 36px; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 10px;
+    }
+    .section-head p { font-size: 17px; color: var(--text-secondary); max-width: 620px; margin: 0 auto; }
+    .section-label {
+      font-size: 12px; font-weight: 600; letter-spacing: 0.06em;
+      text-transform: uppercase; color: var(--accent); margin-bottom: 8px;
+    }
+
+    .card-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 32px; }
+    @media (max-width: 768px) { .card-grid { grid-template-columns: 1fr; } }
+    .card {
+      background: var(--bg-elevated); border-radius: var(--radius-sm);
+      padding: 28px 24px; border: 1px solid var(--border);
+    }
+    .card .icon { font-size: 28px; margin-bottom: 10px; }
+    .card h3 { font-size: 17px; font-weight: 600; margin-bottom: 8px; }
+    .card p { font-size: 14px; color: var(--text-secondary); line-height: 1.55; }
+
+    .pipeline {
+      background: var(--bg-elevated); border-radius: var(--radius);
+      box-shadow: var(--shadow); border: 1px solid var(--border);
+      padding: 32px 28px; margin-bottom: 40px; overflow-x: auto;
+    }
+    .pipeline-row {
+      display: flex; align-items: stretch; gap: 8px; min-width: 640px;
+    }
+    .pipe-box {
+      flex: 1; text-align: center; padding: 16px 10px;
+      border-radius: var(--radius-sm); border: 1px solid var(--border);
+      background: #f5f5f7; position: relative;
+    }
+    .pipe-box.highlight { background: linear-gradient(135deg, rgba(0,113,227,0.08), rgba(0,113,227,0.02)); border-color: rgba(0,113,227,0.2); }
+    .pipe-box.disabled { opacity: 0.55; }
+    .pipe-box h4 { font-size: 13px; font-weight: 600; margin-bottom: 4px; }
+    .pipe-box p { font-size: 11px; color: var(--text-secondary); line-height: 1.35; }
+    .pipe-arrow { display: flex; align-items: center; color: var(--text-tertiary); font-size: 18px; flex-shrink: 0; }
+
+    .perspective-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 40px; }
+    @media (max-width: 900px) { .perspective-grid { grid-template-columns: 1fr; } }
+    .perspective {
+      border-radius: var(--radius); overflow: hidden;
+      border: 1px solid var(--border); background: var(--bg-elevated);
+      box-shadow: var(--shadow);
+    }
+    .perspective-head {
+      padding: 20px 22px; border-bottom: 1px solid var(--border);
+    }
+    .perspective-head.maintainer { background: linear-gradient(135deg, rgba(88,86,214,0.08), transparent); }
+    .perspective-head.consumer { background: linear-gradient(135deg, rgba(52,199,89,0.08), transparent); }
+    .perspective-head.attacker { background: linear-gradient(135deg, rgba(255,59,48,0.06), transparent); }
+    .perspective-head h3 { font-size: 18px; font-weight: 600; margin-bottom: 4px; }
+    .perspective-head span { font-size: 13px; color: var(--text-secondary); }
+    .perspective-body { padding: 20px 22px; font-size: 14px; color: var(--text-secondary); }
+    .perspective-body ul { padding-left: 18px; margin-top: 8px; }
+    .perspective-body li { margin-bottom: 6px; line-height: 1.45; }
+    .perspective-body code {
+      font-family: var(--mono); font-size: 12px;
+      background: #f5f5f7; padding: 2px 6px; border-radius: 4px;
+    }
+
+    .compare { margin-bottom: 36px; }
+    .compare-header { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; flex-wrap: wrap; }
+    .compare-num {
+      width: 32px; height: 32px; border-radius: 50%; background: var(--text);
+      color: white; font-size: 14px; font-weight: 700;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .compare-header h3 { font-size: 20px; font-weight: 600; }
+    .tag { font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 980px; margin-left: auto; }
+    .tag-what { background: rgba(88,86,214,0.12); color: var(--purple); }
+    .tag-why { background: rgba(255,149,0,0.12); color: #c93400; }
+    .tag-how { background: rgba(0,113,227,0.1); color: var(--accent); }
+    .compare-desc { font-size: 15px; color: var(--text-secondary); margin-bottom: 14px; padding-left: 44px; }
+  .compare-panels { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; padding-left: 44px; }
+    @media (max-width: 768px) {
+      .compare-panels, .compare-desc { padding-left: 0; }
+      .compare-panels { grid-template-columns: 1fr; }
+    }
+    .panel { border-radius: var(--radius-sm); overflow: hidden; border: 1px solid var(--border); background: var(--bg-elevated); }
+    .panel-label { padding: 10px 14px; font-size: 11px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; border-bottom: 1px solid var(--border); background: #f5f5f7; color: var(--text-secondary); }
+    .panel-label.accent { background: linear-gradient(135deg, rgba(0,113,227,0.06), transparent); color: var(--accent); }
+    .panel-body {
+      padding: 14px; font-family: var(--mono); font-size: 11.5px; line-height: 1.65;
+      overflow-x: auto; white-space: pre; max-height: 280px; overflow-y: auto;
+    }
+    .panel-body .cmt { color: #86868b; }
+    .panel-body .kw { color: #ad3da4; }
+    .panel-body .ok { color: #248a3d; }
+    .panel-body .no { color: #d70015; }
+    .panel-body .hl { background: rgba(255, 149, 0, 0.18); border-radius: 2px; }
+
+    .steps { counter-reset: step; list-style: none; margin-bottom: 32px; }
+    .steps li {
+      counter-increment: step; position: relative; padding: 20px 20px 20px 56px;
+      background: var(--bg-elevated); border-radius: var(--radius-sm);
+      border: 1px solid var(--border); margin-bottom: 12px;
+    }
+    .steps li::before {
+      content: counter(step); position: absolute; left: 18px; top: 20px;
+      width: 28px; height: 28px; border-radius: 50%; background: var(--accent);
+      color: white; font-size: 13px; font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .steps li h4 { font-size: 16px; font-weight: 600; margin-bottom: 6px; }
+    .steps li p { font-size: 14px; color: var(--text-secondary); line-height: 1.5; }
+    .steps li code { font-family: var(--mono); font-size: 12px; background: #f5f5f7; padding: 2px 5px; border-radius: 4px; }
+
+    .callout {
+      border-radius: var(--radius-sm); padding: 20px 22px; margin-bottom: 32px;
+      border-left: 4px solid var(--accent); background: rgba(0,113,227,0.04);
+    }
+    .callout h4 { font-size: 15px; font-weight: 600; margin-bottom: 6px; }
+    .callout p { font-size: 14px; color: var(--text-secondary); line-height: 1.5; }
+
+    .build-box {
+      background: #1d1d1f; color: #f5f5f7; border-radius: var(--radius);
+      padding: 28px; margin-bottom: 32px;
+    }
+    .build-box h3 { font-size: 19px; font-weight: 600; margin-bottom: 14px; }
+    .build-box pre { font-family: var(--mono); font-size: 12.5px; line-height: 1.7; color: #a1a1a6; overflow-x: auto; }
+    .build-box .cmd { color: #fff; }
+    .build-box .flag { color: #64d2ff; }
+
+    .footer {
+      text-align: center; padding: 36px 22px 56px;
+      border-top: 1px solid var(--border); color: var(--text-tertiary); font-size: 12px;
+    }
+    .footer a { color: var(--accent); text-decoration: none; margin: 0 6px; }
+  </style>
+</head>
+<body>
+
+  <nav class="nav">
+    <div class="nav-inner">
+      <div class="nav-title">wmt-framework · ProGuard 原理</div>
+      <ul class="nav-links">
+        <li><a href="#what">是什么</a></li>
+        <li><a href="#why">为什么</a></li>
+        <li><a href="#how">怎么做</a></li>
+        <li><a href="#perspectives">三方视角</a></li>
+        <li><a href="#cases">典型案例</a></li>
+        <li><a href="proguard-strategy-guide.html">策略对照 →</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <header class="hero">
+    <div class="hero-badge">JDK17 · wmt-framework-jdk17</div>
+    <h1>ProGuard 原理<br/>与本仓库实践全景</h1>
+    <p>
+      一份文档讲清：ProGuard 在字节码层做了什么、本仓库为何这样配置、
+      框架维护者 / 业务依赖方 / 逆向者各自看到什么。
+    </p>
+    <div class="hero-toc">
+      <a href="#what">是什么</a>
+      <a href="#why">为什么</a>
+      <a href="#how">怎么做</a>
+      <a href="#perspectives">三方视角</a>
+      <a href="#cases">典型案例</a>
+    </div>
+  </header>
+
+  <!-- ========== 是什么 ========== -->
+  <section id="what">
+    <div class="section-head">
+      <div class="section-label">Chapter 1</div>
+      <h2>是什么</h2>
+      <p>ProGuard 是 Java 字节码处理工具，在 <strong>class 文件</strong> 层面工作，不读 .java 源码。</p>
+    </div>
+
+    <div class="card-grid">
+      <div class="card">
+        <div class="icon">📥</div>
+        <h3>输入</h3>
+        <p>你们打好的 <code style="font-family:var(--mono);font-size:12px">*.jar</code>（program jar）+ JDK jmods + Maven 依赖（library jars，如 Spring）。</p>
+      </div>
+      <div class="card">
+        <div class="icon">⚙️</div>
+        <h3>处理</h3>
+        <p>按 <code style="font-family:var(--mono);font-size:12px">*.conf</code> 规则做 shrink / optimize / obfuscate / preverify 四步（本仓库关闭了前两步）。</p>
+      </div>
+      <div class="card">
+        <div class="icon">📤</div>
+        <h3>输出</h3>
+        <p>同名 JAR 覆盖原产物 + 内部 <code style="font-family:var(--mono);font-size:12px">proguard_map.txt</code>（映射表，禁止外发）。</p>
+      </div>
+    </div>
+
+    <div class="pipeline">
+      <p style="font-size:13px;color:var(--text-secondary);margin-bottom:16px;text-align:center;">ProGuard 经典四步 · 本仓库实际启用情况</p>
+      <div class="pipeline-row">
+        <div class="pipe-box disabled">
+          <h4>1. Shrink</h4>
+          <p>删除未引用类/成员<br/><strong>本仓库：关闭</strong><br/>-dontshrink</p>
+        </div>
+        <div class="pipe-arrow">→</div>
+        <div class="pipe-box disabled">
+          <h4>2. Optimize</h4>
+          <p>内联、合并字节码<br/><strong>本仓库：关闭</strong><br/>-dontoptimize</p>
+        </div>
+        <div class="pipe-arrow">→</div>
+        <div class="pipe-box highlight">
+          <h4>3. Obfuscate</h4>
+          <p>重命名 + 剥离调试信息<br/><strong>本仓库：启用</strong></p>
+        </div>
+        <div class="pipe-arrow">→</div>
+        <div class="pipe-box highlight">
+          <h4>4. Preverify</h4>
+          <p>写入 StackMap<br/><strong>JDK17 必须保留</strong></p>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout">
+      <h4>关键概念：Program vs Library</h4>
+      <p>
+        <strong>Program classes</strong>（你们 JAR 里的类）可以被混淆。<br/>
+        <strong>Library classes</strong>（Spring、JDK 等依赖）只用来分析引用关系，不会被改写，也不会打进你们的 JAR。
+        本仓库通过 <code>includeDependency=true</code> 把 provided 依赖当作 libraryjars。
+      </p>
+    </div>
+  </section>
+
+  <!-- ========== 为什么 ========== -->
+  <section id="why">
+    <div class="section-head">
+      <div class="section-label">Chapter 2</div>
+      <h2>为什么</h2>
+      <p>wmt-framework 是<strong>被依赖的组件库</strong>，不是独立 App——策略必须「保运行、保 API、增逆向成本」。</p>
+    </div>
+
+    <div class="card-grid">
+      <div class="card">
+        <div class="icon">🎯</div>
+        <h3>保护什么</h3>
+        <p>内部实现细节、工具类 private 成员、调试元数据。降低 jadx 一键还原源码的可读性。</p>
+      </div>
+      <div class="card">
+        <div class="icon">🚫</div>
+        <h3>不能破坏什么</h3>
+        <p>Spring 自动配置类名、<code>@ConfigurationProperties</code> 字段、MyBatis Mapper、Validator、Jackson 序列化器——都靠反射或类名加载。</p>
+      </div>
+      <div class="card">
+        <div class="icon">⚖️</div>
+        <h3>为何不全量混淆</h3>
+        <p>Starter 若 shrink + 重命名 <code>core.**</code>，业务系统启动即失败。库模块也禁止 shrink，避免误删「看起来未引用、运行期才用到」的类。</p>
+      </div>
+    </div>
+
+    <div class="callout" style="border-color: var(--orange); background: rgba(255,149,0,0.05);">
+      <h4>与 Android App 混淆的区别</h4>
+      <p>
+        Android 应用是<strong>封闭入口</strong>，ProGuard 可以激进 shrink。Spring Boot Starter 是<strong>开放插件</strong>，
+        被 Spring、MyBatis、Hibernate Validator 等多框架扫描——必须大量 <code>-keep</code>，混淆强度天然低于 App。
+      </p>
+    </div>
+  </section>
+
+  <!-- ========== 怎么做 ========== -->
+  <section id="how">
+    <div class="section-head">
+      <div class="section-label">Chapter 3</div>
+      <h2>怎么做</h2>
+      <p>在本仓库，混淆是 Maven <code>package</code> 阶段自动执行的一步，由 Profile 开关控制。</p>
+    </div>
+
+    <div class="pipeline">
+      <p style="font-size:13px;color:var(--text-secondary);margin-bottom:16px;text-align:center;">wmt-framework-jdk17 构建流水线（-Pobfuscate）</p>
+      <div class="pipeline-row">
+        <div class="pipe-box"><h4>compile</h4><p>.java → .class<br/>Lombok / MapStruct</p></div>
+        <div class="pipe-arrow">→</div>
+        <div class="pipe-box"><h4>jar</h4><p>打原始 JAR<br/>*_proguard_base.jar</p></div>
+        <div class="pipe-arrow">→</div>
+        <div class="pipe-box highlight"><h4>proguard</h4><p>读 *.conf<br/>写回同名 JAR</p></div>
+        <div class="pipe-arrow">→</div>
+        <div class="pipe-box"><h4>install</h4><p>~/.m2 或私服<br/>业务方依赖</p></div>
+      </div>
+    </div>
+
+    <ol class="steps">
+      <li>
+        <h4>规则文件分层</h4>
+        <p>
+          <code>proguard-jdk17-library.conf</code> → <code>wmt-common</code>；<br/>
+          <code>proguard-jdk17-starter.conf</code> → 16 个 starter（include library 规则 + Spring/MyBatis keep）。<br/>
+          路径：<code>docs/proguard/</code>，由根 <code>pom.xml</code> 的 <code>proguard.config</code> 引用。
+        </p>
+      </li>
+      <li>
+        <h4>插件挂载</h4>
+        <p>
+          <code>wmt-framework-jdk17/pom.xml</code> 的 <code>proguard-jar-modules</code> profile：凡含 <code>src/main/java</code> 的子模块自动挂载
+          <code>proguard-maven-plugin</code>，默认 <code>skip.proguard=true</code>，加 <code>-Pobfuscate</code> 才执行。
+        </p>
+      </li>
+      <li>
+        <h4>JDK 引导库</h4>
+        <p>
+          ProGuard 需要 JDK 17 的 <code>jmods/*.jmod</code> 作 classpath 分析。
+          默认 <code>proguard.jdk.home=${java.home}</code>；也可 <code>export PROGUARD_JDK_HOME=...</code> 覆盖。
+        </p>
+      </li>
+      <li>
+        <h4>产物与保密</h4>
+        <p>
+          发布：<code>target/*.jar</code>（已混淆）。<br/>
+          内部留存：<code>proguard_map.txt</code>、<code>proguard_seed.txt</code>——<strong>勿提交 Git、勿发给业务方</strong>。
+        </p>
+      </li>
+    </ol>
+
+    <div class="build-box">
+      <h3>常用命令</h3>
+      <pre><span class="cmd">export</span> JAVA_HOME=<span class="str">"$(/usr/libexec/java_home -v 17)"</span>
+
+<span class="cmt"># 先装 BOM（切换分支后建议删 .flattened-pom.xml 再 install）</span>
+mvn -f wmt-dependencies-jdk17/pom.xml clean install -DskipTests
+
+<span class="cmt"># 全量 17 模块混淆安装</span>
+mvn -f wmt-framework-jdk17/pom.xml clean install <span class="flag">-Pobfuscate</span> -DskipTests
+
+<span class="cmt"># 加强版规则链（当前与默认等价，预留收紧 keep）</span>
+mvn -f wmt-framework-jdk17/pom.xml clean install <span class="flag">-Pobfuscate-strong</span> -DskipTests</pre>
+    </div>
+  </section>
+
+  <!-- ========== 三方视角 ========== -->
+  <section id="perspectives">
+    <div class="section-head">
+      <p class="section-label">Chapter 4</p>
+      <h2>三方视角</h2>
+      <p>同一份组件，三个人看到的是三个世界。</p>
+    </div>
+
+    <div class="perspective-grid">
+      <div class="perspective">
+        <div class="perspective-head maintainer">
+          <h3>① 框架维护者</h3>
+          <span>Git 仓库里的你们</span>
+        </div>
+        <div class="perspective-body">
+          <strong style="color:var(--text)">看到：</strong>
+          <ul>
+            <li>完整 <code>.java</code> 源码、注释、芋道式包结构</li>
+            <li><code>docs/proguard/*.conf</code> 规则与 README</li>
+            <li>构建日志、<code>proguard_map.txt</code> 映射</li>
+            <li><code>*_proguard_base.jar</code> 混淆前备份</li>
+          </ul>
+          <strong style="color:var(--text);display:block;margin-top:12px">职责：</strong>
+          维护 <code>-keep</code> 规则、验证 17 模块全量构建、决定是否收紧混淆。
+        </div>
+      </div>
+
+      <div class="perspective">
+        <div class="perspective-head consumer">
+          <h3>② 业务依赖方</h3>
+          <span>引入 starter 的应用团队</span>
+        </div>
+        <div class="perspective-body">
+          <strong style="color:var(--text)">看到：</strong>
+          <ul>
+            <li>Maven 坐标不变：<code>com.wmt:wmt-spring-boot-starter-web</code></li>
+            <li>IDE 补全：<code>CommonResult</code>、<code>PageParam</code> 类名方法名正常</li>
+            <li><code>application.yml</code> 里 <code>wmt.*</code> 配置项名称不变</li>
+            <li>运行时 JSON、异常格式与明文版一致</li>
+          </ul>
+          <strong style="color:var(--text);display:block;margin-top:12px">通常不会：</strong>
+          反编译框架 JAR；也<strong>不应</strong>收到 <code>proguard_map.txt</code>。
+        </div>
+      </div>
+
+      <div class="perspective">
+        <div class="perspective-head attacker">
+          <h3>③ 逆向分析者</h3>
+          <span>拿到 ~/.m2 里 JAR 的人</span>
+        </div>
+        <div class="perspective-body">
+          <strong style="color:var(--text)">看到：</strong>
+          <ul>
+            <li>public API 类名仍在（<code>CommonResult</code>、<code>WmtWebAutoConfiguration</code>）</li>
+            <li>无 <code>SourceFile</code> / <code>LineNumberTable</code>，jadx 难对应 .java 行</li>
+            <li><code>package-info</code> 等变成 <code>a.class</code></li>
+            <li>部分 private 字段、lambda 名为 <code>a</code>、<code>b</code></li>
+          </ul>
+          <strong style="color:var(--text);display:block;margin-top:12px">若拿到 map：</strong>
+          混淆基本失效——故 map 必须内控。
+        </div>
+      </div>
+    </div>
+
+    <div class="compare-panels" style="padding-left:0;margin-top:8px;">
+      <div class="panel">
+        <div class="panel-label">维护者 · 磁盘上的文件</div>
+        <div class="panel-body">wmt-framework-jdk17/wmt-common/src/main/java/.../CommonResult.java
+docs/proguard/proguard-jdk17-library.conf
+wmt-common/target/proguard_map.txt          <span class="cmt">← 内部</span>
+wmt-common/target/*_proguard_base.jar       <span class="cmt">← 可删</span></div>
+      </div>
+      <div class="panel">
+        <div class="panel-label accent">依赖方 · ~/.m2 里只有一个</div>
+        <div class="panel-body">~/.m2/repository/com/wmt/wmt-common/.../
+  wmt-common-2025.12-jdk17-SNAPSHOT.jar     <span class="ok">← 已混淆，即依赖产物</span>
+
+<span class="cmt">// pom.xml 与明文版完全相同</span>
+&lt;artifactId&gt;wmt-spring-boot-starter-web&lt;/artifactId&gt;</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== 典型案例 ========== -->
+  <section id="cases">
+    <div class="section-head">
+      <div class="section-label">Chapter 5</div>
+      <h2>典型案例</h2>
+      <p>每个案例标注「是什么 / 为什么 / 怎么做」，左为仓库真实形态，右为依赖方或 JAR 内形态。</p>
+    </div>
+
+    <!-- Case 1 -->
+    <article class="compare">
+      <div class="compare-header">
+        <div class="compare-num">1</div>
+        <h3>统一返回体 CommonResult</h3>
+        <span class="tag tag-what">是什么</span>
+        <span class="tag tag-why">保 API</span>
+      </div>
+      <p class="compare-desc"><strong>是什么：</strong>业务 Controller 统一返回的 JSON 包装类。<strong>为什么 keep：</strong><code>common.pojo.**</code> 被业务代码直接 import。<strong>怎么做：</strong>library.conf 整包 <code>-keep { *; }</code>。</p>
+      <div class="compare-panels">
+        <div class="panel">
+          <div class="panel-label">维护者 · CommonResult.java</div>
+          <div class="panel-body"><span class="kw">public class</span> CommonResult&lt;T&gt; {
+    <span class="kw">private</span> Integer code;
+    <span class="kw">private</span> String msg;
+    <span class="kw">private</span> T data;
+
+    <span class="kw">public static</span> &lt;T&gt; CommonResult&lt;T&gt; success(T data) { ... }
+    <span class="kw">public static</span> &lt;T&gt; CommonResult&lt;T&gt; error(Integer code, String msg) { ... }
+}</div>
+        </div>
+        <div class="panel">
+          <div class="panel-label accent">依赖方 · 写法与 javap 签名</div>
+          <div class="panel-body"><span class="cmt">// 业务代码（完全不变）</span>
+<span class="kw">return</span> CommonResult.success(vo);
+
+<span class="cmt">// javap 混淆 JAR</span>
+<span class="kw">public class</span> ...CommonResult {
+  <span class="ok">public static CommonResult success(Object);</span>
+  <span class="ok">public Integer getCode();</span>
+  <span class="ok">public String getMsg();</span>
+}</div>
+        </div>
+      </div>
+    </article>
+
+    <!-- Case 2 -->
+    <article class="compare">
+      <div class="compare-header">
+        <div class="compare-num">2</div>
+        <h3>Spring Boot 自动配置</h3>
+        <span class="tag tag-why">保类名</span>
+        <span class="tag tag-how">SPI 加载</span>
+      </div>
+      <p class="compare-desc"><strong>是什么：</strong><code>META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports</code> 列出配置类全名。<strong>为什么：</strong>Spring 按字符串 loadClass，类名变则启动失败。<strong>怎么做：</strong>starter.conf keep <code>@AutoConfiguration</code> 与 <code>config.**</code>。</p>
+      <div class="compare-panels">
+        <div class="panel">
+          <div class="panel-label">维护者 · imports 文件</div>
+          <div class="panel-body">META-INF/spring/...AutoConfiguration.imports
+
+com.wmt.framework.web.config.WmtWebAutoConfiguration
+com.wmt.framework.jackson.config.WmtJacksonAutoConfiguration
+com.wmt.framework.swagger.config.WmtSwaggerAutoConfiguration
+...</div>
+        </div>
+        <div class="panel">
+          <div class="panel-label accent">依赖方 · 引入 starter 即生效</div>
+          <div class="panel-body"><span class="cmt">// 业务 pom 只需依赖，无需 @Import</span>
+&lt;artifactId&gt;wmt-spring-boot-starter-web&lt;/artifactId&gt;
+
+<span class="ok">✓</span> 混淆前后 imports 内容一致
+<span class="ok">✓</span> Filter / ExceptionHandler 类名保留
+<span class="ok">✓</span> 业务无感知</div>
+        </div>
+      </div>
+    </article>
+
+    <!-- Case 3 -->
+    <article class="compare">
+      <div class="compare-header">
+        <div class="compare-num">3</div>
+        <h3>工具类 PageUtils 的 private 成员</h3>
+        <span class="tag tag-what">混淆内部</span>
+        <span class="tag tag-how">public keep</span>
+      </div>
+      <p class="compare-desc"><strong>是什么：</strong>分页辅助工具。<strong>为什么部分混淆：</strong><code>util.**</code> 只 keep public 方法，private 与 lambda 可缩短。<strong>怎么做：</strong>业务只调 <code>PageUtils.getStart()</code>，签名不变。</p>
+      <div class="compare-panels">
+        <div class="panel">
+          <div class="panel-label">维护者 · 源码 + map</div>
+          <div class="panel-body"><span class="kw">public class</span> PageUtils {
+    <span class="kw">public static int</span> getStart(PageParam p) { ... }
+    <span class="hl">private static Integer cacheMax = 1000;</span>
+}
+
+<span class="cmt">// proguard_map.txt（内部）</span>
+cacheMax → a
+lambda$xxx → b</div>
+        </div>
+        <div class="panel">
+          <div class="panel-label accent">依赖方 · 只用到 public</div>
+          <div class="panel-body">PageUtils.getStart(pageParam)   <span class="ok">IDE 提示正常</span>
+PageParam.getPageNo()             <span class="ok">正常</span>
+
+<span class="cmt">// 依赖方不会、也不应访问 private</span>
+<span class="no">// 逆向者看到 a、b 但无源文件行号</span></div>
+        </div>
+      </div>
+    </article>
+
+    <!-- Case 4 -->
+    <article class="compare">
+      <div class="compare-header">
+        <div class="compare-num">4</div>
+        <h3>全局异常 GlobalExceptionHandler</h3>
+        <span class="tag tag-why">保运行</span>
+        <span class="tag tag-how">元数据剥离</span>
+      </div>
+      <p class="compare-desc"><strong>是什么：</strong>将异常转为 <code>CommonResult</code> JSON。<strong>为什么类名保留：</strong><code>core.**</code> 整包 keep。<strong>怎么做：</strong>剥离 SourceFile/LineNumberTable，反编译可读性下降，运行时行为不变。</p>
+      <div class="compare-panels">
+        <div class="panel">
+          <div class="panel-label">维护者 · javap 明文 class</div>
+          <div class="panel-body">Compiled from <span class="hl">"GlobalExceptionHandler.java"</span>
+SourceFile: <span class="hl">"GlobalExceptionHandler.java"</span>
+LineNumberTable:
+  line 42: 0
+  line 43: 5
+...</div>
+        </div>
+        <div class="panel">
+          <div class="panel-label accent">依赖方运行时 + 逆向者 javap</div>
+          <div class="panel-body"><span class="cmt">// 业务抛 ServiceException</span>
+{ "code": 400, "msg": "xxx", "data": null }  <span class="ok">不变</span>
+
+<span class="cmt">// 混淆后 javap</span>
+<span class="kw">public class</span> ...GlobalExceptionHandler { ... }
+<span class="no">（无 Compiled from / SourceFile / LineNumberTable）</span></div>
+        </div>
+      </div>
+    </article>
+
+    <!-- Case 5 -->
+    <article class="compare">
+      <div class="compare-header">
+        <div class="compare-num">5</div>
+        <h3>校验注解 @Mobile / ConstraintValidator</h3>
+        <span class="tag tag-why">反射加载</span>
+      </div>
+      <p class="compare-desc"><strong>是什么：</strong>Hibernate Validator 按类名实例化校验器。<strong>为什么全 keep：</strong><code>@Constraint</code> 与 <code>validation.**</code> 规则。<strong>怎么做：</strong>业务 DTO 照常写注解，校验失败仍走统一异常响应。</p>
+      <div class="compare-panels">
+        <div class="panel">
+          <div class="panel-label">依赖方 · DTO</div>
+          <div class="panel-body"><span class="kw">public class</span> UserCreateReqDTO {
+    <span class="kw">@Mobile</span>
+    <span class="kw">private</span> String mobile;
+}</div>
+        </div>
+        <div class="panel">
+          <div class="panel-label accent">混淆 JAR 内</div>
+          <div class="panel-body"><span class="ok">MobileValidator 类名保留</span>
+<span class="ok">@Mobile 注解保留</span>
+<span class="ok">校验失败 → CommonResult 400</span>
+
+<span class="cmt">// 若混淆 Validator 类名 → 运行期 ClassNotFound</span></div>
+        </div>
+      </div>
+    </article>
+
+    <!-- Case 6 -->
+    <article class="compare">
+      <div class="compare-header">
+        <div class="compare-num">6</div>
+        <h3>若错误开启 shrink（反面教材）</h3>
+        <span class="tag tag-why">为何 -dontshrink</span>
+      </div>
+      <p class="compare-desc"><strong>是什么：</strong>删除「静态分析认为未使用」的类。<strong>为什么危险：</strong>Spring 反射加载、MyBatis 接口代理在分析期不可见。<strong>怎么做：</strong>library + starter 均 <code>-dontshrink -dontoptimize</code>，用 keep 精确控制而非删类。</p>
+      <div class="compare-panels">
+        <div class="panel">
+          <div class="panel-label">假设去掉 -dontshrink 后</div>
+          <div class="panel-body"><span class="no">✗</span> AutoConfiguration 类被删 → 自动配置不生效
+<span class="no">✗</span> TypeHandler 被删 → 数据库类型映射失败
+<span class="no">✗</span> ConstraintValidator 被删 → 校验静默失效
+
+<span class="cmt">// 业务表现：启动成功但功能残缺，最难排查</span></div>
+        </div>
+        <div class="panel">
+          <div class="panel-label accent">本仓库做法</div>
+          <div class="panel-body"><span class="ok">-dontshrink</span>
+<span class="ok">-dontoptimize</span>
+<span class="ok">大量 -keep 保留框架契约</span>
+<span class="ok">仅 obfuscate + 元数据剥离</span>
+
+<span class="cmt">// 牺牲「最小体积」，换取「可预测的启动」</span></div>
+        </div>
+      </div>
+    </article>
+  </section>
+
+  <section>
+    <div class="callout">
+      <h4>延伸阅读</div>
+      <p>
+        业务方视角的 Before/After 对照与保留矩阵，见同目录
+        <a href="proguard-strategy-guide.html" style="color:var(--accent)">proguard-strategy-guide.html</a>。
+        构建排障与规则真源见
+        <a href="README-jdk17.md" style="color:var(--accent)">README-jdk17.md</a>、
+        <a href="proguard-jdk17-library.conf" style="color:var(--accent)">library.conf</a>、
+        <a href="proguard-jdk17-starter.conf" style="color:var(--accent)">starter.conf</a>。
+      </p>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <p>wmt-framework-jdk17 · ProGuard 原理与实践 · docs/proguard/</p>
+    <p style="margin-top:10px">
+      <a href="proguard-principles-guide.html">原理篇（本文）</a>
+      <a href="proguard-strategy-guide.html">策略对照篇</a>
+      <a href="README-jdk17.md">构建 README</a>
+    </p>
+  </footer>
+
+</body>
+</html>
