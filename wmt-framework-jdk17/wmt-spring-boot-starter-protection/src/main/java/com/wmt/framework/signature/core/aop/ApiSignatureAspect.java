@@ -1,14 +1,13 @@
 package com.wmt.framework.signature.core.aop;
 
 import cn.hutool.core.lang.Assert;
-import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.BooleanUtil;
 import cn.hutool.core.util.ObjUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.crypto.digest.DigestUtil;
 import com.wmt.framework.common.exception.ServiceException;
 import com.wmt.framework.common.exception.enums.GlobalErrorCodeConstants;
 import com.wmt.framework.common.util.servlet.ServletUtils;
+import com.wmt.framework.signature.core.ApiSignatureUtils;
 import com.wmt.framework.signature.core.annotation.ApiSignature;
 import com.wmt.framework.signature.core.redis.ApiSignatureRedisDAO;
 import jakarta.servlet.http.HttpServletRequest;
@@ -18,10 +17,9 @@ import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.SortedMap;
-import java.util.TreeMap;
 
 import static com.wmt.framework.common.exception.enums.GlobalErrorCodeConstants.BAD_REQUEST;
 
@@ -63,8 +61,8 @@ public class ApiSignatureAspect {
 
         // 2. 校验签名【重要！】
         String clientSignature = request.getHeader(signature.sign()); // 客户端签名
-        String serverSignatureString = buildSignatureString(signature, request, appSecret); // 服务端签名字符串
-        String serverSignature = DigestUtil.sha256Hex(serverSignatureString); // 服务端签名
+        String serverSignatureString = buildSignatureString(signature, request, appSecret);
+        String serverSignature = cn.hutool.crypto.digest.DigestUtil.sha256Hex(serverSignatureString);
         if (ObjUtil.notEqual(clientSignature, serverSignature)) {
             return false;
         }
@@ -133,42 +131,23 @@ public class ApiSignatureAspect {
      * @return 签名字符串
      */
     private String buildSignatureString(ApiSignature signature, HttpServletRequest request, String appSecret) {
-        SortedMap<String, String> parameterMap = getRequestParameterMap(request); // 请求头
-        SortedMap<String, String> headerMap = getRequestHeaderMap(signature, request); // 请求参数
-        String requestBody = StrUtil.nullToDefault(ServletUtils.getBody(request), ""); // 请求体
-        return MapUtil.join(parameterMap, "&", "=")
-                + requestBody
-                + MapUtil.join(headerMap, "&", "=")
-                + appSecret;
+        String queryString = ApiSignatureUtils.buildQueryString(getRequestParameterMap(request));
+        String requestBody = StrUtil.nullToDefault(ServletUtils.getBody(request), "");
+        return ApiSignatureUtils.buildSignatureString(
+                queryString,
+                requestBody,
+                request.getHeader(signature.appId()),
+                request.getHeader(signature.timestamp()),
+                request.getHeader(signature.nonce()),
+                appSecret);
     }
 
-    /**
-     * 获取请求头加签参数 Map
-     *
-     * @param request   请求
-     * @param signature 签名注解
-     * @return signature params
-     */
-    private static SortedMap<String, String> getRequestHeaderMap(ApiSignature signature, HttpServletRequest request) {
-        SortedMap<String, String> sortedMap = new TreeMap<>();
-        sortedMap.put(signature.appId(), request.getHeader(signature.appId()));
-        sortedMap.put(signature.timestamp(), request.getHeader(signature.timestamp()));
-        sortedMap.put(signature.nonce(), request.getHeader(signature.nonce()));
-        return sortedMap;
-    }
-
-    /**
-     * 获取请求参数 Map
-     *
-     * @param request 请求
-     * @return queryParams
-     */
-    private static SortedMap<String, String> getRequestParameterMap(HttpServletRequest request) {
-        SortedMap<String, String> sortedMap = new TreeMap<>();
+    private static Map<String, String> getRequestParameterMap(HttpServletRequest request) {
+        Map<String, String> map = new HashMap<>();
         for (Map.Entry<String, String[]> entry : request.getParameterMap().entrySet()) {
-            sortedMap.put(entry.getKey(), entry.getValue()[0]);
+            map.put(entry.getKey(), entry.getValue()[0]);
         }
-        return sortedMap;
+        return map;
     }
 
 }

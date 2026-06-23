@@ -31,6 +31,8 @@
 
         <module>wmt-spring-boot-starter-sjb</module>
         <module>wmt-spring-boot-starter-esb</module>
+        <!-- partner-http 源码保留，待组件库下一版发布后再启用 module -->
+        <!-- <module>wmt-spring-boot-starter-partner-http</module> -->
         <module>wmt-spring-boot-starter-xxljob</module>
     </modules>
 

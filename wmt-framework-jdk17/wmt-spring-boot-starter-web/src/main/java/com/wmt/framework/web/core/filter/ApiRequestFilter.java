@@ -22,7 +22,7 @@ public abstract class ApiRequestFilter extends OncePerRequestFilter {
         // 只过滤 API 请求的地址
         String apiUri = request.getRequestURI().substring(request.getContextPath().length());
         return !StrUtil.startWithAny(apiUri, webProperties.getAdminApi().getPrefix(), webProperties.getAppApi().getPrefix(),
-                webProperties.getPfbApi().getPrefix());
+                webProperties.getPfbApi().getPrefix(), webProperties.getOpenApi().getPrefix());
     }
 
 }

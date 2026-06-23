@@ -54,4 +54,8 @@ public class ApiSignatureRedisDAO {
         return (String) stringRedisTemplate.opsForHash().get(SIGNATURE_APPID, appId);
     }
 
+    public void setAppSecret(String appId, String appSecret) {
+        stringRedisTemplate.opsForHash().put(SIGNATURE_APPID, appId, appSecret);
+    }
+
 }

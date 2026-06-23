@@ -25,6 +25,11 @@ public class WebProperties {
      */
     @NotNull(message = "PFB API 不能为空")
     private Api pfbApi = new Api("/pfb-api", "**.controller.pfb.**");
+    /**
+     * 对外开放伙伴回调等接口（不走登录态，走 {@code @ApiSignature} 等伙伴认证）。
+     */
+    @NotNull(message = "Open API 不能为空")
+    private Api openApi = new Api("/open-api", "**.controller.open.**");
 
     @NotNull(message = "Admin UI 不能为空")
     private Ui adminUi;
