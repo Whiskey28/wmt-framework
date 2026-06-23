@@ -181,6 +181,7 @@ spring:
 | wmt-spring-boot-starter-test | 测试组件 | `com.wmt:wmt-spring-boot-starter-test` |
 | wmt-spring-boot-starter-elk-logging | ELK日志组件 | `com.wmt:wmt-spring-boot-starter-elk-logging` |
 | wmt-spring-boot-starter-sjb | SJB组件 | `com.wmt:wmt-spring-boot-starter-sjb` |
+| wmt-spring-boot-starter-esb | 内蒙古银行 ESB（TCP+XML）组件 | `com.wmt:wmt-spring-boot-starter-esb` |
 
 ### 业务技术组件
 

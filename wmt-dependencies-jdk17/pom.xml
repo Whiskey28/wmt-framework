@@ -524,6 +524,12 @@
             </dependency>
 
             <dependency>
+                <groupId>com.wmt</groupId>
+                <artifactId>wmt-spring-boot-starter-esb</artifactId>
+                <version>${revision}</version>
+            </dependency>
+
+            <dependency>
                 <groupId>org.projectlombok</groupId>
                 <artifactId>lombok</artifactId>
                 <version>${lombok.version}</version>
