@@ -55,6 +55,7 @@
         <mapstruct.version>1.6.3</mapstruct.version>
         <hutool-5.version>5.8.42</hutool-5.version>
         <hutool-6.version>6.0.0-M22</hutool-6.version>
+        <uuid-creator.version>6.1.1</uuid-creator.version>
         <fastexcel.version>1.3.0</fastexcel.version>
         <velocity.version>2.4.1</velocity.version>
         <fastjson.version>1.2.83</fastjson.version>
@@ -79,7 +80,7 @@
         <weixin-java.version>4.7.9-20251224.161447</weixin-java.version>
         <alipay-sdk-java.version>4.40.607.ALL</alipay-sdk-java.version>
 
-        <xxl-job.version>2.4.0</xxl-job.version>
+        <xxl-job.version>3.1.1</xxl-job.version>
     </properties>
 
     <dependencyManagement>
@@ -345,6 +346,11 @@
                 <artifactId>wmt-spring-boot-starter-job</artifactId>
                 <version>${revision}</version>
             </dependency>
+            <dependency>
+                <groupId>com.wmt</groupId>
+                <artifactId>wmt-spring-boot-starter-xxljob</artifactId>
+                <version>${revision}</version>
+            </dependency>
 
             <dependency>
                 <groupId>com.xuxueli</groupId>
@@ -557,6 +563,12 @@
                 <groupId>org.mapstruct</groupId>
                 <artifactId>mapstruct-processor</artifactId>
                 <version>${mapstruct.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.github.f4b6a3</groupId>
+                <artifactId>uuid-creator</artifactId>
+                <version>${uuid-creator.version}</version>
             </dependency>
 
             <dependency>

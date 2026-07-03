@@ -45,6 +45,11 @@ public class WmtXxlJobAutoConfiguration {
         if (!StringUtils.hasText(props.getExecutor().getLogpath())) {
             log.warn("XXL-Job 配置警告：executor.logpath 未配置，使用默认值 ./logs/xxl-job");
         }
+        int logRetentionDays = props.getExecutor().getLogretentiondays();
+        if (logRetentionDays > 0 && logRetentionDays < 3) {
+            log.warn("XXL-Job 配置警告：executor.logretentiondays={} 低于 3.1.1 最小值 3，执行器将按官方规则处理",
+                    logRetentionDays);
+        }
     }
 
     // @Bean(initMethod = "start", destroyMethod = "destroy")

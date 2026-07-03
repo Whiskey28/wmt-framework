@@ -2,7 +2,7 @@
 
 ## 概述
 
-WMT XXL-Job 组件提供了基于 XXL-Job 的分布式任务调度能力，支持任务管理、监控和调度。本组件已与 Job 模块解耦，可独立使用。
+基于 **XXL-Job 3.1.1** 的分布式任务调度能力（执行器 Starter，对接独立部署的 xxl-job-admin）。
 
 ## 功能特性
 
@@ -302,7 +302,7 @@ management:
 
 ## 文档
 
-- [迁移指南](MIGRATION_GUIDE.md) - 从 Job 模块迁移到 XXL-Job
+- [多租户任务规范](TENANT_XXLJOB.md)
 - [开发规范](XXLJOB_STANDARDS.md) - XXL-Job 任务开发规范
 - [示例代码](src/main/java/com/wmt/framework/xxljob/example/UserSyncJob.java) - 完整示例
 
