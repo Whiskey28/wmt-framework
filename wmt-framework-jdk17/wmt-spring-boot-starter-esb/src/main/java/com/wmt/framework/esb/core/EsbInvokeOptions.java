@@ -33,8 +33,18 @@ public class EsbInvokeOptions {
 
     private String filePath;
 
+    /**
+     * 是否走联盟路由：为 true 时，{@link EsbClient} 会向 Body 注入
+     * {@code wmt.esb.alliance.key-ind}（Body 须实现 {@link EsbAllianceBody}）。
+     */
+    private boolean alliance;
+
     public static EsbInvokeOptions of(String svcCd, String svcScn) {
         return EsbInvokeOptions.builder().svcCd(svcCd).svcScn(svcScn).build();
+    }
+
+    public static EsbInvokeOptions of(String svcCd, String svcScn, boolean alliance) {
+        return EsbInvokeOptions.builder().svcCd(svcCd).svcScn(svcScn).alliance(alliance).build();
     }
 
 }

@@ -26,6 +26,9 @@ import java.time.format.DateTimeFormatter;
  *         req,
  *         MyResp.class
  * );
+ *
+ * // 联盟路由：options.alliance=true 且 Body 实现 EsbAllianceBody，
+ * // 会自动注入 wmt.esb.alliance.key-ind → Body.KeyInd（SysHead.Mac 仍由行内 ESB 生成）
  * }</pre>
  */
 @Slf4j
@@ -59,9 +62,11 @@ public class EsbClient {
 
     public <T> EsbResponse<T> invoke(EsbInvokeOptions options, Object body, Class<T> bodyType) {
         validateOptions(options);
+        injectAllianceKeyIndIfNeeded(options, body);
         EsbEnvelope<Object> requestEnvelope = buildRequestEnvelope(options, body);
         String requestXml = xmlCodec.encode(requestEnvelope);
-        log.info("[esb] request svcCd={} svcScn={} body={}", options.getSvcCd(), options.getSvcScn(),
+        log.info("[esb] request svcCd={} svcScn={} alliance={} body={}",
+                options.getSvcCd(), options.getSvcScn(), options.isAlliance(),
                 abbreviate(requestXml, 2000));
 
         String responseXml = transport.sendAndReceive(requestXml);
@@ -124,6 +129,29 @@ public class EsbClient {
             throw new ServiceException(GlobalErrorCodeConstants.BAD_REQUEST.getCode(),
                     "ESB 调用缺少 SvcCd 或 SvcScn");
         }
+    }
+
+    /**
+     * 联盟路由：向 Body 注入 KeyInd（已有值不覆盖），SysHead.Mac 仍由行内 ESB 生成。
+     */
+    private void injectAllianceKeyIndIfNeeded(EsbInvokeOptions options, Object body) {
+        if (options == null || !options.isAlliance()) {
+            return;
+        }
+        if (!(body instanceof EsbAllianceBody allianceBody)) {
+            throw new ServiceException(GlobalErrorCodeConstants.BAD_REQUEST.getCode(),
+                    "联盟 ESB 调用（alliance=true）要求 Body 实现 EsbAllianceBody 以承载 KeyInd");
+        }
+        if (StringUtils.hasText(allianceBody.getKeyInd())) {
+            return;
+        }
+        String keyInd = properties.getAlliance() != null ? properties.getAlliance().getKeyInd() : null;
+        if (!StringUtils.hasText(keyInd)) {
+            throw new ServiceException(GlobalErrorCodeConstants.ERROR_CONFIGURATION.getCode(),
+                    "未配置联盟密钥标识（wmt.esb.alliance.key-ind）");
+        }
+        allianceBody.setKeyInd(keyInd);
+        log.debug("[esb] injected alliance KeyInd for svcCd={}", options.getSvcCd());
     }
 
     private String abbreviate(String text, int max) {

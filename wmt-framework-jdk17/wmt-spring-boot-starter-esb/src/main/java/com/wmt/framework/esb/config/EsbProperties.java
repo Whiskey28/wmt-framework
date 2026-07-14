@@ -85,8 +85,34 @@ public class EsbProperties implements Serializable {
      */
     private int maxBodyBytes = 100 * 1024;
 
+    /**
+     * 联盟路由相关配置（MAC：Body.KeyInd 由消费方上送，SysHead.Mac 由行内 ESB 生成）。
+     */
+    private final Alliance alliance = new Alliance();
+
     public String resolveSrcSysId() {
         return srcSysId != null && !srcSysId.isBlank() ? srcSysId : cnsmSysId;
+    }
+
+    /**
+     * 联盟 MAC 密钥标识配置。
+     *
+     * <pre>
+     * wmt:
+     *   esb:
+     *     alliance:
+     *       key-ind: DMPF.861BY861XXXX.zak
+     * </pre>
+     */
+    @Data
+    public static class Alliance implements Serializable {
+
+        /**
+         * 联盟密钥标识，上送到请求 Body 的 {@code KeyInd}。
+         * 格式通常为：{@code {系统简称}.861BY861XXXX.zak}
+         */
+        private String keyInd;
+
     }
 
 }
