@@ -1,0 +1,3 @@
+# 行方 vendor jar 不提交；本地放入后执行 scripts/install-union-sdk.sh
+lib/*.jar
+!lib/.gitkeep

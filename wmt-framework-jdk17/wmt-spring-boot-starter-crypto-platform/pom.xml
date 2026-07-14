@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <groupId>com.wmt</groupId>
+        <artifactId>wmt-framework-jdk17</artifactId>
+        <version>${revision}</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+    <artifactId>wmt-spring-boot-starter-crypto-platform</artifactId>
+    <packaging>jar</packaging>
+
+    <name>${project.artifactId}</name>
+    <description>
+        内蒙古银行加密平台（Union CSSP）客户端封装。
+        基于行方交付 example-basic-services 3.8.204 + BouncyCastle jdk18on。
+        用途：密钥导入（servE112）等运维向密钥操作；日常联盟 MAC 仍由行内 ESB 计算。
+    </description>
+
+    <properties>
+        <union.example-basic-services.version>3.8.204</union.example-basic-services.version>
+        <bouncycastle.jdk18on.version>1.80</bouncycastle.jdk18on.version>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.wmt</groupId>
+            <artifactId>wmt-common</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-configuration-processor</artifactId>
+            <optional>true</optional>
+        </dependency>
+
+        <!-- 行方 SDK：首次使用需 ./scripts/install-union-sdk.sh -->
+        <dependency>
+            <groupId>com.union</groupId>
+            <artifactId>example-basic-services</artifactId>
+            <version>${union.example-basic-services.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcprov-jdk18on</artifactId>
+            <version>${bouncycastle.jdk18on.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcpkix-jdk18on</artifactId>
+            <version>${bouncycastle.jdk18on.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+</project>

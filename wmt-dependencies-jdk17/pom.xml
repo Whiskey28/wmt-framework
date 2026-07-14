@@ -535,6 +535,12 @@
                 <version>${revision}</version>
             </dependency>
 
+            <dependency>
+                <groupId>com.wmt</groupId>
+                <artifactId>wmt-spring-boot-starter-crypto-platform</artifactId>
+                <version>${revision}</version>
+            </dependency>
+
             <!-- partner-http 待下一版发布后再收录 BOM
             <dependency>
                 <groupId>com.wmt</groupId>

@@ -1,0 +1,12 @@
+# UNION API · 加密平台 serverList.conf 模板（联调前按行方清单替换）
+#
+# 通过 wmt.crypto-platform.config-file 指定本文件绝对路径；
+# JVM 属性 cn.keyou.platform.api3.config.file 由 starter 自动写入。
+
+# 服务器类型 | sysID | appID | 报文头位数 | 超时ms | 探活间隔s | 连接类型 | 最大连接数
+# 连接类型: 0 TCP短连接 / 1 TCP长连接 / 2 SSL短连接 / 3 SSL长连接
+[CSSP]	[TE]	[TE]	[2]	[3000]	[60]	[1]	[10]
+
+{CSSP}
+# TODO: 按《MAC 加密流程》环境清单填写行内加密机 IP/端口（示例 IT 172.16.92.84）
+[172.16.92.84]	[22601]
