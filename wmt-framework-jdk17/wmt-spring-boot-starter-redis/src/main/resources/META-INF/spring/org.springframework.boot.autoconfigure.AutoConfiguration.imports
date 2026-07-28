@@ -1,2 +1,3 @@
 com.wmt.framework.redis.config.WmtRedisAutoConfiguration
 com.wmt.framework.redis.config.WmtCacheAutoConfiguration
+com.wmt.framework.redis.config.WmtRedissonAutoConfiguration
