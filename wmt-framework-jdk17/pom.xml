@@ -28,6 +28,7 @@
         <module>wmt-spring-boot-starter-biz-tenant</module>
         <module>wmt-spring-boot-starter-biz-data-permission</module>
         <module>wmt-spring-boot-starter-biz-ip</module>
+        <module>wmt-spring-boot-starter-biz-finance</module>
 
         <module>wmt-spring-boot-starter-sjb</module>
         <module>wmt-spring-boot-starter-esb</module>
