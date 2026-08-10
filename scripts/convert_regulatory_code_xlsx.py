@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 """将监管集市码表 xlsx 转为 regulatory-code.csv（仅所属行业代码 / GB/T 4754-2017）。
 
-用法:
-  python3 convert_regulatory_code_xlsx.py \\
+用法（在仓库根目录）:
+  python3 scripts/convert_regulatory_code_xlsx.py \\
     --xlsx /path/to/1.1行内处理-监管集市码表.xlsx \\
-    --out  ../src/main/resources/regulatory-code.csv
+    --out  wmt-framework-jdk17/wmt-spring-boot-starter-biz-finance/src/main/resources/regulatory-code.csv
 
 建树规则: 最长已存在前缀作为 parentCode；门类 parentCode 为空。
+本脚本放在仓库根 scripts/，勿放入 starter 模块以免打进 jar。
 """
 
 from __future__ import annotations
