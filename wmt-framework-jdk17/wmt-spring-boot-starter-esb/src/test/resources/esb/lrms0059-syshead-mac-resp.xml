@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<service>
+    <SysHead>
+        <SvcCd>300230003</SvcCd>
+        <SvcScn>10</SvcScn>
+        <CnsmSysId>8610716</CnsmSysId>
+        <ChnlTp/>
+        <PrvdSysId/>
+        <CnsmSysSeqNo>8610716000019000051</CnsmSysSeqNo>
+        <PrvdSysSeqNo/>
+        <SrcSysSeqNo>8610716000019000901</SrcSysSeqNo>
+        <Mac/>
+        <TranDt>20260818</TranDt>
+        <TranTm>163602</TranTm>
+        <TranRetSt>S</TranRetSt>
+        <RetMsgArray>
+            <RetCd>000000</RetCd>
+            <RetMsg>成功</RetMsg>
+        </RetMsgArray>
+        <PrvdSysSvrId/>
+        <FileFlg/>
+        <FilePath/>
+    </SysHead>
+    <AppHead>
+        <TlrNo/>
+        <BranchId/>
+    </AppHead>
+    <Body>
+        <InfoNo>CST-001</InfoNo>
+    </Body>
+</service>

@@ -1,6 +1,7 @@
 package com.wmt.framework.esb.core;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.fasterxml.jackson.dataformat.xml.ser.ToXmlGenerator;
@@ -43,14 +44,18 @@ public class EsbXmlCodec {
                     .constructParametricType(EsbEnvelope.class, bodyType);
             return xmlMapper.readValue(xml, envelopeType);
         } catch (Exception ex) {
-            throw new ServiceException(GlobalErrorCodeConstants.INTERNAL_SERVER_ERROR.getCode(),
+            ServiceException se = new ServiceException(GlobalErrorCodeConstants.INTERNAL_SERVER_ERROR.getCode(),
                     "ESB 响应报文解析失败");
+            se.initCause(ex);
+            throw se;
         }
     }
 
     private static XmlMapper createDefaultXmlMapper() {
         XmlMapper mapper = new XmlMapper();
         mapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
+        // 与 JsonUtils 一致：提供方偶发未知头字段（如 nmdev 0058 的 <Nac/> 笔误）不得挡解包
+        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         mapper.configure(ToXmlGenerator.Feature.WRITE_XML_DECLARATION, true);
         mapper.getFactory().setCharacterEscapes(new EsbXmlCharacterEscapes());
         return mapper;

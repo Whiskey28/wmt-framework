@@ -1,5 +1,6 @@
 package com.wmt.framework.esb.core.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import lombok.Data;
@@ -8,9 +9,12 @@ import java.io.Serializable;
 
 /**
  * ESB 标准报文系统头 SysHead（请求/响应共用字段模型）。
+ *
+ * <p>规范字段为 {@code Mac}，不含 {@code Nac}。未知节点忽略，避免提供方笔误挡解包。</p>
  */
 @Data
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class EsbSysHead implements Serializable {
 
     @JacksonXmlProperty(localName = "SvcCd")
