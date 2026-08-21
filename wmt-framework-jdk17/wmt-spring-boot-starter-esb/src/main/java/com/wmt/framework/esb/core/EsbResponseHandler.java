@@ -5,12 +5,22 @@ import com.wmt.framework.common.exception.enums.GlobalErrorCodeConstants;
 import com.wmt.framework.esb.core.model.EsbSysHead;
 import org.springframework.util.StringUtils;
 
+import java.util.Set;
+
 /**
  * 统一解析 ESB 响应 SysHead 中的 {@code TranRetSt} / {@code RetCd}。
+ *
+ * <p>成功码因提供方而异：信贷/CFCA 等为 {@code 000000}，DMCP/外部统一接入为 {@code 00000}。</p>
  */
 public class EsbResponseHandler {
 
+    /** 信贷 / CFCA 等 SysHead 成功码 */
     public static final String SUCCESS_RET_CD = "000000";
+
+    /** DMCP / 外部统一接入 SysHead 成功码 */
+    public static final String SUCCESS_RET_CD_DMCP = "00000";
+
+    public static final Set<String> SUCCESS_RET_CDS = Set.of(SUCCESS_RET_CD, SUCCESS_RET_CD_DMCP);
 
     public static final String TRAN_RET_SUCCESS = "S";
 
@@ -41,7 +51,7 @@ public class EsbResponseHandler {
             return false;
         }
         return TRAN_RET_SUCCESS.equals(sysHead.getTranRetSt())
-                && SUCCESS_RET_CD.equals(sysHead.resolveRetCd());
+                && SUCCESS_RET_CDS.contains(sysHead.resolveRetCd());
     }
 
 }
