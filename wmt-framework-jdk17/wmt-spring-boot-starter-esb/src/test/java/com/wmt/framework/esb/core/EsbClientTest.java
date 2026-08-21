@@ -18,8 +18,11 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+import java.util.concurrent.atomic.AtomicReference;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class EsbClientTest {
 
@@ -28,6 +31,8 @@ class EsbClientTest {
     private ExecutorService executor;
 
     private int port;
+
+    private final AtomicReference<String> capturedRequestXml = new AtomicReference<>();
 
     @BeforeEach
     void setUp() throws IOException {
@@ -55,6 +60,7 @@ class EsbClientTest {
         properties.setPort(port);
         properties.setCnsmSysId("DMPF001");
         properties.setSrcSysId("DMPF001");
+        properties.setCnsmSysSvrId("1721600100");
         properties.setConnectTimeoutMs(3_000);
         properties.setReadTimeoutMs(3_000);
 
@@ -81,6 +87,18 @@ class EsbClientTest {
 
         assertNotNull(resp);
         assertEquals("WMA2004", resp.getInfoNo());
+
+        String xml = capturedRequestXml.get();
+        assertNotNull(xml);
+        assertTrue(xml.contains("<CnsmSysSvrId>1721600100</CnsmSysSvrId>"), xml);
+        assertTrue(xml.contains("<SrcSysSvrId>1721600100</SrcSysSvrId>"), xml);
+        // 同请求 Cnsm/Src 流水号相同
+        int cnsmIdx = xml.indexOf("<CnsmSysSeqNo>");
+        int srcIdx = xml.indexOf("<SrcSysSeqNo>");
+        String cnsmSeq = xml.substring(cnsmIdx + "<CnsmSysSeqNo>".length(), xml.indexOf("</CnsmSysSeqNo>"));
+        String srcSeq = xml.substring(srcIdx + "<SrcSysSeqNo>".length(), xml.indexOf("</SrcSysSeqNo>"));
+        assertEquals(cnsmSeq, srcSeq);
+        assertEquals(19, cnsmSeq.length());
     }
 
     private EsbAppHead appHead(String tlrNo, String branchId) {
@@ -96,7 +114,8 @@ class EsbClientTest {
              OutputStream outputStream = socket.getOutputStream()) {
             String requestLengthHeader = EsbTcpTransport.readFixedHeader(inputStream, 8, StandardCharsets.UTF_8);
             int requestLength = EsbTcpTransport.parseLengthHeader(requestLengthHeader);
-            EsbTcpTransport.readFully(inputStream, requestLength);
+            byte[] requestBytes = EsbTcpTransport.readFully(inputStream, requestLength);
+            capturedRequestXml.set(new String(requestBytes, StandardCharsets.UTF_8));
 
             String responseXml = """
                     <?xml version="1.0" encoding="UTF-8"?>

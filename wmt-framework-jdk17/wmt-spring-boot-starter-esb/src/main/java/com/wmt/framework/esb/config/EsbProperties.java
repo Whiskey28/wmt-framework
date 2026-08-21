@@ -2,8 +2,10 @@ package com.wmt.framework.esb.config;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.util.StringUtils;
 
 import java.io.Serializable;
+import java.net.InetAddress;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
@@ -19,6 +21,7 @@ import java.nio.charset.StandardCharsets;
  *     port: 10001
  *     cnsm-sys-id: DMPF001
  *     src-sys-id: DMPF001
+ *     cnsm-sys-svr-id: 1721600100   # SysHead.CnsmSysSvrId；行方给定优先
  * </pre>
  */
 @Data
@@ -49,6 +52,16 @@ public class EsbProperties implements Serializable {
      * 源发起系统 ID，7 位，对应 SysHead.SrcSysId；缺省时与 {@link #cnsmSysId} 相同
      */
     private String srcSysId;
+
+    /**
+     * 调用方服务器标识，对应 SysHead.CnsmSysSvrId（行方必填）；缺省回退本机 IP 去点
+     */
+    private String cnsmSysSvrId;
+
+    /**
+     * 源发起服务器标识，对应 SysHead.SrcSysSvrId；缺省时与 {@link #cnsmSysSvrId} 解析结果相同
+     */
+    private String srcSysSvrId;
 
     /**
      * 渠道类型，对应 SysHead.ChnlTp
@@ -92,6 +105,38 @@ public class EsbProperties implements Serializable {
 
     public String resolveSrcSysId() {
         return srcSysId != null && !srcSysId.isBlank() ? srcSysId : cnsmSysId;
+    }
+
+    /**
+     * 解析 CnsmSysSvrId：配置优先，否则本机 IP 去点（如 172.16.0.100 → 1721600100）。
+     */
+    public String resolveCnsmSysSvrId() {
+        if (StringUtils.hasText(cnsmSysSvrId)) {
+            return cnsmSysSvrId.trim();
+        }
+        return fallbackLocalServerId();
+    }
+
+    /**
+     * 解析 SrcSysSvrId：配置优先，否则与 {@link #resolveCnsmSysSvrId()} 相同。
+     */
+    public String resolveSrcSysSvrId() {
+        if (StringUtils.hasText(srcSysSvrId)) {
+            return srcSysSvrId.trim();
+        }
+        return resolveCnsmSysSvrId();
+    }
+
+    static String fallbackLocalServerId() {
+        try {
+            String hostAddress = InetAddress.getLocalHost().getHostAddress();
+            if (StringUtils.hasText(hostAddress)) {
+                return hostAddress.replace(".", "").replace(":", "");
+            }
+        } catch (Exception ignored) {
+            // fall through
+        }
+        return "127001";
     }
 
     /**

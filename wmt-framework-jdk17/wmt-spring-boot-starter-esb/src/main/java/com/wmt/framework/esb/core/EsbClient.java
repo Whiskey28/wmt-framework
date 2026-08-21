@@ -111,12 +111,25 @@ public class EsbClient {
         sysHead.setCnsmSysId(EsbSequenceService.normalizeSystemId(properties.getCnsmSysId()));
         sysHead.setSrcSysId(EsbSequenceService.normalizeSystemId(properties.resolveSrcSysId()));
         sysHead.setChnlTp(StringUtils.hasText(options.getChnlTp()) ? options.getChnlTp() : properties.getChnlTp());
-        sysHead.setCnsmSysSeqNo(StringUtils.hasText(options.getCnsmSysSeqNo())
-                ? options.getCnsmSysSeqNo()
-                : sequenceService.nextCnsmSysSeqNo());
-        sysHead.setSrcSysSeqNo(StringUtils.hasText(options.getSrcSysSeqNo())
-                ? options.getSrcSysSeqNo()
-                : sequenceService.nextSrcSysSeqNo());
+        // 单笔请求共用一号，避免 Cnsm/Src 各取一次导致连跳
+        String sharedSeqNo = null;
+        if (StringUtils.hasText(options.getCnsmSysSeqNo())) {
+            sysHead.setCnsmSysSeqNo(options.getCnsmSysSeqNo());
+        } else {
+            sharedSeqNo = sequenceService.nextCnsmSysSeqNo();
+            sysHead.setCnsmSysSeqNo(sharedSeqNo);
+        }
+        if (StringUtils.hasText(options.getSrcSysSeqNo())) {
+            sysHead.setSrcSysSeqNo(options.getSrcSysSeqNo());
+        } else {
+            sysHead.setSrcSysSeqNo(sharedSeqNo != null ? sharedSeqNo : sequenceService.nextSrcSysSeqNo());
+        }
+        String cnsmSysSvrId = properties.resolveCnsmSysSvrId();
+        if (!StringUtils.hasText(properties.getCnsmSysSvrId())) {
+            log.warn("[esb] wmt.esb.cnsm-sys-svr-id 未配置，CnsmSysSvrId 回退为 {}", cnsmSysSvrId);
+        }
+        sysHead.setCnsmSysSvrId(cnsmSysSvrId);
+        sysHead.setSrcSysSvrId(properties.resolveSrcSysSvrId());
         sysHead.setTranDt(now.format(TRAN_DATE));
         sysHead.setTranTm(now.format(TRAN_TIME));
         sysHead.setFileFlg(StringUtils.hasText(options.getFileFlg()) ? options.getFileFlg() : properties.getFileFlg());

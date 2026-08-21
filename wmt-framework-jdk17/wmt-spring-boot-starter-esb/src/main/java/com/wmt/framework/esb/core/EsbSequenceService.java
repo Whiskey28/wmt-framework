@@ -1,30 +1,48 @@
 package com.wmt.framework.esb.core;
 
-import com.wmt.framework.esb.config.EsbProperties;
 import com.wmt.framework.common.exception.ServiceException;
 import com.wmt.framework.common.exception.enums.GlobalErrorCodeConstants;
+import com.wmt.framework.esb.config.EsbProperties;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.util.StringUtils;
 
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * ESB 19 位流水号生成器。
  *
  * <p>规则：系统 ID(7) + 保留(00) + 组合位(0) + 前段(2) + 外围标志(9) + 后段(6)。</p>
- * <p>生产环境如需满足「3 天内不重复」，请替换为 Redis/DB 等持久化实现。</p>
+ * <p>优先 Redis {@code INCR}（键 {@code esb:seq:{cnsmSysId}}），保证重启/多实例不撞号；
+ * 无 Redis Bean 时回退进程内计数并打 WARN（仅适合单测/无 Redis 本地）。</p>
  */
+@Slf4j
 public class EsbSequenceService {
 
     private static final String PERIPHERAL_FLAG = "9";
 
+    static final String REDIS_KEY_PREFIX = "esb:seq:";
+
     private final EsbProperties properties;
 
-    private final AtomicInteger frontSegment = new AtomicInteger(0);
+    private final StringRedisTemplate stringRedisTemplate;
 
-    private final AtomicInteger backSegment = new AtomicInteger(0);
+    private final AtomicLong memoryCounter = new AtomicLong(0);
+
+    private final boolean redisEnabled;
 
     public EsbSequenceService(EsbProperties properties) {
+        this(properties, null);
+    }
+
+    public EsbSequenceService(EsbProperties properties, StringRedisTemplate stringRedisTemplate) {
         this.properties = properties;
+        this.stringRedisTemplate = stringRedisTemplate;
+        this.redisEnabled = stringRedisTemplate != null;
+        if (!redisEnabled) {
+            log.warn("[esb] EsbSequenceService 未注入 StringRedisTemplate，流水号使用进程内存计数；"
+                    + "重启后会从 0 回绕，生产/联调请确保 Redis 可用");
+        }
     }
 
     /**
@@ -35,7 +53,10 @@ public class EsbSequenceService {
     }
 
     /**
-     * 生成源发起系统流水号 SrcSysSeqNo；单笔直连 ESB 场景可与 CnsmSysSeqNo 相同。
+     * 生成源发起系统流水号 SrcSysSeqNo。
+     *
+     * <p>单笔直连 ESB 时通常与 {@link #nextCnsmSysSeqNo()} 相同；
+     * {@link EsbClient} 组头时只取一次号并同时赋给两者，避免一次请求连跳两号。</p>
      */
     public String nextSrcSysSeqNo() {
         return nextSequence();
@@ -43,12 +64,32 @@ public class EsbSequenceService {
 
     private String nextSequence() {
         String systemId = normalizeSystemId(properties.getCnsmSysId());
-        int front = frontSegment.updateAndGet(value -> value >= 99 ? 0 : value + 1);
-        int back = backSegment.updateAndGet(value -> value >= 999_999 ? 0 : value + 1);
+        long n = nextCounter(systemId);
+        int front = (int) (n % 100);
+        int back = (int) (n % 1_000_000L);
         return systemId + "00" + "0"
                 + String.format("%02d", front)
                 + PERIPHERAL_FLAG
                 + String.format("%06d", back);
+    }
+
+    private long nextCounter(String systemId) {
+        if (redisEnabled) {
+            try {
+                Long value = stringRedisTemplate.opsForValue().increment(REDIS_KEY_PREFIX + systemId);
+                if (value == null || value <= 0) {
+                    throw new ServiceException(GlobalErrorCodeConstants.ERROR_CONFIGURATION.getCode(),
+                            "ESB Redis 流水号 INCR 返回非法值: " + value);
+                }
+                return value;
+            } catch (ServiceException ex) {
+                throw ex;
+            } catch (Exception ex) {
+                throw new ServiceException(GlobalErrorCodeConstants.ERROR_CONFIGURATION.getCode(),
+                        "ESB Redis 流水号生成失败: " + ex.getMessage());
+            }
+        }
+        return memoryCounter.incrementAndGet();
     }
 
     static String normalizeSystemId(String systemId) {
