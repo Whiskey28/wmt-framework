@@ -1,1 +1,2 @@
 com.wmt.framework.esb.config.EsbAutoConfiguration
+com.wmt.framework.esb.config.EsbProviderAutoConfiguration

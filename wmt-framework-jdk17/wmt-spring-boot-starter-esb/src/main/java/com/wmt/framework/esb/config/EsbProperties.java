@@ -103,6 +103,19 @@ public class EsbProperties implements Serializable {
      */
     private final Alliance alliance = new Alliance();
 
+    /**
+     * ESB 提供方（入站 TCP XML）。默认关闭监听，联调前显式打开。
+     *
+     * <pre>
+     * wmt:
+     *   esb:
+     *     provider:
+     *       enabled: true
+     *       port: 10002
+     * </pre>
+     */
+    private final Provider provider = new Provider();
+
     public String resolveSrcSysId() {
         return srcSysId != null && !srcSysId.isBlank() ? srcSysId : cnsmSysId;
     }
@@ -157,6 +170,31 @@ public class EsbProperties implements Serializable {
          * 格式通常为：{@code {系统简称}.861BY861XXXX.zak}
          */
         private String keyInd;
+
+    }
+
+    /**
+     * ESB 提供方入站监听配置（前缀 {@code wmt.esb.provider}）。
+     */
+    @Data
+    public static class Provider implements Serializable {
+
+        /**
+         * 是否启动 TCP 监听。默认 false，避免本地无意占端口。
+         */
+        private boolean enabled = false;
+
+        /** 监听端口（ESB → 本系统） */
+        private int port = 10002;
+
+        /** 工作线程数 */
+        private int workerThreads = 16;
+
+        /** 单连接读超时（毫秒），建议 ≤ P1≈60s */
+        private int soTimeoutMs = 60_000;
+
+        /** ServerSocket backlog */
+        private int backlog = 128;
 
     }
 
