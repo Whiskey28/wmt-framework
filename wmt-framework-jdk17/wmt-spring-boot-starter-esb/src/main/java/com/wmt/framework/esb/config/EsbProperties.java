@@ -153,14 +153,18 @@ public class EsbProperties implements Serializable {
     }
 
     /**
-     * 联盟 MAC 密钥标识配置。
+     * 联盟路由相关配置。
      *
      * <pre>
      * wmt:
      *   esb:
      *     alliance:
      *       key-ind: DMPF.861BY861XXXX.zak
+     *       branch-id: "4190001"   # AppHead.BranchId；联盟核心报文头必输
      * </pre>
+     *
+     * <p>联盟渠道号 {@code 09}、系统编号 {@code 8610716} 由 {@code EsbClient} 封装常量覆盖，
+     * 不在此重复配置，以免与行内 {@code chnl-tp}/{@code cnsm-sys-id} 双源。</p>
      */
     @Data
     public static class Alliance implements Serializable {
@@ -170,6 +174,11 @@ public class EsbProperties implements Serializable {
          * 格式通常为：{@code {系统简称}.861BY861XXXX.zak}
          */
         private String keyInd;
+
+        /**
+         * 联盟出站 AppHead.BranchId（机构代号，长度 ≥ 3）。
+         */
+        private String branchId;
 
     }
 

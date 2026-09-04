@@ -57,7 +57,7 @@ class EsbClientAllianceTest {
 
     @Test
     void invoke_shouldInjectKeyIndWhenAllianceTrue() {
-        EsbClient client = newClient("DMPF.861BY8610001.zak");
+        EsbClient client = newClient("DMPF.861BY8610001.zak", "4190001");
 
         AllianceReq req = new AllianceReq();
         req.setBizNo("B001");
@@ -76,11 +76,16 @@ class EsbClientAllianceTest {
         String xml = capturedRequestXml.get();
         assertTrue(xml != null && xml.contains("<KeyInd>DMPF.861BY8610001.zak</KeyInd>"),
                 "request xml should contain KeyInd: " + xml);
+        assertTrue(xml.contains("<BranchId>4190001</BranchId>"), xml);
+        assertTrue(xml.contains("<ChnlTp>09</ChnlTp>"), xml);
+        assertTrue(xml.contains("<CnsmSysId>8610716</CnsmSysId>"), xml);
+        assertTrue(xml.contains("<SrcSysId>8610716</SrcSysId>"), xml);
+        assertTrue(xml.contains("<CnsmSysSeqNo>8610716"), "seq should use alliance sys id: " + xml);
     }
 
     @Test
     void invoke_shouldNotOverrideExistingKeyInd() {
-        EsbClient client = newClient("DMPF.861BY8610001.zak");
+        EsbClient client = newClient("DMPF.861BY8610001.zak", "4190001");
 
         AllianceReq req = new AllianceReq();
         req.setBizNo("B001");
@@ -98,7 +103,7 @@ class EsbClientAllianceTest {
 
     @Test
     void invoke_shouldFailWhenAllianceButBodyNotImplement() {
-        EsbClient client = newClient("DMPF.861BY8610001.zak");
+        EsbClient client = newClient("DMPF.861BY8610001.zak", "4190001");
         PlainReq req = new PlainReq();
         req.setBizNo("B001");
 
@@ -111,7 +116,7 @@ class EsbClientAllianceTest {
 
     @Test
     void invoke_shouldFailWhenAllianceButKeyIndNotConfigured() {
-        EsbClient client = newClient(null);
+        EsbClient client = newClient(null, "4190001");
         AllianceReq req = new AllianceReq();
         req.setBizNo("B001");
 
@@ -122,15 +127,30 @@ class EsbClientAllianceTest {
         ));
     }
 
-    private EsbClient newClient(String keyInd) {
+    @Test
+    void invoke_shouldFailWhenAllianceButBranchIdNotConfigured() {
+        EsbClient client = newClient("DMPF.861BY8610001.zak", null);
+        AllianceReq req = new AllianceReq();
+        req.setBizNo("B001");
+
+        assertThrows(ServiceException.class, () -> client.invokeForBody(
+                EsbInvokeOptions.of("11003000003", "01", true),
+                req,
+                AllianceResp.class
+        ));
+    }
+
+    private EsbClient newClient(String keyInd, String branchId) {
         EsbProperties properties = new EsbProperties();
         properties.setHost("127.0.0.1");
         properties.setPort(port);
         properties.setCnsmSysId("DMPF001");
         properties.setSrcSysId("DMPF001");
+        properties.setChnlTp("O3");
         properties.setConnectTimeoutMs(3_000);
         properties.setReadTimeoutMs(3_000);
         properties.getAlliance().setKeyInd(keyInd);
+        properties.getAlliance().setBranchId(branchId);
         return new EsbClient(
                 properties,
                 new EsbTcpTransport(properties),

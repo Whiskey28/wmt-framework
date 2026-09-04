@@ -46,10 +46,17 @@ public class EsbSequenceService {
     }
 
     /**
-     * 生成调用方系统流水号 CnsmSysSeqNo。
+     * 生成调用方系统流水号 CnsmSysSeqNo（使用配置的 {@code wmt.esb.cnsm-sys-id}）。
      */
     public String nextCnsmSysSeqNo() {
-        return nextSequence();
+        return nextSequence(properties.getCnsmSysId());
+    }
+
+    /**
+     * 生成调用方系统流水号（显式系统 ID，供联盟覆盖等场景）。
+     */
+    public String nextCnsmSysSeqNo(String systemId) {
+        return nextSequence(systemId);
     }
 
     /**
@@ -59,11 +66,18 @@ public class EsbSequenceService {
      * {@link EsbClient} 组头时只取一次号并同时赋给两者，避免一次请求连跳两号。</p>
      */
     public String nextSrcSysSeqNo() {
-        return nextSequence();
+        return nextSequence(properties.getCnsmSysId());
     }
 
-    private String nextSequence() {
-        String systemId = normalizeSystemId(properties.getCnsmSysId());
+    /**
+     * 生成源发起系统流水号（显式系统 ID）。
+     */
+    public String nextSrcSysSeqNo(String systemId) {
+        return nextSequence(systemId);
+    }
+
+    private String nextSequence(String systemIdRaw) {
+        String systemId = normalizeSystemId(systemIdRaw);
         long n = nextCounter(systemId);
         int front = (int) (n % 100);
         int back = (int) (n % 1_000_000L);

@@ -28,7 +28,9 @@ import java.time.format.DateTimeFormatter;
  * );
  *
  * // 联盟路由：options.alliance=true 且 Body 实现 EsbAllianceBody，
- * // 会自动注入 wmt.esb.alliance.key-ind → Body.KeyInd（SysHead.Mac 仍由行内 ESB 生成）
+ * // 会自动注入 wmt.esb.alliance.key-ind → Body.KeyInd（SysHead.Mac 仍由行内 ESB 生成）；
+ * // 并覆盖 ChnlTp=09、CnsmSysId/SrcSysId=8610716，AppHead.BranchId 取自
+ * // options 或 wmt.esb.alliance.branch-id（行内路径不受影响）
  * }</pre>
  */
 @Slf4j
@@ -37,6 +39,18 @@ public class EsbClient {
     private static final DateTimeFormatter TRAN_DATE = DateTimeFormatter.ofPattern("yyyyMMdd");
 
     private static final DateTimeFormatter TRAN_TIME = DateTimeFormatter.ofPattern("HHmmss");
+
+    /**
+     * 联盟核心报文头渠道号（群公告「渠道号」；与行内 {@code wmt.esb.chnl-tp} 分离）。
+     */
+    static final String ALLIANCE_CHNL_TP = "09";
+
+    /**
+     * 联盟核心报文头请求方系统编号（群公告「系统编号」；与行内 {@code wmt.esb.cnsm-sys-id} 分离）。
+     */
+    static final String ALLIANCE_CNSM_SYS_ID = "8610716";
+
+    private static final int ALLIANCE_BRANCH_ID_MIN_LEN = 3;
 
     private final EsbProperties properties;
 
@@ -98,31 +112,74 @@ public class EsbClient {
     private EsbEnvelope<Object> buildRequestEnvelope(EsbInvokeOptions options, Object body) {
         EsbEnvelope<Object> envelope = new EsbEnvelope<>();
         envelope.setSysHead(buildRequestSysHead(options));
-        envelope.setAppHead(options.getAppHead() != null ? options.getAppHead() : new EsbAppHead());
+        envelope.setAppHead(resolveAppHead(options));
         envelope.setBody(body);
         return envelope;
     }
 
+    /**
+     * 行内：透传 options.AppHead（可空）。
+     * 联盟：BranchId 优先 options，否则 {@code wmt.esb.alliance.branch-id}，且长度 ≥ 3。
+     */
+    private EsbAppHead resolveAppHead(EsbInvokeOptions options) {
+        EsbAppHead appHead = options.getAppHead() != null ? options.getAppHead() : new EsbAppHead();
+        if (!options.isAlliance()) {
+            return appHead;
+        }
+        if (!StringUtils.hasText(appHead.getBranchId())) {
+            String configured = properties.getAlliance() != null ? properties.getAlliance().getBranchId() : null;
+            if (StringUtils.hasText(configured)) {
+                appHead.setBranchId(configured.trim());
+            }
+        } else {
+            appHead.setBranchId(appHead.getBranchId().trim());
+        }
+        String branchId = appHead.getBranchId();
+        if (!StringUtils.hasText(branchId) || branchId.length() < ALLIANCE_BRANCH_ID_MIN_LEN) {
+            throw new ServiceException(GlobalErrorCodeConstants.ERROR_CONFIGURATION.getCode(),
+                    "联盟 ESB 缺少 AppHead.BranchId（配置 wmt.esb.alliance.branch-id），或长度不能小于 "
+                            + ALLIANCE_BRANCH_ID_MIN_LEN + " 位");
+        }
+        return appHead;
+    }
+
     private EsbSysHead buildRequestSysHead(EsbInvokeOptions options) {
         LocalDateTime now = LocalDateTime.now();
+        boolean alliance = options.isAlliance();
         EsbSysHead sysHead = new EsbSysHead();
         sysHead.setSvcCd(options.getSvcCd());
         sysHead.setSvcScn(options.getSvcScn());
-        sysHead.setCnsmSysId(EsbSequenceService.normalizeSystemId(properties.getCnsmSysId()));
-        sysHead.setSrcSysId(EsbSequenceService.normalizeSystemId(properties.resolveSrcSysId()));
-        sysHead.setChnlTp(StringUtils.hasText(options.getChnlTp()) ? options.getChnlTp() : properties.getChnlTp());
-        // 单笔请求共用一号，避免 Cnsm/Src 各取一次导致连跳
+        // 联盟：常量覆盖系统编号；行内：沿用 yaml
+        String cnsmSysId = alliance ? ALLIANCE_CNSM_SYS_ID : properties.getCnsmSysId();
+        String srcSysId = alliance ? ALLIANCE_CNSM_SYS_ID : properties.resolveSrcSysId();
+        sysHead.setCnsmSysId(EsbSequenceService.normalizeSystemId(cnsmSysId));
+        sysHead.setSrcSysId(EsbSequenceService.normalizeSystemId(srcSysId));
+        // 联盟：常量渠道 09；options 显式 ChnlTp 仍可覆盖（透传场景）
+        if (StringUtils.hasText(options.getChnlTp())) {
+            sysHead.setChnlTp(options.getChnlTp());
+        } else if (alliance) {
+            sysHead.setChnlTp(ALLIANCE_CHNL_TP);
+        } else {
+            sysHead.setChnlTp(properties.getChnlTp());
+        }
+        // 单笔请求共用一号，避免 Cnsm/Src 各取一次导致连跳；联盟流水前缀用联盟系统号
         String sharedSeqNo = null;
         if (StringUtils.hasText(options.getCnsmSysSeqNo())) {
             sysHead.setCnsmSysSeqNo(options.getCnsmSysSeqNo());
         } else {
-            sharedSeqNo = sequenceService.nextCnsmSysSeqNo();
+            sharedSeqNo = alliance
+                    ? sequenceService.nextCnsmSysSeqNo(ALLIANCE_CNSM_SYS_ID)
+                    : sequenceService.nextCnsmSysSeqNo();
             sysHead.setCnsmSysSeqNo(sharedSeqNo);
         }
         if (StringUtils.hasText(options.getSrcSysSeqNo())) {
             sysHead.setSrcSysSeqNo(options.getSrcSysSeqNo());
         } else {
-            sysHead.setSrcSysSeqNo(sharedSeqNo != null ? sharedSeqNo : sequenceService.nextSrcSysSeqNo());
+            sysHead.setSrcSysSeqNo(sharedSeqNo != null
+                    ? sharedSeqNo
+                    : (alliance
+                    ? sequenceService.nextSrcSysSeqNo(ALLIANCE_CNSM_SYS_ID)
+                    : sequenceService.nextSrcSysSeqNo()));
         }
         String cnsmSysSvrId = properties.resolveCnsmSysSvrId();
         if (!StringUtils.hasText(properties.getCnsmSysSvrId())) {
